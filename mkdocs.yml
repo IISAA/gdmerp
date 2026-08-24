@@ -1,0 +1,25 @@
+site_name: Bomerp
+site_description: Proyecto BomERP
+site_author: UPeU
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: es
+  features:
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: teal
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+
+nav:
+  - Inicio: index.md
