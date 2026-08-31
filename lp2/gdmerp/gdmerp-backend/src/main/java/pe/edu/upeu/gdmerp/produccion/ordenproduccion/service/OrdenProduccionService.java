@@ -6,6 +6,7 @@ import java.util.List;
 public interface OrdenProduccionService {
     List<OrdenProduccionResponse> listar();
     OrdenProduccionResponse buscarPorId(Long id);
+    List<OrdenProduccionResponse> listarPorCentroTrabajo(Long centroTrabajoId);
     OrdenProduccionResponse crear(OrdenProduccionRequest request);
     OrdenProduccionResponse actualizar(Long id, OrdenProduccionRequest request);
     void eliminar(Long id);

@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record ProductoRequest(
-    @NotBlank(message = "El nombre no puede estar vacío") String nombre,
+    @NotBlank(message = "El nombre es obligatorio") String nombre,
     @NotNull(message = "El precio es obligatorio") @Min(value = 0) BigDecimal precio,
-    @NotNull(message = "El stock es obligatorio") @Min(value = 0) Integer stock
+    @NotNull(message = "El stock es obligatorio") @Min(value = 0) Integer stock,
+    @NotNull(message = "El ID del almacén es obligatorio") Long almacenId,
+    @NotNull(message = "El ID de la categoría es obligatorio") Long categoriaId
 ) {}

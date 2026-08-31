@@ -25,6 +25,12 @@ public class OrdenProduccionController {
         return ResponseEntity.ok(ordenProduccionService.listar());
     }
 
+    @Operation(summary = "Navegación controlada: lista las órdenes de un centro de trabajo")
+    @GetMapping("/por-centro-trabajo/{centroTrabajoId}")
+    public ResponseEntity<List<OrdenProduccionResponse>> listarPorCentroTrabajo(@PathVariable Long centroTrabajoId) {
+        return ResponseEntity.ok(ordenProduccionService.listarPorCentroTrabajo(centroTrabajoId));
+    }
+
     @Operation(summary = "Busca orden de producción por ID")
     @GetMapping("/{id}")
     public ResponseEntity<OrdenProduccionResponse> buscarPorId(@PathVariable Long id) {

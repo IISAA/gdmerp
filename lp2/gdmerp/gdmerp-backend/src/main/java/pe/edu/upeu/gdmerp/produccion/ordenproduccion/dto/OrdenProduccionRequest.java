@@ -6,5 +6,6 @@ import jakarta.validation.constraints.NotNull;
 public record OrdenProduccionRequest(
     @NotBlank(message = "El producto es obligatorio") String producto,
     @NotNull(message = "La cantidad es obligatoria") @Min(value = 1) Integer cantidadPlanificada,
-    @NotBlank(message = "El estado es obligatorio") String estado
+    @NotBlank(message = "El estado es obligatorio") String estado,
+    @NotNull(message = "El ID del centro de trabajo es obligatorio") Long centroTrabajoId
 ) {}

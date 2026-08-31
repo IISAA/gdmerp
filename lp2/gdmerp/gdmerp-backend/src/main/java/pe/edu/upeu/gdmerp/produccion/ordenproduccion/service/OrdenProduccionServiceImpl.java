@@ -3,6 +3,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
+import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
+import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
@@ -13,13 +15,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrdenProduccionServiceImpl implements OrdenProduccionService {
-    private final OrdenProduccionRepository repository;
+    private final OrdenProduccionRepository ordenRepository;
+    private final CentroTrabajoRepository centroTrabajoRepository;
     private final OrdenProduccionMapper mapper;
 
     @Override
     @Transactional(readOnly = true)
     public List<OrdenProduccionResponse> listar() {
-        return repository.findAll().stream().map(mapper::toResponse).toList();
+        return ordenRepository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     @Override
@@ -29,10 +32,19 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<OrdenProduccionResponse> listarPorCentroTrabajo(Long centroTrabajoId) {
+        getCentroTrabajoEntity(centroTrabajoId); // Valida que el centro exista (404 si no)
+        return ordenRepository.findByCentroTrabajoId(centroTrabajoId).stream()
+            .map(mapper::toResponse).toList();
+    }
+
+    @Override
     @Transactional
     public OrdenProduccionResponse crear(OrdenProduccionRequest request) {
         OrdenProduccion op = mapper.toEntity(request);
-        return mapper.toResponse(repository.save(op));
+        op.setCentroTrabajo(getCentroTrabajoEntity(request.centroTrabajoId()));
+        return mapper.toResponse(ordenRepository.save(op));
     }
 
     @Override
@@ -40,17 +52,23 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
     public OrdenProduccionResponse actualizar(Long id, OrdenProduccionRequest request) {
         OrdenProduccion op = getEntity(id);
         mapper.updateEntity(op, request);
-        return mapper.toResponse(repository.save(op));
+        op.setCentroTrabajo(getCentroTrabajoEntity(request.centroTrabajoId()));
+        return mapper.toResponse(ordenRepository.save(op));
     }
 
     @Override
     @Transactional
     public void eliminar(Long id) {
-        repository.delete(getEntity(id));
+        ordenRepository.delete(getEntity(id));
     }
 
     private OrdenProduccion getEntity(Long id) {
-        return repository.findById(id)
+        return ordenRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Orden de Producción no encontrada: " + id));
+    }
+
+    private CentroTrabajo getCentroTrabajoEntity(Long id) {
+        return centroTrabajoRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Centro de Trabajo no encontrado: " + id));
     }
 }

@@ -24,6 +24,12 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.listar());
     }
 
+    @Operation(summary = "Navegación controlada: lista los productos de un almacén")
+    @GetMapping("/por-almacen/{almacenId}")
+    public ResponseEntity<List<ProductoResponse>> listarPorAlmacen(@PathVariable Long almacenId) {
+        return ResponseEntity.ok(productoService.listarPorAlmacen(almacenId));
+    }
+
     @Operation(summary = "Busca producto por ID")
     @GetMapping("/{id}")
     public ResponseEntity<ProductoResponse> buscarPorId(@PathVariable Long id) {

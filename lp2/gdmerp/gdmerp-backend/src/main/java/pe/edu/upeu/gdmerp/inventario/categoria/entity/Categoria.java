@@ -1,4 +1,4 @@
-package pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity;
+package pe.edu.upeu.gdmerp.inventario.categoria.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
-import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
+import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 
 @Entity
-@Table(name = "CENTROS_TRABAJO", schema = "GDM_PRODUCCION")
+@Table(name = "CATEGORIAS", schema = "GDM_INVENTARIO")
 @Getter
 @Setter
 @NoArgsConstructor
-public class CentroTrabajo {
+public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
@@ -30,9 +30,10 @@ public class CentroTrabajo {
     @Column(name = "NOMBRE", nullable = false, unique = true, length = 80)
     private String nombre;
 
-    @Column(name = "CAPACIDAD")
-    private Integer capacidad;
+    @Column(name = "DESCRIPCION", length = 200)
+    private String descripcion;
 
-    @OneToMany(mappedBy = "centroTrabajo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrdenProduccion> ordenes = new ArrayList<>();
+    // Lado "1" de la relación: una categoría clasifica muchos productos
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Producto> productos = new ArrayList<>();
 }
