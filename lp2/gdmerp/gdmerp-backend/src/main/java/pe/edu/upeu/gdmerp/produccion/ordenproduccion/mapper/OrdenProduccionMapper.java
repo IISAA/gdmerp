@@ -3,17 +3,23 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.mapper.CentroTrabajoMapper;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.DetalleOrdenResponse;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.DetalleOrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
 
 @Mapper(componentModel = "spring", uses = {CentroTrabajoMapper.class})
 public interface OrdenProduccionMapper {
+
     OrdenProduccionResponse toResponse(OrdenProduccion ordenProduccion);
+    DetalleOrdenResponse toDetalleResponse(DetalleOrdenProduccion detalle);
 
     @Mapping(target = "centroTrabajo", ignore = true)
+    @Mapping(target = "detalles", ignore = true)
     OrdenProduccion toEntity(OrdenProduccionRequest request);
 
     @Mapping(target = "centroTrabajo", ignore = true)
+    @Mapping(target = "detalles", ignore = true)
     void updateEntity(@MappingTarget OrdenProduccion ordenProduccion, OrdenProduccionRequest request);
 }

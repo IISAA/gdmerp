@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,8 @@ import pe.edu.upeu.gdmerp.inventario.almacen.dto.AlmacenResponse;
 import pe.edu.upeu.gdmerp.inventario.almacen.service.AlmacenService;
 import java.util.List;
 
+
+@Slf4j
 @Tag(name = "Almacenes")
 @RestController
 @RequestMapping("/api/v1/almacenes")
@@ -22,6 +26,7 @@ public class AlmacenController {
     @Operation(summary = "Lista todos los almacenes")
     @GetMapping
     public ResponseEntity<List<AlmacenResponse>> listar() {
+        log.info("Listando Almacenes ... soy Isai");
         return ResponseEntity.ok(almacenService.listar());
     }
 
