@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.gdmerp.inventario.categoria.dto.CategoriaRequest;
 import pe.edu.upeu.gdmerp.inventario.categoria.dto.CategoriaResponse;
+import pe.edu.upeu.gdmerp.inventario.categoria.dto.ReporteCategoriaCostoDTO;
 import pe.edu.upeu.gdmerp.inventario.categoria.service.CategoriaService;
 import java.util.List;
 
@@ -23,6 +24,12 @@ public class CategoriaController {
     @GetMapping
     public ResponseEntity<List<CategoriaResponse>> listar() {
         return ResponseEntity.ok(categoriaService.listar());
+    }
+
+    @Operation(summary = "Reporte de costos y promedios por categoría con protección de nulls")
+    @GetMapping("/reportes/costos")
+    public ResponseEntity<List<ReporteCategoriaCostoDTO>> reporteCostos() {
+        return ResponseEntity.ok(categoriaService.obtenerReporteCostosPorCategoria());
     }
 
     @Operation(summary = "Busca una categoría por ID")

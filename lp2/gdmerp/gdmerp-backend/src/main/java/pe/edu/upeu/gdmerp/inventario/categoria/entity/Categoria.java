@@ -1,6 +1,5 @@
 package pe.edu.upeu.gdmerp.inventario.categoria.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,7 +32,9 @@ public class Categoria {
     @Column(name = "DESCRIPCION", length = 200)
     private String descripcion;
 
-    // Lado "1" de la relación: una categoría clasifica muchos productos
-    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // Lado "1" de la relación: una categoría clasifica muchos productos.
+    // Sin cascade: la FK la posee Producto, el borrado en cascada de productos
+    // no debe originarse desde aquí.
+    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
     private List<Producto> productos = new ArrayList<>();
 }

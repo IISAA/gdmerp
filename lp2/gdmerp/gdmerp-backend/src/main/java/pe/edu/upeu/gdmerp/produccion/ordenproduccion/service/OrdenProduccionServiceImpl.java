@@ -59,10 +59,11 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
             // B. Llama a Inventario para obtener los datos de lectura del producto
             ProductoResponse insumo = productoService.buscarPorId(detalleReq.productoId());
 
-            // C. Construye el detalle con el nombre real
+            // C. Construye el detalle con el nombre real y copia del costo unitario
             DetalleOrdenProduccion detalle = new DetalleOrdenProduccion();
             detalle.setProductoId(detalleReq.productoId());
             detalle.setNombreProducto(insumo.nombre()); // <-- Asignación del nombre real corregida
+            detalle.setCostoUnitario(insumo.costoPromedio()); // Copia del precio del catálogo (histórico)
             detalle.setCantidadRequerida(detalleReq.cantidadRequerida());
 
             op.addDetalle(detalle);

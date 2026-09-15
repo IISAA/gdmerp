@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "DETALLES_ORDEN_PRODUCCION", schema = "GDM_PRODUCCION")
@@ -28,4 +29,13 @@ public class DetalleOrdenProduccion {
 
     @Column(name = "CANTIDAD_REQUERIDA", nullable = false)
     private Integer cantidadRequerida;
+
+    // Copia del costo unitario del insumo al momento del consumo (histórico).
+    @Column(name = "COSTO_UNITARIO", nullable = false, precision = 10, scale = 2)
+    private BigDecimal costoUnitario;
+
+    // Cálculo de total por línea: cantidad requerida x costo unitario copiado.
+    public BigDecimal getSubtotal() {
+        return costoUnitario.multiply(BigDecimal.valueOf(cantidadRequerida));
+    }
 }

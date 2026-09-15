@@ -1,12 +1,15 @@
 -- GdmERP - Sesión 4: Tabla de Detalle de Orden de Producción (Cabecera-Detalle)
 -- Ejecutar con un usuario con privilegios DBA sobre el esquema GDM_PRODUCCION.
 
+-- El detalle guarda una COPIA del costo unitario del insumo al momento del consumo
+-- (histórico), igual que una venta copia nombre y precio del catálogo.
 CREATE TABLE GDM_PRODUCCION.DETALLES_ORDEN_PRODUCCION (
     ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     ORDEN_ID NUMBER NOT NULL,
     PRODUCTO_ID NUMBER NOT NULL,
     NOMBRE_PRODUCTO VARCHAR2(120) NOT NULL,
     CANTIDAD_REQUERIDA NUMBER NOT NULL,
+    COSTO_UNITARIO NUMBER(10,2) NOT NULL,
     CONSTRAINT FK_DET_ORD FOREIGN KEY (ORDEN_ID) REFERENCES GDM_PRODUCCION.ORDENES_PRODUCCION(ID)
 );
 

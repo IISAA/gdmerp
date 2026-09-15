@@ -1,6 +1,5 @@
 package pe.edu.upeu.gdmerp.inventario.almacen.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,7 +33,8 @@ public class Almacen {
     @Column(name = "UBICACION", length = 200)
     private String ubicacion;
 
-    // Lado "1" de la relación
-    @OneToMany(mappedBy = "almacen", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // Lado "1" de la relación. Sin cascade: la FK la posee Producto, el borrado
+    // en cascada de productos no debe originarse desde aquí.
+    @OneToMany(mappedBy = "almacen", fetch = FetchType.LAZY)
     private List<Producto> productos = new ArrayList<>();
 }

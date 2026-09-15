@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,5 +45,12 @@ public class OrdenProduccion {
     public void addDetalle(DetalleOrdenProduccion detalle) {
         detalles.add(detalle);
         detalle.setOrdenProduccion(this);
+    }
+
+    // Total de cabecera = suma de los subtotales de los detalles.
+    public BigDecimal getTotalCostoInsumos() {
+        return detalles.stream()
+                .map(DetalleOrdenProduccion::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

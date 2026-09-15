@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:21521/FREEPDB1
+    username: GDMERP_APP
+    password: 123456
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    show-sql: true # Excelente práctica en dev para ver qué consultas hace Hibernate
+    hibernate:
+      ddl-auto: update
+
+# --- VARIABLES PERSONALIZADAS DE GDMERP (Entorno DEV) ---
+gdmerp:
+  cors:
+    allowed-origins: "http://localhost:4200, http://127.0.0.1:4200" # Frontend local
+  inventario:
+    stock-retry:
+      max-intentos: 5       # Reintentos ante colisión de bloqueo optimista (@Version)
+      backoff-ms: 50        # Espera entre reintentos (en milisegundos)

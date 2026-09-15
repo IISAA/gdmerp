@@ -1,6 +1,5 @@
 package pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,6 +32,6 @@ public class CentroTrabajo {
     @Column(name = "CAPACIDAD")
     private Integer capacidad;
 
-    @OneToMany(mappedBy = "centroTrabajo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "centroTrabajo", fetch = FetchType.LAZY)
     private List<OrdenProduccion> ordenes = new ArrayList<>();
 }

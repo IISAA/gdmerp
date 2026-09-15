@@ -1,6 +1,7 @@
 package pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto;
 
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.dto.CentroTrabajoResponse;
+import java.math.BigDecimal;
 import java.util.List;
 
 public record OrdenProduccionResponse(
@@ -10,6 +11,7 @@ public record OrdenProduccionResponse(
     Integer cantidadPlanificada, 
     String estado,
     String loteGenerado,
+    BigDecimal totalCostoInsumos,
     CentroTrabajoResponse centroTrabajo,
     List<DetalleOrdenResponse> detalles
 ) {}

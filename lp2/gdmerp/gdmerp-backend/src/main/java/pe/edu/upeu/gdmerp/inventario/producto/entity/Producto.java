@@ -34,11 +34,18 @@ public class Producto {
     private BigDecimal costoPromedio;
 
     // Este es el campo que resuelve tu error
+    // El stock es gestionado por el servidor (operaciones de lote). Nace en 0.
     @Column(nullable = false)
-    private Integer stockTotal;
+    private Integer stockTotal = 0;
 
     @Column(nullable = false)
     private Integer stockMinimo;
+
+    // Control de concurrencia: cada UPDATE a la fila incrementa la versión y
+    // valida en el WHERE que coincida con la que leyó la transacción.
+    @Version
+    @Column(name = "VERSION")
+    private Long version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ALMACEN_ID", nullable = false)

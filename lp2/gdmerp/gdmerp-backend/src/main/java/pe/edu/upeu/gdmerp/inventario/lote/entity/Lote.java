@@ -32,4 +32,9 @@ public class Lote {
 
     @Column(nullable = false)
     private LocalDate fechaVencimiento;
+
+    // Control de concurrencia sobre la cantidad disponible del lote (consumo FEFO).
+    @Version
+    @Column(name = "VERSION")
+    private Long version;
 }

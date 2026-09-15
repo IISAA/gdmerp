@@ -12,7 +12,10 @@ import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
 @Mapper(componentModel = "spring", uses = {CentroTrabajoMapper.class})
 public interface OrdenProduccionMapper {
 
+    @Mapping(target = "totalCostoInsumos", expression = "java(ordenProduccion.getTotalCostoInsumos())")
     OrdenProduccionResponse toResponse(OrdenProduccion ordenProduccion);
+
+    @Mapping(target = "subtotal", expression = "java(detalle.getSubtotal())")
     DetalleOrdenResponse toDetalleResponse(DetalleOrdenProduccion detalle);
 
     @Mapping(target = "centroTrabajo", ignore = true)
