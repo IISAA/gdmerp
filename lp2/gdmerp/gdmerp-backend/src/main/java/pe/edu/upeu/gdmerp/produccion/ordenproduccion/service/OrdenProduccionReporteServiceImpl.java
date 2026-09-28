@@ -39,7 +39,7 @@ public class OrdenProduccionReporteServiceImpl implements OrdenProduccionReporte
                 .orElseThrow(() -> new ResourceNotFoundException("Orden de Producción no encontrada: " + ordenId));
 
         List<DetalleOrdenProduccion> detalles = orden.getDetalles();
-        List<Long> productoIds = detalles.stream().map(DetalleOrdenProduccion::getProductoId).toList();
+        List<Long> productoIds = detalles.stream().map(DetalleOrdenProduccion::getMateriaPrimaId).toList();
 
         Map<Long, BigDecimal> costos = productoService.obtenerCostoPromedioPorIds(productoIds)
                 .stream()
@@ -48,14 +48,14 @@ public class OrdenProduccionReporteServiceImpl implements OrdenProduccionReporte
         BigDecimal costoTotal = BigDecimal.ZERO;
         List<DetalleConsumoDTO> materiales = new ArrayList<>();
         for (DetalleOrdenProduccion detalle : detalles) {
-            BigDecimal costoUnitario = costos.get(detalle.getProductoId());
+            BigDecimal costoUnitario = costos.get(detalle.getMateriaPrimaId());
             if (costoUnitario == null) {
                 costoUnitario = detalle.getCostoUnitario() != null ? detalle.getCostoUnitario() : BigDecimal.ZERO;
             }
             BigDecimal costoLinea = costoUnitario.multiply(BigDecimal.valueOf(detalle.getCantidadRequerida()));
             costoTotal = costoTotal.add(costoLinea);
             materiales.add(new DetalleConsumoDTO(
-                    detalle.getProductoId(),
+                    detalle.getMateriaPrimaId(),
                     detalle.getNombreProducto(),
                     detalle.getCantidadRequerida(),
                     costoUnitario,

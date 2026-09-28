@@ -15,13 +15,20 @@ public interface OrdenProduccionMapper {
     @Mapping(target = "totalCostoInsumos", expression = "java(ordenProduccion.getTotalCostoInsumos())")
     OrdenProduccionResponse toResponse(OrdenProduccion ordenProduccion);
 
+    @Mapping(target = "nombreMateriaPrima", source = "nombreProducto")
     @Mapping(target = "subtotal", expression = "java(detalle.getSubtotal())")
     DetalleOrdenResponse toDetalleResponse(DetalleOrdenProduccion detalle);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "producto", ignore = true)
+    @Mapping(target = "loteGenerado", ignore = true)
     @Mapping(target = "centroTrabajo", ignore = true)
     @Mapping(target = "detalles", ignore = true)
     OrdenProduccion toEntity(OrdenProduccionRequest request);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "producto", ignore = true)
+    @Mapping(target = "loteGenerado", ignore = true)
     @Mapping(target = "centroTrabajo", ignore = true)
     @Mapping(target = "detalles", ignore = true)
     void updateEntity(@MappingTarget OrdenProduccion ordenProduccion, OrdenProduccionRequest request);

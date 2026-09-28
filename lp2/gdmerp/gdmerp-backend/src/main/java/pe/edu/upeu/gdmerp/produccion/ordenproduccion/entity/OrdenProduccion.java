@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
+import org.hibernate.annotations.BatchSize;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +31,15 @@ public class OrdenProduccion {
     @Column(name = "CANTIDAD_PLANIFICADA", nullable = false)
     private Integer cantidadPlanificada;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO", nullable = false, length = 30)
-    private String estado;
+    private EstadoOrdenProduccion estado;
+
+    @Column(name = "FECHA_PLANIFICADA_INICIO")
+    private LocalDateTime fechaPlanificadaInicio;
+
+    @Column(name = "FECHA_ESTIMADA_FIN")
+    private LocalDateTime fechaEstimadaFin;
 
     @Column(name = "LOTE_GENERADO", length = 50)
     private String loteGenerado;
@@ -39,6 +48,7 @@ public class OrdenProduccion {
     @JoinColumn(name = "CENTRO_TRABAJO_ID", nullable = false)
     private CentroTrabajo centroTrabajo;
 
+    @BatchSize(size = 30)
     @OneToMany(mappedBy = "ordenProduccion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<DetalleOrdenProduccion> detalles = new ArrayList<>();
 

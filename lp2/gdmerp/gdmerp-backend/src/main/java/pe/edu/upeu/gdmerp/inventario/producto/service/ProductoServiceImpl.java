@@ -8,9 +8,8 @@ import pe.edu.upeu.gdmerp.inventario.almacen.entity.Almacen;
 import pe.edu.upeu.gdmerp.inventario.almacen.repository.AlmacenRepository;
 import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.dto.CreateProductoRequest;
+import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoRequest;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
-import pe.edu.upeu.gdmerp.inventario.producto.dto.UpdateProductoRequest;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 import pe.edu.upeu.gdmerp.inventario.producto.mapper.ProductoMapper;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
@@ -40,7 +39,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
-    public ProductoResponse crear(CreateProductoRequest request) {
+    public ProductoResponse crear(ProductoRequest request) {
         validarSkuUnico(request.sku(), null);
 
         Producto producto = productoMapper.toEntity(request);
@@ -53,7 +52,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
-    public ProductoResponse actualizar(Long id, UpdateProductoRequest request) {
+    public ProductoResponse actualizar(Long id, ProductoRequest request) {
         Producto producto = getProductoEntity(id);
         validarSkuUnico(request.sku(), id);
 

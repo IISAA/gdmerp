@@ -12,6 +12,7 @@ import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepos
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.DetalleOrdenProduccion;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.EstadoOrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.mapper.OrdenProduccionMapper;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
@@ -50,20 +51,23 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
         OrdenProduccion op = mapper.toEntity(request);
         op.setCentroTrabajo(ct);
 
-        // 1. DESCUENTO DE INSUMOS (FEFO) Y OBTENCIÓN DE DATOS
-        request.detalles().forEach(detalleReq -> {
-            // A. Llama a Inventario para descontar (falla y hace rollback de todo si no hay
-            // stock)
-            inventarioService.consumirStockFefo(detalleReq.productoId(), detalleReq.cantidadRequerida());
+        // Resuelve el nombre del producto terminado a partir del ID recibido
+        ProductoResponse productoTerminado = productoService.buscarPorId(request.productoTerminadoId());
+        op.setProducto(productoTerminado.nombre());
 
-            // B. Llama a Inventario para obtener los datos de lectura del producto
-            ProductoResponse insumo = productoService.buscarPorId(detalleReq.productoId());
+        // 1. DESCUENTO DE MATERIAS PRIMAS (FEFO) Y OBTENCIÓN DE DATOS
+        request.detalles().forEach(detalleReq -> {
+            // A. Llama a Inventario para descontar (falla y hace rollback de todo si no hay stock)
+            inventarioService.consumirStockFefo(detalleReq.materiaPrimaId(), detalleReq.cantidadRequerida());
+
+            // B. Llama a Inventario para obtener los datos de lectura del insumo
+            ProductoResponse insumo = productoService.buscarPorId(detalleReq.materiaPrimaId());
 
             // C. Construye el detalle con el nombre real y copia del costo unitario
             DetalleOrdenProduccion detalle = new DetalleOrdenProduccion();
-            detalle.setProductoId(detalleReq.productoId());
-            detalle.setNombreProducto(insumo.nombre()); // <-- Asignación del nombre real corregida
-            detalle.setCostoUnitario(insumo.costoPromedio()); // Copia del precio del catálogo (histórico)
+            detalle.setMateriaPrimaId(detalleReq.materiaPrimaId());
+            detalle.setNombreProducto(insumo.nombre());
+            detalle.setCostoUnitario(insumo.costoPromedio());
             detalle.setCantidadRequerida(detalleReq.cantidadRequerida());
 
             op.addDetalle(detalle);
@@ -78,7 +82,9 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
                 fechaVencimiento);
 
         op.setLoteGenerado(numeroLoteNuevo);
-        op.setEstado("FINALIZADA");
+        if (op.getEstado() == null) {
+            op.setEstado(request.estado() != null ? request.estado() : EstadoOrdenProduccion.COMPLETADO);
+        }
 
         // 3. GUARDAR ORDEN DE PRODUCCIÓN Y DETALLES (Cascada)
         return mapper.toResponse(ordenRepository.save(op));
@@ -90,6 +96,10 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
         OrdenProduccion op = getEntity(id);
         mapper.updateEntity(op, request);
         op.setCentroTrabajo(getCentroTrabajoEntity(request.centroTrabajoId()));
+        if (request.productoTerminadoId() != null) {
+            ProductoResponse productoTerminado = productoService.buscarPorId(request.productoTerminadoId());
+            op.setProducto(productoTerminado.nombre());
+        }
         return mapper.toResponse(ordenRepository.save(op));
     }
 

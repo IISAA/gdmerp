@@ -7,7 +7,7 @@ spring:
   jpa:
     show-sql: true # Excelente práctica en dev para ver qué consultas hace Hibernate
     hibernate:
-      ddl-auto: update
+      ddl-auto: update # Excelente práctica en dev para crear y eliminar la BD al iniciar y cerrar la app
 
 # --- VARIABLES PERSONALIZADAS DE GDMERP (Entorno DEV) ---
 gdmerp:

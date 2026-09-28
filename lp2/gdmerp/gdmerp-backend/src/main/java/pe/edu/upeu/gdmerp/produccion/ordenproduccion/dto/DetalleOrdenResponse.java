@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 
 public record DetalleOrdenResponse(
     Long id,
-    Long productoId,
-    String nombreProducto,
+    Long materiaPrimaId,
+    String nombreMateriaPrima,
     Integer cantidadRequerida,
     BigDecimal costoUnitario,
     BigDecimal subtotal

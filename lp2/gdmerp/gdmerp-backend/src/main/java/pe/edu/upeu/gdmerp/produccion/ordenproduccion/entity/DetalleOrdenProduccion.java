@@ -22,7 +22,7 @@ public class DetalleOrdenProduccion {
     private OrdenProduccion ordenProduccion;
 
     @Column(name = "PRODUCTO_ID", nullable = false)
-    private Long productoId;
+    private Long materiaPrimaId;
 
     @Column(name = "NOMBRE_PRODUCTO", nullable = false, length = 120)
     private String nombreProducto;

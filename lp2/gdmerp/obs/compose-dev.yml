@@ -1,0 +1,33 @@
+name: gdmerp-obs-dev
+
+services:
+  gdmerp-prometheus:
+    image: prom/prometheus:v3.14.0
+    container_name: gdmerp-prometheus-dev
+    restart: unless-stopped
+    ports:
+      - "39090:9090"
+    volumes:
+      - ./prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  
+
+  gdmerp-loki:
+    image: grafana/loki:3.7.6
+    container_name: gdmerp-loki-dev
+    restart: unless-stopped
+    ports:
+      - "33100:3100"
+
+  gdmerp-promtail:
+    image: grafana/promtail:3.6.8
+    container_name: gdmerp-promtail-dev
+    restart: unless-stopped
+    volumes:
+      - ./promtail/promtail-config-dev.yml:/etc/promtail/config.yml:ro
+      - ../gdmerp-backend/logs:/var/log/gdmerp-backend:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - gdmerp-loki

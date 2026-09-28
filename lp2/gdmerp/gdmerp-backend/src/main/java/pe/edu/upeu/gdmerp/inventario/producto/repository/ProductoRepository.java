@@ -1,6 +1,9 @@
 package pe.edu.upeu.gdmerp.inventario.producto.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,11 +11,24 @@ import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ReporteStockCriticoDTO;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ReporteStockProductoDTO;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
-        
-    // Método derivado (Query Method) para buscar productos por la llave foránea
-    List<Producto> findByAlmacenId(Long almacenId);
+
+    @Override
+    @Query("SELECT p FROM Producto p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.almacen")
+    List<Producto> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = {"categoria", "almacen"})
+    Page<Producto> findAll(Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = {"categoria", "almacen"})
+    Optional<Producto> findById(Long id);
+
+    @Query("SELECT p FROM Producto p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.almacen WHERE p.almacen.id = :almacenId")
+    List<Producto> findByAlmacenId(@Param("almacenId") Long almacenId);
 
     boolean existsBySku(String sku);
 
@@ -52,6 +68,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     
     @Query("""
            SELECT p FROM Producto p
+           LEFT JOIN FETCH p.categoria
+           LEFT JOIN FETCH p.almacen
            WHERE (:categoriaId IS NULL OR p.categoria.id = :categoriaId)
              AND (:almacenId IS NULL OR p.almacen.id = :almacenId)
              AND (:minStock IS NULL OR p.stockTotal >= :minStock)

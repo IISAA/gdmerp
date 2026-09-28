@@ -17,11 +17,13 @@ import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepos
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.DetalleOrdenRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.EstadoOrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.service.OrdenProduccionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -145,9 +147,10 @@ class OrdenProduccionTransactionTest {
     private OrdenProduccionRequest ordenRequest(Long productoTerminadoId, int cantidadPlanificada, int cantidadRequerida) {
         return new OrdenProduccionRequest(
                 productoTerminadoId,
-                "Cacao Procesado",
                 cantidadPlanificada,
-                "FINALIZADA",
+                EstadoOrdenProduccion.PLANIFICADO,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(2),
                 centro.getId(),
                 List.of(new DetalleOrdenRequest(insumo.getId(), cantidadRequerida)));
     }
