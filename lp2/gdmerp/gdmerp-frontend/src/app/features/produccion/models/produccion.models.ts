@@ -20,6 +20,15 @@ export interface OrdenProduccionRequest {
   detalles: DetalleOrdenRequest[];
 }
 
+export interface OrdenProduccionUpdateRequest {
+  cantidadPlanificada: number;
+  estado: EstadoOrdenProduccion;
+  centroTrabajoId: number;
+  fechaPlanificadaInicio: string;
+  fechaEstimadaFin: string;
+  detalles: DetalleOrdenRequest[];
+}
+
 export interface DetalleOrdenResponse {
   id: number;
   materiaPrimaId: number;

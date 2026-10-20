@@ -33,6 +33,10 @@ public class Producto {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal costoPromedio;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_producto", nullable = false)
+    private TipoProducto tipoProducto = TipoProducto.MATERIA_PRIMA;
+
     // Este es el campo que resuelve tu error
     // El stock es gestionado por el servidor (operaciones de lote). Nace en 0.
     @Column(nullable = false)

@@ -1,152 +1,86 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormArray, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 import { OrdenProduccionService } from '../../services/orden-produccion.service';
 import { EstadoOrdenProduccion, OrdenProduccionRequest } from '../../models/produccion.models';
+
+import { ProductoService } from '../../services/producto.service';
+import { Producto } from '../../models/producto.model';
+import { CentroTrabajoService } from '../../services/centro-trabajo.service';
+import { CentroTrabajo } from '../../models/centro-trabajo.model';
 
 @Component({
   selector: 'app-crear-orden',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
-  template: `
-    <div style="padding: 1.5rem; max-width: 900px; margin: 0 auto;">
-      <div style="margin-bottom: 1.5rem;">
-        <a routerLink="/produccion/ordenes" style="color: #d97706; text-decoration: none; font-size: 0.875rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.25rem;">
-          ← Volver al listado de órdenes
-        </a>
-        <h2 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin: 0.5rem 0 0.25rem 0;">
-          Nueva Orden de Producción
-        </h2>
-      </div>
-
-      <div style="background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; padding: 2rem;">
-        <form [formGroup]="form" (ngSubmit)="guardar()">
-          
-          <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin-top: 0; margin-bottom: 1.25rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem;">
-            1. Parámetros de la Orden
-          </h3>
-
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
-            <div>
-              <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.375rem;">
-                Producto Terminado *
-              </label>
-              <select formControlName="productoTerminadoId" style="width: 100%; padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.9rem; background-color: white;">
-                <option [value]="3">Aceite de Coco Virgen Extra 500ml</option>
-              </select>
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.375rem;">
-                Cantidad Planificada *
-              </label>
-              <input type="number" formControlName="cantidadPlanificada" min="1" style="width: 100%; padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.9rem; box-sizing: border-box;">
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.375rem;">
-                Centro de Trabajo *
-              </label>
-              <select formControlName="centroTrabajoId" style="width: 100%; padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.9rem; background-color: white;">
-                <option [value]="1">Línea de Prensa Fría y Filtrado</option>
-              </select>
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.375rem;">
-                Estado Inicial *
-              </label>
-              <select formControlName="estado" style="width: 100%; padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.9rem; background-color: white;">
-                @for (est of estados; track est) {
-                  <option [value]="est">{{ est }}</option>
-                }
-              </select>
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.375rem;">
-                Fecha Planificada Inicio *
-              </label>
-              <input type="date" formControlName="fechaPlanificadaInicio" style="width: 100%; padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.9rem; box-sizing: border-box;">
-            </div>
-
-            <div>
-              <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.375rem;">
-                Fecha Estimada Fin *
-              </label>
-              <input type="date" formControlName="fechaEstimadaFin" style="width: 100%; padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.9rem; box-sizing: border-box;">
-            </div>
-          </div>
-
-          <div style="margin-top: 2rem; margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem; margin-bottom: 1rem;">
-              <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin: 0;">
-                2. Insumos y Materias Primas Requeridas
-              </h3>
-              <button type="button" (click)="agregarMateriaPrima()" style="background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-                + Agregar Insumo
-              </button>
-            </div>
-
-            <div formArrayName="detalles" style="display: flex; flex-direction: column; gap: 0.75rem;">
-              @for (detalle of detalles.controls; track $index; let i = $index) {
-                <div [formGroupName]="i" style="display: flex; align-items: center; gap: 1rem; background-color: #f9fafb; padding: 0.875rem; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
-                  <div style="font-weight: 700; color: #6b7280; font-size: 0.85rem; width: 25px;">#{{ i + 1 }}</div>
-                  
-                  <div style="flex: 2;">
-                    <label style="display: block; font-size: 0.75rem; color: #4b5563; font-weight: 600; margin-bottom: 0.25rem;">Materia Prima</label>
-                    <select formControlName="materiaPrimaId" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; background: white;">
-                      <option [value]="1">Coco Fresco Entero (Con cáscara)</option>
-                      <option [value]="2">Botella de Vidrio Ámbar 500ml</option>
-                    </select>
-                  </div>
-
-                  <div style="flex: 1;">
-                    <label style="display: block; font-size: 0.75rem; color: #4b5563; font-weight: 600; margin-bottom: 0.25rem;">Cantidad</label>
-                    <input type="number" formControlName="cantidadRequerida" min="0.01" step="0.01" style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; box-sizing: border-box;">
-                  </div>
-
-                  <div style="padding-top: 1.1rem;">
-                    <button type="button" (click)="eliminarMateriaPrima(i)" [disabled]="detalles.length === 1" style="background: transparent; color: #ef4444; border: none; font-size: 1.25rem; cursor: pointer; padding: 0.25rem 0.5rem;">✕</button>
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-
-          @if (errorMessage) {
-            <div style="background-color: #fee2e2; border: 1px solid #f87171; color: #b91c1c; padding: 0.75rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; margin-bottom: 1.5rem;">
-              {{ errorMessage }}
-            </div>
-          }
-
-          <div style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #f3f4f6; padding-top: 1.5rem;">
-            <a routerLink="/produccion/ordenes" style="padding: 0.625rem 1.25rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; text-decoration: none; font-size: 0.95rem;">
-              Cancelar
-            </a>
-            <button type="submit" [disabled]="form.invalid || isSubmitting" [style.opacity]="form.invalid || isSubmitting ? '0.6' : '1'" style="background-color: #16a34a; color: white; border: none; padding: 0.625rem 1.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
-              @if (isSubmitting) { <span>Guardando...</span> } @else { <span>Guardar Orden</span> }
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `
+  imports: [
+    ReactiveFormsModule, 
+    RouterLink, 
+    MatAutocompleteModule, 
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatSelectModule, 
+    MatButtonModule, 
+    MatDatepickerModule, 
+    MatNativeDateModule,
+    MatSnackBarModule
+  ],
+  templateUrl: './crear-orden.component.html'
 })
 export class CrearOrdenComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly ordenService = inject(OrdenProduccionService);
-  private readonly router = inject(Router);
-
+  private readonly fb: FormBuilder = inject(FormBuilder);
+  private readonly ordenService: OrdenProduccionService = inject(OrdenProduccionService);
+  private readonly router: Router = inject(Router);
+  private readonly snackBar: MatSnackBar = inject(MatSnackBar);
+  
+  // Servicios Externos
+  private readonly productoService: ProductoService = inject(ProductoService);
+  private readonly centroTrabajoService: CentroTrabajoService = inject(CentroTrabajoService);
+  
   readonly estados = Object.values(EstadoOrdenProduccion);
   isSubmitting = false;
   errorMessage = '';
 
+  // ----------------------------------------------------
+  // ESTADOS REACTIVOS (Signals) PARA AUTOCOMPLETES
+  // ----------------------------------------------------
+  protected readonly productosTerminados = signal<Producto[]>([]);
+  protected readonly materiasPrimas = signal<Producto[]>([]);
+  protected readonly centros = signal<CentroTrabajo[]>([]);
+
+  // Autocomplete: Producto Terminado
+  protected readonly productoBusqueda = signal('');
+  protected readonly productosFiltrados = computed(() => {
+    const texto = this.productoBusqueda().trim().toLowerCase();
+    if (!texto) return this.productosTerminados();
+    return this.productosTerminados().filter((p) => p.nombre.toLowerCase().includes(texto));
+  });
+
+  // Autocomplete: Centro de Trabajo
+  protected readonly centroBusqueda = signal('');
+  protected readonly centrosFiltrados = computed(() => {
+    const texto = this.centroBusqueda().trim().toLowerCase();
+    if (!texto) return this.centros();
+    return this.centros().filter((c) => c.nombre.toLowerCase().includes(texto));
+  });
+
+  // ----------------------------------------------------
+  // DEFINICIÓN DEL FORMULARIO
+  // ----------------------------------------------------
   readonly form: FormGroup = this.fb.group({
-    productoTerminadoId: [3, [Validators.required, Validators.min(1)]],
+    productoTerminadoId: [0, [Validators.required, Validators.min(1)]],
     cantidadPlanificada: [100, [Validators.required, Validators.min(1)]],
     estado: [EstadoOrdenProduccion.PLANIFICADO, [Validators.required]],
-    centroTrabajoId: [1, [Validators.required, Validators.min(1)]],
+    centroTrabajoId: [0, [Validators.required, Validators.min(1)]],
     fechaPlanificadaInicio: [this.getTodayDateString(), [Validators.required]],
     fechaEstimadaFin: [this.getDefaultEndDateString(), [Validators.required]],
     detalles: this.fb.array([])
@@ -157,14 +91,67 @@ export class CrearOrdenComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.agregarMateriaPrima(1, 500); 
-    this.agregarMateriaPrima(2, 100); 
+    // 1. Cargar SOLO Productos Terminados
+    this.productoService.listar('TERMINADO').subscribe({
+      next: (data) => this.productosTerminados.set(data),
+      error: (err) => console.error('Error cargando terminados:', err)
+    });
+
+    // 2. Cargar SOLO Materias Primas
+    this.productoService.listar('MATERIA_PRIMA').subscribe({
+      next: (data) => {
+        this.materiasPrimas.set(data);
+        if (data.length > 0) {
+          // Agregar la primera fila por defecto si es necesario
+          this.agregarMateriaPrima(data[0].id, data[0].nombre, 1);
+        }
+      },
+      error: (err) => console.error('Error cargando insumos:', err)
+    });
+
+    // Cargar Centros de Trabajo
+    this.centroTrabajoService.listar().subscribe({
+      next: (data) => this.centros.set(data),
+      error: (err) => console.error('Error cargando centros de trabajo:', err)
+    });
   }
 
-  agregarMateriaPrima(materiaPrimaId: number = 1, cantidadRequerida: number = 10): void {
+  // ----------------------------------------------------
+  // MÉTODOS DE AUTOCOMPLETE: PRODUCTO TERMINADO
+  // ----------------------------------------------------
+  protected buscarProducto(texto: string): void {
+    this.productoBusqueda.set(texto);
+    this.form.controls['productoTerminadoId'].setValue(0);
+  }
+
+  protected onProductoSeleccionado(evento: MatAutocompleteSelectedEvent): void {
+    const producto = this.productosTerminados().find((p) => p.nombre === evento.option.value);
+    this.form.controls['productoTerminadoId'].setValue(producto?.id ?? 0);
+    this.form.controls['productoTerminadoId'].markAsTouched();
+  }
+
+  // ----------------------------------------------------
+  // MÉTODOS DE AUTOCOMPLETE: CENTRO DE TRABAJO
+  // ----------------------------------------------------
+  protected buscarCentro(texto: string): void {
+    this.centroBusqueda.set(texto);
+    this.form.controls['centroTrabajoId'].setValue(0);
+  }
+
+  protected onCentroSeleccionado(evento: MatAutocompleteSelectedEvent): void {
+    const centro = this.centros().find((c) => c.nombre === evento.option.value);
+    this.form.controls['centroTrabajoId'].setValue(centro?.id ?? 0);
+    this.form.controls['centroTrabajoId'].markAsTouched();
+  }
+
+  // ----------------------------------------------------
+  // MÉTODOS DE AUTOCOMPLETE: MATERIAS PRIMAS (FORMARRAY)
+  // ----------------------------------------------------
+  agregarMateriaPrima(id: number = 0, nombre: string = '', cantidad: number = 10): void {
     const detalleGroup = this.fb.group({
-      materiaPrimaId: [materiaPrimaId, [Validators.required, Validators.min(1)]],
-      cantidadRequerida: [cantidadRequerida, [Validators.required, Validators.min(0.01)]]
+      materiaPrimaId: [id, [Validators.required, Validators.min(1)]],
+      materiaPrimaNombre: [nombre], // Control temporal para el texto del Autocomplete
+      cantidadRequerida: [cantidad, [Validators.required, Validators.min(1)]]
     });
     this.detalles.push(detalleGroup);
   }
@@ -173,16 +160,39 @@ export class CrearOrdenComponent implements OnInit {
     this.detalles.removeAt(index);
   }
 
+  // Este método filtra las opciones de la lista flotante *solo para la fila actual*
+  protected obtenerMateriasPrimasFiltradas(index: number): Producto[] {
+    const textoBuscado = this.detalles.at(index).get('materiaPrimaNombre')?.value?.trim().toLowerCase() || '';
+    if (!textoBuscado) return this.materiasPrimas();
+    return this.materiasPrimas().filter((p) => p.nombre.toLowerCase().includes(textoBuscado));
+  }
+
+  // Cuando el usuario escribe sin seleccionar, marcamos el ID como inválido (0)
+  protected invalidarMateriaPrimaId(index: number): void {
+    this.detalles.at(index).get('materiaPrimaId')?.setValue(0);
+  }
+
+  // Cuando selecciona de la lista, atrapamos el ID real de esa fila
+  protected onMateriaPrimaSeleccionada(evento: MatAutocompleteSelectedEvent, index: number): void {
+    const producto = this.materiasPrimas().find((p) => p.nombre === evento.option.value);
+    this.detalles.at(index).get('materiaPrimaId')?.setValue(producto?.id ?? 0);
+    this.detalles.at(index).get('materiaPrimaId')?.markAsTouched();
+  }
+
+  // ----------------------------------------------------
+  // GUARDADO Y UTILIDADES
+  // ----------------------------------------------------
   guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.snackBar.open('⚠️ Por favor, completa todos los campos requeridos correctamente.', 'Cerrar', { duration: 4000 });
       return;
     }
-
+    
     this.isSubmitting = true;
     this.errorMessage = '';
     const raw = this.form.getRawValue();
-
+    
     const request: OrdenProduccionRequest = {
       productoTerminadoId: Number(raw.productoTerminadoId),
       cantidadPlanificada: Number(raw.cantidadPlanificada),
@@ -190,7 +200,7 @@ export class CrearOrdenComponent implements OnInit {
       centroTrabajoId: Number(raw.centroTrabajoId),
       fechaPlanificadaInicio: this.formatFecha(raw.fechaPlanificadaInicio),
       fechaEstimadaFin: this.formatFecha(raw.fechaEstimadaFin),
-      detalles: (raw.detalles || []).map((d: { materiaPrimaId: number | string; cantidadRequerida: number | string }) => ({
+      detalles: (raw.detalles || []).map((d: any) => ({
         materiaPrimaId: Number(d.materiaPrimaId),
         cantidadRequerida: Number(d.cantidadRequerida)
       }))
@@ -199,26 +209,55 @@ export class CrearOrdenComponent implements OnInit {
     this.ordenService.crear(request).subscribe({
       next: () => {
         this.isSubmitting = false;
+        this.snackBar.open('✅ Orden de producción guardada exitosamente.', 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
         this.router.navigate(['/produccion/ordenes']);
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.errorMessage = 'Error al registrar la orden. Verifica la consola o el backend.';
-        console.error(err);
+        console.error('Error del backend:', err);
+        
+        // Extraer el mensaje de error del backend (Spring Boot suele enviarlo en err.error.message o err.error.errors)
+        let mensajeBackend = err.error?.message;
+        if (err.status === 400 && err.error?.errors && Array.isArray(err.error.errors)) {
+          mensajeBackend = err.error.errors.map((e: any) => `${e.field}: ${e.defaultMessage}`).join(' | ');
+        }
+        
+        // Mensaje amigable para el usuario
+        const mensajeMostrar = mensajeBackend 
+          ? `❌ Error: ${mensajeBackend}` 
+          : '❌ No se pudo guardar la orden. Verifica que exista stock disponible para todos los insumos seleccionados.';
+
+        this.errorMessage = mensajeMostrar;
+
+        this.snackBar.open(mensajeMostrar, 'Entendido', {
+          duration: 6000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
     });
   }
 
-  private formatFecha(fecha: string): string {
+  private formatFecha(fecha: any): string {
     if (!fecha) return '';
-    if (fecha.includes('T')) return fecha;
-    return `${fecha}T08:00:00`;
+    if (fecha instanceof Date) {
+      const year = fecha.getFullYear();
+      const month = String(fecha.getMonth() + 1).padStart(2, '0');
+      const day = String(fecha.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}T08:00:00`;
+    }
+    const fechaStr = String(fecha);
+    if (fechaStr.includes('T')) return fechaStr;
+    return `${fechaStr}T08:00:00`;
   }
 
-  private getTodayDateString(): string {
-    return new Date().toISOString().split('T')[0];
-  }
-
+  private getTodayDateString(): string { return new Date().toISOString().split('T')[0]; }
   private getDefaultEndDateString(): string {
     const date = new Date();
     date.setDate(date.getDate() + 7);

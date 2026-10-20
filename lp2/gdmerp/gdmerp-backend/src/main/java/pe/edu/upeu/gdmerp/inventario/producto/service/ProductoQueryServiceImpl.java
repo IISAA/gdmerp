@@ -1,6 +1,7 @@
 package pe.edu.upeu.gdmerp.inventario.producto.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.CostoProductoDTO;
@@ -15,6 +16,7 @@ public class ProductoQueryServiceImpl implements ProductoQueryService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<CostoProductoDTO> obtenerCostoPromedioPorIds(List<Long> productoIds) {
         if (productoIds == null || productoIds.isEmpty()) {
             return List.of();

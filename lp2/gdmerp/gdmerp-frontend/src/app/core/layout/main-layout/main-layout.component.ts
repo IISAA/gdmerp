@@ -7,16 +7,6 @@ import { HeaderComponent } from '../header/header.component';
   selector: 'app-main-layout',
   standalone: true,
   imports: [RouterOutlet, SidebarComponent, HeaderComponent],
-  template: `
-    <div style="display: flex; height: 100vh; background-color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif;">
-      <app-sidebar></app-sidebar>
-      <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-        <app-header></app-header>
-        <main style="flex: 1; padding: 2rem; overflow-y: auto;">
-          <router-outlet></router-outlet>
-        </main>
-      </div>
-    </div>
-  `
+  templateUrl: './main-layout.component.html'
 })
 export class MainLayoutComponent {}

@@ -1,0 +1,141 @@
+<div style="padding: 1.5rem; max-width: 1000px; margin: 0 auto;">
+  <div style="margin-bottom: 1.5rem;">
+    <a routerLink="/produccion/ordenes" style="color: #d97706; text-decoration: none; font-size: 0.875rem; font-weight: 500;">
+      ← Volver al listado de órdenes
+    </a>
+    <h2 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin: 0.5rem 0 0.25rem 0;">
+      Nueva Orden de Producción
+    </h2>
+  </div>
+
+  <div style="background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; padding: 2rem;">
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      
+      <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin-top: 0; margin-bottom: 1.25rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem;">
+        1. Parámetros de la Orden
+      </h3>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+        
+        <!-- PRODUCTO TERMINADO (Autocomplete) -->
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Producto Terminado (Cacao) *</mat-label>
+          <input type="text" matInput [matAutocomplete]="autoProducto" [value]="productoBusqueda()" (input)="buscarProducto($any($event.target).value)" (blur)="form.controls['productoTerminadoId'].markAsTouched()">
+          <mat-autocomplete #autoProducto="matAutocomplete" (optionSelected)="onProductoSeleccionado($event)">
+            @for (producto of productosFiltrados(); track producto.id) {
+              <mat-option [value]="producto.nombre">{{ producto.nombre }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (form.controls['productoTerminadoId'].touched && form.controls['productoTerminadoId'].hasError('min')) {
+            <mat-error>Seleccione un producto de la lista.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Cantidad Planificada *</mat-label>
+          <input matInput type="number" formControlName="cantidadPlanificada" min="1">
+        </mat-form-field>
+
+        <!-- CENTRO DE TRABAJO (Autocomplete S08) -->
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Centro de Trabajo *</mat-label>
+          <input type="text" matInput [matAutocomplete]="autoCentro" [value]="centroBusqueda()" (input)="buscarCentro($any($event.target).value)" (blur)="form.controls['centroTrabajoId'].markAsTouched()">
+          <mat-autocomplete #autoCentro="matAutocomplete" (optionSelected)="onCentroSeleccionado($event)">
+            @for (centro of centrosFiltrados(); track centro.id) {
+              <mat-option [value]="centro.nombre">{{ centro.nombre }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (form.controls['centroTrabajoId'].touched && form.controls['centroTrabajoId'].hasError('min')) {
+            <mat-error>Seleccione un centro de trabajo de la lista.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Estado Inicial *</mat-label>
+          <mat-select formControlName="estado">
+            @for (est of estados; track est) {
+              <mat-option [value]="est">{{ est }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Fecha Planificada Inicio *</mat-label>
+          <input matInput [matDatepicker]="pickerInicio" formControlName="fechaPlanificadaInicio">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+          <mat-datepicker #pickerInicio></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Fecha Estimada Fin *</mat-label>
+          <input matInput [matDatepicker]="pickerFin" formControlName="fechaEstimadaFin">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFin></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- SECCIÓN DE INSUMOS (FormArray) -->
+      <div style="margin-top: 2rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin: 0;">
+            2. Insumos y Materias Primas Requeridas
+          </h3>
+          <button mat-stroked-button type="button" (click)="agregarMateriaPrima()" color="primary">
+            + Agregar Insumo
+          </button>
+        </div>
+
+        <div formArrayName="detalles" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          @for (detalle of detalles.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" style="display: flex; align-items: center; gap: 1rem; background-color: #f9fafb; padding: 0.875rem; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+              <div style="font-weight: 700; color: #6b7280; font-size: 0.85rem; width: 25px;">#{{ i + 1 }}</div>
+              
+              <div style="flex: 2;">
+                <!-- MATERIA PRIMA (Autocomplete Dinámico por Fila) -->
+                <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
+                  <mat-label>Materia Prima</mat-label>
+                  <input type="text" matInput formControlName="materiaPrimaNombre" [matAutocomplete]="autoMP" (input)="invalidarMateriaPrimaId(i)">
+                  <mat-autocomplete #autoMP="matAutocomplete" (optionSelected)="onMateriaPrimaSeleccionada($event, i)">
+                    <!-- Evaluamos el filtro de forma dinámica pasando el índice de la fila -->
+                    @for (mp of obtenerMateriasPrimasFiltradas(i); track mp.id) {
+                      <mat-option [value]="mp.nombre">{{ mp.nombre }}</mat-option>
+                    }
+                  </mat-autocomplete>
+                  @if (detalle.get('materiaPrimaId')?.touched && detalle.get('materiaPrimaId')?.hasError('min')) {
+                    <mat-error>Insumo no válido</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div style="flex: 1;">
+                <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
+                  <mat-label>Cantidad</mat-label>
+                  <input matInput type="number" formControlName="cantidadRequerida" min="1" step="1">
+                </mat-form-field>
+              </div>
+
+              <div>
+                <button mat-icon-button color="warn" type="button" (click)="eliminarMateriaPrima(i)">
+                  ✕
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (errorMessage) {
+        <div style="background-color: #fee2e2; border: 1px solid #f87171; color: #b91c1c; padding: 0.75rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; margin-bottom: 1.5rem;">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <div style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #f3f4f6; padding-top: 1.5rem;">
+        <button mat-stroked-button type="button" routerLink="/produccion/ordenes">Cancelar</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting">
+          @if (isSubmitting) { Guardando... } @else { Guardar Orden }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

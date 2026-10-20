@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoRequest;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
-import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoRequest;
 import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
 import org.springframework.data.domain.Sort;
 import java.util.List;
@@ -20,10 +19,11 @@ import java.util.List;
 public class ProductoController {
     private final ProductoService productoService;
 
-    @Operation(summary = "Lista todos los productos")
+    @Operation(summary = "Lista todos los productos o filtra por tipo de producto")
     @GetMapping
-    public ResponseEntity<List<ProductoResponse>> listar() {
-        return ResponseEntity.ok(productoService.listar());
+    public ResponseEntity<List<ProductoResponse>> listar(
+            @RequestParam(name = "tipoProducto", required = false) String tipoProducto) {
+        return ResponseEntity.ok(productoService.listar(tipoProducto));
     }
 
     @Operation(summary = "Filtro dinámico de productos con ordenamiento")

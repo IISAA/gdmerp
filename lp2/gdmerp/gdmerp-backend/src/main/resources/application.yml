@@ -1,16 +1,19 @@
-# Activamos el perfil de desarrollo por defecto
+# Configuración global de la aplicación
 spring:
   application:
-      name: gdmerp-backend
+    name: gdmerp-backend
+
+  # Perfil de desarrollo por defecto
   profiles:
     active: dev
 
-# Configuraciones globales (comunes para cualquier entorno)
+# Configuración de Spring Boot Actuator
 management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus
+        include: health,info,prometheus
+
   endpoint:
     prometheus:
       enabled: true

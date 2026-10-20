@@ -1,0 +1,29 @@
+<header style="display: flex; flex-direction: column; width: 100%;">
+  <div style="background-color: #f59e0b; color: white; text-align: center; padding: 0.5rem; font-weight: bold; font-size: 0.875rem;">
+    🚀 ¡Nuevos despachos de Pasta Pura de Cacao y Miel disponibles para producción inmediata!
+  </div>
+  <div style="display: flex; justify-content: flex-end; align-items: center; padding: 0.75rem 2rem; background: white; border-bottom: 1px solid #e5e7eb; gap: 1.5rem;">
+    @if (authService.isLoggedIn()) {
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="text-align: right;">
+          <div style="font-weight: 600; color: #111827; font-size: 0.95rem;">
+            {{ authService.getUsername() }}
+          </div>
+          <div style="font-size: 0.75rem; color: #6b7280;">
+            {{ authService.getUserRoles().join(', ') || 'Sin Rol' }}
+          </div>
+        </div>
+        <div style="width: 36px; height: 36px; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.875rem;">
+          {{ getInitials() }}
+        </div>
+        <button mat-stroked-button color="warn" (click)="authService.logout()" style="margin-left: 0.5rem; font-size: 0.85rem; border-color: #fca5a5; color: #dc2626;">
+          <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem; vertical-align: middle;">logout</mat-icon> Salir
+        </button>
+      </div>
+    } @else {
+      <button mat-flat-button color="primary" (click)="authService.login()" style="font-size: 0.875rem;">
+        <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem; vertical-align: middle;">login</mat-icon> Iniciar Sesión
+      </button>
+    }
+  </div>
+</header>

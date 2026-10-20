@@ -18,11 +18,15 @@ public interface ProductoMapper {
     @Mapping(target = "almacen", ignore = true)
     @Mapping(target = "categoria", ignore = true)
     @Mapping(target = "lotes", ignore = true)
+    @Mapping(target = "stockTotal", ignore = true)
+    @Mapping(target = "version", ignore = true)
     Producto toEntity(ProductoRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "almacen", ignore = true)
     @Mapping(target = "categoria", ignore = true)
     @Mapping(target = "lotes", ignore = true)
+    @Mapping(target = "stockTotal", ignore = true)
+    @Mapping(target = "version", ignore = true)
     void updateEntity(@MappingTarget Producto producto, ProductoRequest request);
 }

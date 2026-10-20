@@ -11,6 +11,7 @@ import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.mapper.CategoriaMapper;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @Service
@@ -22,18 +23,21 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<CategoriaResponse> listar() {
         return categoriaRepository.findAll().stream().map(categoriaMapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public CategoriaResponse buscarPorId(Long id) {
         return categoriaMapper.toResponse(getCategoriaEntity(id));
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public CategoriaResponse crear(CategoriaRequest request) {
         validarNombreUnico(request.nombre(), null);
         return categoriaMapper.toResponse(categoriaRepository.save(categoriaMapper.toEntity(request)));
@@ -41,6 +45,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public CategoriaResponse actualizar(Long id, CategoriaRequest request) {
         Categoria categoria = getCategoriaEntity(id);
         validarNombreUnico(request.nombre(), id);
@@ -50,6 +55,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public void eliminar(Long id) {
         Categoria categoria = getCategoriaEntity(id);
         if (productoRepository.existsByCategoriaId(id)) {
@@ -74,6 +80,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<ReporteCategoriaCostoDTO> obtenerReporteCostosPorCategoria() {
         return categoriaRepository.reporteCostosPorCategoria();
     }

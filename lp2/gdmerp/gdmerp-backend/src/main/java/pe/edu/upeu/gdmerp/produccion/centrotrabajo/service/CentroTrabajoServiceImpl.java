@@ -1,5 +1,7 @@
 package pe.edu.upeu.gdmerp.produccion.centrotrabajo.service;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
@@ -20,18 +22,21 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'OPERARIO', 'ALMACENERO')")
     public List<CentroTrabajoResponse> listar() {
         return repository.findAll().stream().map(mapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'OPERARIO', 'ALMACENERO')")
     public CentroTrabajoResponse buscarPorId(Long id) {
         return mapper.toResponse(getEntity(id));
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
     public CentroTrabajoResponse crear(CentroTrabajoRequest request) {
         validarNombreUnico(request.nombre(), null);
         CentroTrabajo ct = mapper.toEntity(request);
@@ -40,6 +45,7 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
     public CentroTrabajoResponse actualizar(Long id, CentroTrabajoRequest request) {
         CentroTrabajo ct = getEntity(id);
         validarNombreUnico(request.nombre(), id);
@@ -49,6 +55,7 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
     public void eliminar(Long id) {
         CentroTrabajo ct = getEntity(id);
         if (ordenProduccionRepository.existsByCentroTrabajoId(id)) {

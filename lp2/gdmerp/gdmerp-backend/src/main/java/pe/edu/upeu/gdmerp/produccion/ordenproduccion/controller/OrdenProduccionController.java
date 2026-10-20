@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionUpdateRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.service.OrdenProduccionService;
 import java.util.List;
 
@@ -45,8 +46,9 @@ public class OrdenProduccionController {
 
     @Operation(summary = "Actualiza una orden de producción")
     @PutMapping("/{id}")
-    public ResponseEntity<OrdenProduccionResponse> actualizar(@PathVariable Long id,
-            @Valid @RequestBody OrdenProduccionRequest request) {
+    public ResponseEntity<OrdenProduccionResponse> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody OrdenProduccionUpdateRequest request) {
         return ResponseEntity.ok(ordenProduccionService.actualizar(id, request));
     }
 

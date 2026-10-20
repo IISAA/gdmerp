@@ -1,6 +1,7 @@
 package pe.edu.upeu.gdmerp.inventario.producto.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ReporteStockCriticoDTO;
@@ -17,12 +18,14 @@ public class ProductoReporteServiceImpl implements ProductoReporteService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<ReporteStockProductoDTO> obtenerReporteStock() {
         return repository.reporteStockConsolidado();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<ReporteStockCriticoDTO> obtenerReporteStockCritico() {
         return repository.reporteStockCritico();
     }

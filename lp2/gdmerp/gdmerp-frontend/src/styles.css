@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Estilos de notificaciones de grado industrial (MatSnackBar) */
+.success-snackbar {
+  --mat-snack-bar-button-color: #ffffff;
+  --mdc-snackbar-container-color: #15803d;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  background-color: #15803d !important;
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+.error-snackbar {
+  --mat-snack-bar-button-color: #ffffff;
+  --mdc-snackbar-container-color: #b91c1c;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  background-color: #b91c1c !important;
+  color: #ffffff !important;
+  font-weight: 500;
+}

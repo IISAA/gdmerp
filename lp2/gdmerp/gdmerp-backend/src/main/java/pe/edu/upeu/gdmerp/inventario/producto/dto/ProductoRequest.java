@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import pe.edu.upeu.gdmerp.inventario.producto.entity.TipoProducto;
 import java.math.BigDecimal;
 
 public record ProductoRequest(
@@ -32,5 +33,11 @@ public record ProductoRequest(
     Long almacenId,
 
     @NotNull(message = "El ID de la categoría es obligatorio")
-    Long categoriaId
-) {}
+    Long categoriaId,
+
+    TipoProducto tipoProducto
+) {
+    public ProductoRequest(String sku, String nombre, String unidadMedida, BigDecimal costoPromedio, Integer stockMinimo, Long almacenId, Long categoriaId) {
+        this(sku, nombre, unidadMedida, costoPromedio, stockMinimo, almacenId, categoriaId, TipoProducto.MATERIA_PRIMA);
+    }
+}

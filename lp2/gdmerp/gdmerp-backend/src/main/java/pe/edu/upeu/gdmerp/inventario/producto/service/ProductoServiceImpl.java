@@ -11,9 +11,11 @@ import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoRequest;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.inventario.producto.entity.TipoProducto;
 import pe.edu.upeu.gdmerp.inventario.producto.mapper.ProductoMapper;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @Service
@@ -27,18 +29,37 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductoResponse> listar() {
-        return productoRepository.findAll().stream().map(productoMapper::toResponse).toList();
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    public List<ProductoResponse> listar(String tipoProducto) {
+        List<Producto> entidades;
+        if (tipoProducto != null && !tipoProducto.isBlank()) {
+            TipoProducto tipo = TipoProducto.valueOf(tipoProducto.trim().toUpperCase());
+            entidades = productoRepository.findByTipoProducto(tipo);
+        } else {
+            entidades = productoRepository.findAll();
+        }
+        return entidades.stream()
+                .map(productoMapper::toResponse)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    public List<ProductoResponse> listar() {
+        return listar((String) null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public ProductoResponse buscarPorId(Long id) {
         return productoMapper.toResponse(getProductoEntity(id));
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public ProductoResponse crear(ProductoRequest request) {
         validarSkuUnico(request.sku(), null);
 
@@ -52,6 +73,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public ProductoResponse actualizar(Long id, ProductoRequest request) {
         Producto producto = getProductoEntity(id);
         validarSkuUnico(request.sku(), id);
@@ -65,6 +87,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public void eliminar(Long id) {
         Producto producto = getProductoEntity(id);
         if (producto.getStockTotal() > 0) {
@@ -99,6 +122,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<ProductoResponse> listarPorAlmacen(Long almacenId) {
         return productoRepository.findByAlmacenId(almacenId)
                 .stream()
@@ -108,10 +132,35 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<ProductoResponse> filtrarDinamicamente(Long categoriaId, Long almacenId, Integer minStock, Sort sort) {
         return productoRepository.filtrarDinamicamente(categoriaId, almacenId, minStock, sort)
                 .stream()
                 .map(productoMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    public void ajustarStock(Long id, Integer cantidadDelta) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
+
+        int delta = (cantidadDelta != null) ? cantidadDelta : 0;
+        int nuevoStock = (producto.getStockTotal() != null ? producto.getStockTotal() : 0) + delta;
+        if (nuevoStock < 0) {
+            throw new IllegalStateException("Stock insuficiente para el producto: " + producto.getNombre());
+        }
+
+        producto.setStockTotal(nuevoStock);
+        productoRepository.save(producto);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    public void ajustarStock(Long id, Double cantidadDelta) {
+        ajustarStock(id, cantidadDelta != null ? cantidadDelta.intValue() : 0);
     }
 }

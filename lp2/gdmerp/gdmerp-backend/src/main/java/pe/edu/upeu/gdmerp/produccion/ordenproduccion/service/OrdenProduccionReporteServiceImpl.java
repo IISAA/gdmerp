@@ -1,6 +1,7 @@
 package pe.edu.upeu.gdmerp.produccion.ordenproduccion.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
@@ -28,38 +29,56 @@ public class OrdenProduccionReporteServiceImpl implements OrdenProduccionReporte
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'OPERARIO', 'ALMACENERO')")
     public List<ResumenEstadoOrdenesDTO> obtenerResumenEstados() {
         return ordenRepository.reporteEstadoOrdenes();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'OPERARIO', 'ALMACENERO')")
     public ReporteConsumoOrdenDTO calcularConsumo(Long ordenId) {
         OrdenProduccion orden = ordenRepository.findById(ordenId)
                 .orElseThrow(() -> new ResourceNotFoundException("Orden de Producción no encontrada: " + ordenId));
 
         List<DetalleOrdenProduccion> detalles = orden.getDetalles();
-        List<Long> productoIds = detalles.stream().map(DetalleOrdenProduccion::getMateriaPrimaId).toList();
+        List<Long> productoIds = (detalles != null)
+                ? detalles.stream()
+                        .filter(detalle -> detalle != null && detalle.getMateriaPrimaId() != null)
+                        .map(detalle -> detalle.getMateriaPrimaId())
+                        .toList()
+                : List.of();
 
         Map<Long, BigDecimal> costos = productoService.obtenerCostoPromedioPorIds(productoIds)
                 .stream()
-                .collect(Collectors.toMap(CostoProductoDTO::productoId, CostoProductoDTO::costoPromedio));
+                .filter(dto -> dto != null && dto.productoId() != null)
+                .collect(Collectors.toMap(
+                        dto -> dto.productoId(),
+                        dto -> dto.costoPromedio() != null ? dto.costoPromedio() : BigDecimal.ZERO,
+                        (existente, reemplazo) -> existente
+                ));
 
         BigDecimal costoTotal = BigDecimal.ZERO;
         List<DetalleConsumoDTO> materiales = new ArrayList<>();
-        for (DetalleOrdenProduccion detalle : detalles) {
-            BigDecimal costoUnitario = costos.get(detalle.getMateriaPrimaId());
-            if (costoUnitario == null) {
-                costoUnitario = detalle.getCostoUnitario() != null ? detalle.getCostoUnitario() : BigDecimal.ZERO;
+        if (detalles != null) {
+            for (DetalleOrdenProduccion detalle : detalles) {
+                if (detalle == null) {
+                    continue;
+                }
+                BigDecimal costoUnitario = costos.get(detalle.getMateriaPrimaId());
+                if (costoUnitario == null) {
+                    costoUnitario = detalle.getCostoUnitario() != null ? detalle.getCostoUnitario() : BigDecimal.ZERO;
+                }
+                int cantidad = detalle.getCantidadRequerida() != null ? detalle.getCantidadRequerida() : 0;
+                BigDecimal costoLinea = costoUnitario.multiply(BigDecimal.valueOf(cantidad));
+                costoTotal = costoTotal.add(costoLinea);
+                materiales.add(new DetalleConsumoDTO(
+                        detalle.getMateriaPrimaId(),
+                        detalle.getNombreProducto(),
+                        cantidad,
+                        costoUnitario,
+                        costoLinea));
             }
-            BigDecimal costoLinea = costoUnitario.multiply(BigDecimal.valueOf(detalle.getCantidadRequerida()));
-            costoTotal = costoTotal.add(costoLinea);
-            materiales.add(new DetalleConsumoDTO(
-                    detalle.getMateriaPrimaId(),
-                    detalle.getNombreProducto(),
-                    detalle.getCantidadRequerida(),
-                    costoUnitario,
-                    costoLinea));
         }
 
         return new ReporteConsumoOrdenDTO(

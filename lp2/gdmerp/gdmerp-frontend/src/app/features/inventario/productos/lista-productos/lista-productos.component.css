@@ -1,0 +1,4 @@
+/* Estilos para el componente lista-productos */
+:host {
+  display: block;
+}

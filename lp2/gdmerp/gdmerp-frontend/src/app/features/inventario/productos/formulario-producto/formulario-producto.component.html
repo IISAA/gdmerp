@@ -1,0 +1,107 @@
+<div class="form-container">
+  <!-- Cabecera -->
+  <div class="form-header">
+    <button mat-icon-button routerLink="/inventario/productos" matTooltip="Volver al catálogo">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>{{ isEditMode() ? 'Editar Artículo: ' + form.get('sku')?.value : 'Nuevo Artículo' }}</h2>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+    
+    <!-- TARJETA 1: Información General -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar color="primary">inventory_2</mat-icon>
+        <mat-card-title>Información General</mat-card-title>
+        <mat-card-subtitle>Datos principales de identificación</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="card-content">
+        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre del Producto</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej. Aceite de Coco Virgen 500ml">
+          @if (form.get('nombre')?.hasError('required')) {
+            <mat-error>El nombre es requerido</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="row-2-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Código SKU</mat-label>
+            <input matInput formControlName="sku" placeholder="Ej. ACE-COC-500">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Producto</mat-label>
+            <mat-select formControlName="tipoProducto">
+              @for (tipo of tiposProducto(); track tipo) {
+                <mat-option [value]="tipo">{{ tipo }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="categoriaId">
+            @for (cat of categorias(); track cat.id) {
+              <mat-option [value]="cat.id">{{ cat.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+      </mat-card-content>
+    </mat-card>
+
+    <!-- TARJETA 2: Logística y Finanzas -->
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar color="accent">local_shipping</mat-icon>
+        <mat-card-title>Logística y Finanzas</mat-card-title>
+        <mat-card-subtitle>Gestión de stock y costos</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="card-content">
+
+        <div class="row-2-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Almacén Predeterminado</mat-label>
+            <mat-select formControlName="almacenId">
+              @for (alm of almacenes(); track alm.id) {
+                <mat-option [value]="alm.id">{{ alm.nombre }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Unidad de Medida</mat-label>
+            <input matInput formControlName="unidadMedida" placeholder="uds, kg, lts">
+          </mat-form-field>
+        </div>
+
+        <div class="row-2-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Stock Mínimo (Alerta)</mat-label>
+            <input matInput type="number" formControlName="stockMinimo">
+            <mat-icon matSuffix matTooltip="El sistema alertará si el stock cae por debajo de este número">info</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Costo Promedio (S/)</mat-label>
+            <input matInput type="number" formControlName="costoPromedio">
+          </mat-form-field>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ACCIONES -->
+    <div class="form-actions">
+      <button mat-button type="button" routerLink="/inventario/productos">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSubmitting()">
+        {{ isSubmitting() ? 'Guardando...' : 'Guardar Producto' }}
+      </button>
+    </div>
+
+  </form>
+</div>

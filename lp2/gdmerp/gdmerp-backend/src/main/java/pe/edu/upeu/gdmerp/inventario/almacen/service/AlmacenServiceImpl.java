@@ -9,6 +9,7 @@ import pe.edu.upeu.gdmerp.inventario.almacen.entity.Almacen;
 import pe.edu.upeu.gdmerp.inventario.almacen.mapper.AlmacenMapper;
 import pe.edu.upeu.gdmerp.inventario.almacen.repository.AlmacenRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @Service
@@ -20,18 +21,21 @@ public class AlmacenServiceImpl implements AlmacenService {
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<AlmacenResponse> listar() {
         return almacenRepository.findAll().stream().map(almacenMapper::toResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public AlmacenResponse buscarPorId(Long id) {
         return almacenMapper.toResponse(getAlmacenEntity(id));
     }
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public AlmacenResponse crear(AlmacenRequest request) {
         validarNombreUnico(request.nombre(), null);
         return almacenMapper.toResponse(almacenRepository.save(almacenMapper.toEntity(request)));
@@ -39,6 +43,7 @@ public class AlmacenServiceImpl implements AlmacenService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public AlmacenResponse actualizar(Long id, AlmacenRequest request) {
         Almacen almacen = getAlmacenEntity(id);
         validarNombreUnico(request.nombre(), id);
@@ -48,6 +53,7 @@ public class AlmacenServiceImpl implements AlmacenService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public void eliminar(Long id) {
         Almacen almacen = getAlmacenEntity(id);
         if (productoRepository.existsByAlmacenId(id)) {

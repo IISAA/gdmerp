@@ -20,5 +20,47 @@ services:
       retries: 10
       start_period: 60s
 
+#keycloak-db
+  keycloak-db:
+    image: postgres:17-alpine
+    container_name: gdmerp-keycloak-db
+    restart: unless-stopped
+    ports:
+      - "35432:5432"
+    environment:
+      POSTGRES_DB: GDMERP_KEYCLOAK
+      POSTGRES_USER: GDMERP_KEYCLOAK
+      POSTGRES_PASSWORD: 123456
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U GDMERP_KEYCLOAK -d GDMERP_KEYCLOAK"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    container_name: gdmerp-keycloak
+    restart: unless-stopped
+    command: start-dev
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    ports:
+      - "38080:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin123
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/GDMERP_KEYCLOAK
+      KC_DB_USERNAME: GDMERP_KEYCLOAK
+      KC_DB_PASSWORD: 123456
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
 volumes:
   oracle_data:
+  keycloak_data:
+  keycloak_db_data:

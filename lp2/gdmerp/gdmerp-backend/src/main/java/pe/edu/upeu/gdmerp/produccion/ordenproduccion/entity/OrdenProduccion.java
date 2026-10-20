@@ -59,8 +59,15 @@ public class OrdenProduccion {
 
     // Total de cabecera = suma de los subtotales de los detalles.
     public BigDecimal getTotalCostoInsumos() {
+        if (detalles == null) {
+            return BigDecimal.ZERO;
+        }
         return detalles.stream()
-                .map(DetalleOrdenProduccion::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(detalle -> (detalle != null && detalle.getSubtotal() != null) ? detalle.getSubtotal() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, (acumulado, subtotal) -> {
+                    BigDecimal a = (acumulado != null) ? acumulado : BigDecimal.ZERO;
+                    BigDecimal b = (subtotal != null) ? subtotal : BigDecimal.ZERO;
+                    return a.add(b);
+                });
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.inventario.producto.entity.TipoProducto;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ReporteStockCriticoDTO;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ReporteStockProductoDTO;
 import java.util.List;
@@ -29,6 +30,12 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     @Query("SELECT p FROM Producto p LEFT JOIN FETCH p.categoria LEFT JOIN FETCH p.almacen WHERE p.almacen.id = :almacenId")
     List<Producto> findByAlmacenId(@Param("almacenId") Long almacenId);
+
+    @EntityGraph(attributePaths = {"categoria", "almacen"})
+    List<Producto> findByCategoriaId(Long categoriaId);
+
+    @EntityGraph(attributePaths = {"categoria", "almacen"})
+    List<Producto> findByTipoProducto(TipoProducto tipoProducto);
 
     boolean existsBySku(String sku);
 

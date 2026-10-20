@@ -4,6 +4,7 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   OrdenProduccionRequest,
+  OrdenProduccionUpdateRequest,
   OrdenProduccionResponse
 } from '../models/produccion.models';
 
@@ -23,7 +24,7 @@ export class OrdenProduccionService {
   listar(): void {
     this.http.get<OrdenProduccionResponse[]>(this.apiUrl).subscribe({
       next: (data) => this.ordenes.set(data),
-      error: (err) => console.error('Error al listar órdenes de producción:', err)
+      error: (err: any) => console.error('Error al listar órdenes de producción:', err)
     });
   }
 
@@ -42,7 +43,7 @@ export class OrdenProduccionService {
   }
 
   // Actualizar la orden y recargar la tabla
-  actualizar(id: number, request: OrdenProduccionRequest) {
+  actualizar(id: number, request: OrdenProduccionUpdateRequest | OrdenProduccionRequest): Observable<OrdenProduccionResponse> {
     return this.http.put<OrdenProduccionResponse>(`${this.apiUrl}/${id}`, request).pipe(
       tap(() => this.listar())
     );

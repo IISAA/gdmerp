@@ -1,31 +1,37 @@
 package pe.edu.upeu.gdmerp.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
+public class CorsConfig {
 
-    // Lee la variable que definiste en application.yml con fallback seguro por defecto
-    @Value("${gdmerp.cors.allowed-origins:http://localhost:4200,http://127.0.0.1:4200}")
-    private String allowedOrigins;
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        
+        // Origen explícito de la aplicación Angular
+        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        
+        // Todos los métodos HTTP requeridos (incluyendo OPTIONS para preflight)
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        
+        // Permitir todas las cabeceras requeridas por el cliente y Keycloak
+        config.setAllowedHeaders(List.of("*"));
+        
+        // Permitir envío de credenciales / Authorization
+        config.setAllowCredentials(true);
+        
+        // Cabeceras expuestas para el cliente
+        config.setExposedHeaders(List.of("Authorization", "Link", "X-Total-Count"));
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        // Divide el string por comas y elimina los espacios en blanco accidentales (trim)
-        String[] origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .toArray(String[]::new);
-
-        // Aplica CORS a todos los endpoints (ajusta "/api/**" si tu prefijo es "/api/v1/**")
-        registry.addMapping("/api/**")
-                .allowedOrigins(origins)
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true); // Fundamental si a futuro implementarás JWT con HTTP-Only Cookies
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
