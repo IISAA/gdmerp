@@ -1,15 +1,16 @@
 package pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public record OrdenProduccionUpdateRequest(
     @NotNull(message = "La cantidad planificada es obligatoria")
-    @Min(value = 1, message = "La cantidad planificada debe ser al menos 1")
-    Integer cantidadPlanificada,
+    @DecimalMin(value = "0.0001", message = "La cantidad planificada debe ser al menos 0.0001")
+    BigDecimal cantidadPlanificada,
 
     @NotNull(message = "El estado es obligatorio")
     String estado,
@@ -26,7 +27,23 @@ public record OrdenProduccionUpdateRequest(
     @Valid
     List<DetalleOrdenRequest> detalles
 ) {
-    // Constructor de compatibilidad en caso de invocarse con Double en cantidadPlanificada
+    public OrdenProduccionUpdateRequest(
+            Integer cantidadPlanificada,
+            String estado,
+            Long centroTrabajoId,
+            LocalDateTime fechaPlanificadaInicio,
+            LocalDateTime fechaEstimadaFin,
+            List<DetalleOrdenRequest> detalles) {
+        this(
+            cantidadPlanificada != null ? BigDecimal.valueOf(cantidadPlanificada) : null,
+            estado,
+            centroTrabajoId,
+            fechaPlanificadaInicio,
+            fechaEstimadaFin,
+            detalles
+        );
+    }
+
     public OrdenProduccionUpdateRequest(
             Double cantidadPlanificada,
             String estado,
@@ -35,7 +52,7 @@ public record OrdenProduccionUpdateRequest(
             LocalDateTime fechaEstimadaFin,
             List<DetalleOrdenRequest> detalles) {
         this(
-            cantidadPlanificada != null ? cantidadPlanificada.intValue() : null,
+            cantidadPlanificada != null ? BigDecimal.valueOf(cantidadPlanificada) : null,
             estado,
             centroTrabajoId,
             fechaPlanificadaInicio,

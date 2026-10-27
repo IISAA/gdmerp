@@ -10,7 +10,7 @@ public record OrdenProduccionResponse(
     Long id, 
     Long productoTerminadoId,
     String producto, 
-    Integer cantidadPlanificada, 
+    BigDecimal cantidadPlanificada, 
     EstadoOrdenProduccion estado,
     LocalDateTime fechaPlanificadaInicio,
     LocalDateTime fechaEstimadaFin,
@@ -18,4 +18,12 @@ public record OrdenProduccionResponse(
     BigDecimal totalCostoInsumos,
     CentroTrabajoResponse centroTrabajo,
     List<DetalleOrdenResponse> detalles
-) {}
+) {
+    public Long productoId() {
+        return productoTerminadoId;
+    }
+
+    public BigDecimal cantidad() {
+        return cantidadPlanificada;
+    }
+}

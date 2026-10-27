@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,7 +67,7 @@ class OrdenProduccionTransactionTest {
         productoT = producto("Producto-Terminado", new BigDecimal("50.00"), 0);
         centro = new CentroTrabajo();
         centro.setNombre("CT-" + sufijo);
-        centro.setCapacidad(10);
+        centro.setCapacidad(BigDecimal.valueOf(10));
         centro = centroRepository.save(centro);
 
         int cantidadInsumo = 6;
@@ -84,7 +85,7 @@ class OrdenProduccionTransactionTest {
 
         // Estado DESPUÉS: recarga fresca de la BD
         Producto insumoBd = productoRepository.findById(insumo.getId()).orElseThrow();
-        assertEquals(2, insumoBd.getStockTotal(), "stock insumo debe bajar de 8 a 2");
+        assertBigDecimalEquals(BigDecimal.valueOf(2), insumoBd.getStockTotal());
 
         List<Lote> lotesInsumo = loteRepository
                 .findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(insumo.getId(), 0);
@@ -95,7 +96,7 @@ class OrdenProduccionTransactionTest {
         assertEquals(2, lotesInsumo.get(0).getCantidadActual());
 
         Producto productoTBd = productoRepository.findById(productoT.getId()).orElseThrow();
-        assertEquals(cantidadPlanes, productoTBd.getStockTotal(), "ingreso de producto terminado");
+        assertBigDecimalEquals(BigDecimal.valueOf(cantidadPlanes), productoTBd.getStockTotal());
         assertEquals(1, loteRepository.findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(
                 productoT.getId(), 0).size());
 
@@ -114,32 +115,31 @@ class OrdenProduccionTransactionTest {
         productoT = producto("Producto-Terminado-RB", new BigDecimal("50.00"), 0);
         centro = new CentroTrabajo();
         centro.setNombre("CT-RB-" + sufijo);
-        centro.setCapacidad(10);
+        centro.setCapacidad(BigDecimal.valueOf(10));
         centro = centroRepository.save(centro);
 
         Producto insumoAntes = productoRepository.findById(insumo.getId()).orElseThrow();
         Lote loteInsumoAntes = loteRepository.findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(
                 insumo.getId(), 0).get(0);
-        int stockAntes = insumoAntes.getStockTotal();
+        BigDecimal stockAntes = insumoAntes.getStockTotal();
         int cantidadLoteAntes = loteInsumoAntes.getCantidadActual();
-        int stockPtoAntes = productoRepository.findById(productoT.getId()).orElseThrow().getStockTotal();
+        BigDecimal stockPtoAntes = productoRepository.findById(productoT.getId()).orElseThrow().getStockTotal();
         int lotesPtoAntes = loteRepository.findAll().size();
 
         // La regla de negocio se activa: cantidad demánda (5) > stock disponible (2)
-        IllegalStateException ex = assertThrows(IllegalStateException.class,
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> ordenService.crear(ordenRequest(productoT.getId(), 4, cantidadPedida)));
-        assertTrue(ex.getMessage().contains("Stock insuficiente"), ex.getMessage());
+        assertTrue(ex.getReason() != null && ex.getReason().contains("Stock insuficiente"), ex.getMessage());
 
         // Estado DESPUÉS: nada debe haber cambiado -> rollback total de la transacción.
         Producto insumoDespues = productoRepository.findById(insumo.getId()).orElseThrow();
-        assertEquals(stockAntes, insumoDespues.getStockTotal(), "stock del insumo no debe cambiar");
+        assertBigDecimalEquals(stockAntes, insumoDespues.getStockTotal());
 
         Lote loteDespues = loteRepository.findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(
                 insumo.getId(), 0).get(0);
         assertEquals(cantidadLoteAntes, loteDespues.getCantidadActual(), "ningún lote puede consumirse");
 
-        assertEquals(stockPtoAntes, productoRepository.findById(productoT.getId()).orElseThrow().getStockTotal(),
-                "no debe ingresar producto terminado");
+        assertBigDecimalEquals(stockPtoAntes, productoRepository.findById(productoT.getId()).orElseThrow().getStockTotal());
         assertEquals(lotesPtoAntes, loteRepository.findAll().size(), "no debe crearse lote de ingreso");
 
         assertEquals(ordenesAntes, ordenRepository.count(), "no debe persistirse la cabecera (ni el detalle)");

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +33,9 @@ public class Almacen {
 
     @Column(name = "UBICACION", length = 200)
     private String ubicacion;
+
+    @Column(name = "CAPACIDAD", precision = 12, scale = 4)
+    private BigDecimal capacidad;
 
     // Lado "1" de la relación. Sin cascade: la FK la posee Producto, el borrado
     // en cascada de productos no debe originarse desde aquí.

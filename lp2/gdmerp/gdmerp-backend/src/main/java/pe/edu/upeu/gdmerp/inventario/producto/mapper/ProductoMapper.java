@@ -12,6 +12,7 @@ import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 @Mapper(componentModel = "spring", uses = {AlmacenMapper.class, CategoriaMapper.class})
 public interface ProductoMapper {
 
+    @Mapping(target = "stockActual", source = "stockTotal")
     ProductoResponse toResponse(Producto producto);
 
     @Mapping(target = "id", ignore = true)
@@ -19,6 +20,8 @@ public interface ProductoMapper {
     @Mapping(target = "categoria", ignore = true)
     @Mapping(target = "lotes", ignore = true)
     @Mapping(target = "stockTotal", ignore = true)
+    @Mapping(target = "stockActual", ignore = true)
+    @Mapping(target = "stockFisico", ignore = true)
     @Mapping(target = "version", ignore = true)
     Producto toEntity(ProductoRequest request);
 
@@ -27,6 +30,8 @@ public interface ProductoMapper {
     @Mapping(target = "categoria", ignore = true)
     @Mapping(target = "lotes", ignore = true)
     @Mapping(target = "stockTotal", ignore = true)
+    @Mapping(target = "stockActual", ignore = true)
+    @Mapping(target = "stockFisico", ignore = true)
     @Mapping(target = "version", ignore = true)
     void updateEntity(@MappingTarget Producto producto, ProductoRequest request);
 }

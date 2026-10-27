@@ -6,7 +6,15 @@ public record DetalleOrdenResponse(
     Long id,
     Long materiaPrimaId,
     String nombreMateriaPrima,
-    Integer cantidadRequerida,
+    BigDecimal cantidadRequerida,
     BigDecimal costoUnitario,
     BigDecimal subtotal
-) {}
+) {
+    public Long insumoId() {
+        return materiaPrimaId;
+    }
+
+    public BigDecimal cantidad() {
+        return cantidadRequerida;
+    }
+}

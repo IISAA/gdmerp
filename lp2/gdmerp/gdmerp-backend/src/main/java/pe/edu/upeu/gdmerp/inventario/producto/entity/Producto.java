@@ -21,7 +21,7 @@ public class Producto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(unique = true, nullable = false, length = 30)
     private String sku;
 
     @Column(nullable = false, length = 120)
@@ -30,23 +30,21 @@ public class Producto {
     @Column(nullable = false, length = 20)
     private String unidadMedida;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "COSTO_PROMEDIO", nullable = false, precision = 12, scale = 4)
     private BigDecimal costoPromedio;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_producto", nullable = false)
     private TipoProducto tipoProducto = TipoProducto.MATERIA_PRIMA;
 
-    // Este es el campo que resuelve tu error
-    // El stock es gestionado por el servidor (operaciones de lote). Nace en 0.
-    @Column(nullable = false)
-    private Integer stockTotal = 0;
+    // Precisión decimal de 4 dígitos para conteo de masa y volumen alimentario (kg, g, L, ml)
+    @Column(name = "STOCK_TOTAL", nullable = false, precision = 12, scale = 4)
+    private BigDecimal stockTotal = BigDecimal.ZERO;
 
-    @Column(nullable = false)
-    private Integer stockMinimo;
+    @Column(name = "STOCK_MINIMO", nullable = false, precision = 12, scale = 4)
+    private BigDecimal stockMinimo = BigDecimal.ZERO;
 
-    // Control de concurrencia: cada UPDATE a la fila incrementa la versión y
-    // valida en el WHERE que coincida con la que leyó la transacción.
+    // Control de concurrencia optimista
     @Version
     @Column(name = "VERSION")
     private Long version;
@@ -62,4 +60,54 @@ public class Producto {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORIA_ID", nullable = false)
     private Categoria categoria;
+
+    // Alias de compatibilidad (stockActual / stockFisico)
+    public BigDecimal getStockActual() {
+        return this.stockTotal;
+    }
+
+    public void setStockActual(BigDecimal stockActual) {
+        setStockTotal(stockActual);
+    }
+
+    public BigDecimal getStockFisico() {
+        return this.stockTotal;
+    }
+
+    public void setStockFisico(BigDecimal stockFisico) {
+        setStockTotal(stockFisico);
+    }
+
+    // Sobrecargas de compatibilidad
+    public void setStockTotal(Integer stockTotal) {
+        this.stockTotal = stockTotal != null ? BigDecimal.valueOf(stockTotal) : BigDecimal.ZERO;
+    }
+
+    public void setStockTotal(Double stockTotal) {
+        this.stockTotal = stockTotal != null ? BigDecimal.valueOf(stockTotal) : BigDecimal.ZERO;
+    }
+
+    public void setStockTotal(BigDecimal stockTotal) {
+        this.stockTotal = stockTotal != null ? stockTotal : BigDecimal.ZERO;
+    }
+
+    public void setStockMinimo(Integer stockMinimo) {
+        this.stockMinimo = stockMinimo != null ? BigDecimal.valueOf(stockMinimo) : BigDecimal.ZERO;
+    }
+
+    public void setStockMinimo(Double stockMinimo) {
+        this.stockMinimo = stockMinimo != null ? BigDecimal.valueOf(stockMinimo) : BigDecimal.ZERO;
+    }
+
+    public void setStockMinimo(BigDecimal stockMinimo) {
+        this.stockMinimo = stockMinimo != null ? stockMinimo : BigDecimal.ZERO;
+    }
+
+    public void setCostoPromedio(Double costoPromedio) {
+        this.costoPromedio = costoPromedio != null ? BigDecimal.valueOf(costoPromedio) : null;
+    }
+
+    public void setCostoPromedio(BigDecimal costoPromedio) {
+        this.costoPromedio = costoPromedio;
+    }
 }

@@ -17,6 +17,9 @@ public interface OrdenProduccionRepository extends JpaRepository<OrdenProduccion
     @Query("SELECT o FROM OrdenProduccion o LEFT JOIN FETCH o.centroTrabajo")
     List<OrdenProduccion> findAll();
 
+    @Query("SELECT o FROM OrdenProduccion o LEFT JOIN FETCH o.centroTrabajo")
+    List<OrdenProduccion> findAllWithRelaciones();
+
     @Override
     @EntityGraph(attributePaths = {"centroTrabajo"})
     Page<OrdenProduccion> findAll(Pageable pageable);
@@ -36,7 +39,19 @@ public interface OrdenProduccionRepository extends JpaRepository<OrdenProduccion
            LEFT JOIN FETCH o.detalles
            WHERE o.id = :id
            """)
+    Optional<OrdenProduccion> findByIdWithRelaciones(@Param("id") Long id);
+
+    @Query("""
+           SELECT o FROM OrdenProduccion o
+           LEFT JOIN FETCH o.centroTrabajo
+           LEFT JOIN FETCH o.detalles
+           WHERE o.id = :id
+           """)
     Optional<OrdenProduccion> findByIdConDetalles(@Param("id") Long id);
+
+    @EntityGraph(attributePaths = {"centroTrabajo", "detalles", "detalles.insumo"})
+    @Query("SELECT o FROM OrdenProduccion o WHERE o.id = :id")
+    Optional<OrdenProduccion> findByIdWithDetalles(@Param("id") Long id);
 
     @Query("SELECT o FROM OrdenProduccion o LEFT JOIN FETCH o.centroTrabajo WHERE o.centroTrabajo.id = :centroTrabajoId")
     List<OrdenProduccion> findByCentroTrabajoId(@Param("centroTrabajoId") Long centroTrabajoId);

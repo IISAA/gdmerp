@@ -80,11 +80,11 @@ class StockConcurrenciaIntegrationTest {
             // (versión -> 1). No debe unirse a txA: por eso corre en hilo aparte.
             pool.submit(() -> txTemplate.executeWithoutResult(tx -> {
                 Producto p = productoRepository.findById(producto.getId()).orElseThrow();
-                p.setStockTotal(p.getStockTotal() + 1);
+                p.setStockTotal(p.getStockTotal().add(java.math.BigDecimal.ONE));
             })).get(30, TimeUnit.SECONDS);
 
             // A modifica su copia con la versión vieja y espera COMMIT -> debe colisionar.
-            manejadoEnA.setStockTotal(manejadoEnA.getStockTotal() - 1);
+            manejadoEnA.setStockTotal(manejadoEnA.getStockTotal().subtract(java.math.BigDecimal.ONE));
             assertThrows(OptimisticLockingFailureException.class,
                     () -> transactionManager.commit(txA),
                     "el commit sobre una versión superada debe lanzar OptimisticLockingFailureException");
@@ -97,7 +97,7 @@ class StockConcurrenciaIntegrationTest {
         }
 
         Producto finalBd = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(51, finalBd.getStockTotal(), "solo el incremento de B debe persistir");
+        assertEquals(0, java.math.BigDecimal.valueOf(51).compareTo(finalBd.getStockTotal()), "solo el incremento de B debe persistir");
         assertEquals(1L, finalBd.getVersion(), "la versión en BD debe quedar en 1");
     }
 
@@ -136,7 +136,7 @@ class StockConcurrenciaIntegrationTest {
         assertNotNull(errorDelPerdedor.get(), "el hilo perdedor debe terminar con una excepción");
 
         Producto finalBd = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, finalBd.getStockTotal(), "el stock total debe quedar en cero (sin sobreventa)");
+        assertEquals(0, java.math.BigDecimal.ZERO.compareTo(finalBd.getStockTotal()), "el stock total debe quedar en cero (sin sobreventa)");
         int lotesConStock = loteRepository
                 .findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(producto.getId(), 0).size();
         assertEquals(0, lotesConStock, "ningún lote puede conservar stock tras consumir el 100%");

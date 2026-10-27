@@ -11,6 +11,7 @@ import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.TipoProducto;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ReporteStockCriticoDTO;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ReporteStockProductoDTO;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,9 +38,17 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     @EntityGraph(attributePaths = {"categoria", "almacen"})
     List<Producto> findByTipoProducto(TipoProducto tipoProducto);
 
+    Optional<Producto> findByNombre(String nombre);
+
     boolean existsBySku(String sku);
 
     boolean existsBySkuAndIdNot(String sku, Long id);
+
+    boolean existsBySkuIgnoreCase(String sku);
+
+    boolean existsBySkuIgnoreCaseAndIdNot(String sku, Long id);
+
+    long countBySkuStartingWith(String prefijo);
 
     boolean existsByAlmacenId(Long almacenId);
 
@@ -84,7 +93,11 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     List<Producto> filtrarDinamicamente(
         @Param("categoriaId") Long categoriaId,
         @Param("almacenId") Long almacenId,
-        @Param("minStock") Integer minStock,
+        @Param("minStock") BigDecimal minStock,
         Sort sort
     );
+
+    default List<Producto> filtrarDinamicamente(Long categoriaId, Long almacenId, Integer minStock, Sort sort) {
+        return filtrarDinamicamente(categoriaId, almacenId, minStock != null ? BigDecimal.valueOf(minStock) : null, sort);
+    }
 }

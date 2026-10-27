@@ -1,4 +1,5 @@
 package pe.edu.upeu.gdmerp.inventario.almacen.mapper;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

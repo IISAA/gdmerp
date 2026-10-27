@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -22,9 +23,23 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        if (status == null) status = HttpStatus.BAD_REQUEST;
+        String mensaje = ex.getReason() != null ? ex.getReason() : ex.getMessage();
+        return buildResponse(status, mensaje);
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    // Regla de Negocio: Stock Físico insuficiente para consumos de recetas / órdenes.
+    @ExceptionHandler(InsufficientStockException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientStock(InsufficientStockException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     // Reglas de negocio: incumplimiento de una invariante (p.ej. stock insuficiente).
@@ -104,6 +119,8 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("campo", fieldError.getField());
         error.put("mensaje", fieldError.getDefaultMessage());
+        error.put("field", fieldError.getField());
+        error.put("defaultMessage", fieldError.getDefaultMessage());
         return error;
     }
 

@@ -12,6 +12,7 @@ import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService
 import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
+import pe.edu.upeu.gdmerp.produccion.listamateriales.repository.ListaMaterialesRepository;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.DetalleOrdenRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionUpdateRequest;
@@ -48,6 +49,9 @@ class OrdenProduccionActualizarServiceTest {
 
     @Mock
     private ProductoService productoService;
+
+    @Mock
+    private ListaMaterialesRepository listaMaterialesRepository;
 
     @InjectMocks
     private OrdenProduccionServiceImpl ordenProduccionService;
@@ -98,15 +102,15 @@ class OrdenProduccionActualizarServiceTest {
         OrdenProduccionResponse respuesta = ordenProduccionService.actualizar(10L, request);
 
         assertNotNull(respuesta);
-        assertEquals(60, ordenExistente.getCantidadPlanificada());
+        assertEquals(0, BigDecimal.valueOf(60).compareTo(ordenExistente.getCantidadPlanificada()));
         assertEquals(centroTrabajo2, ordenExistente.getCentroTrabajo());
         assertEquals(1, ordenExistente.getDetalles().size());
         DetalleOrdenProduccion detalle = ordenExistente.getDetalles().get(0);
         assertEquals(200L, detalle.getMateriaPrimaId());
         assertEquals("Harina de Trigo", detalle.getNombreProducto());
-        assertEquals(25, detalle.getCantidadRequerida());
+        assertEquals(0, BigDecimal.valueOf(25).compareTo(detalle.getCantidadRequerida()));
         assertEquals(new BigDecimal("3.50"), detalle.getCostoUnitario());
-        verify(productoService).ajustarStock(200L, -25);
+        verify(productoService).ajustarStock(eq(200L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(-25)) == 0));
         verify(ordenRepository).save(ordenExistente);
     }
 
@@ -141,13 +145,13 @@ class OrdenProduccionActualizarServiceTest {
         ordenProduccionService.actualizar(10L, request);
 
         // 1. REVERTIR: se devuelve (+) el stock del detalle antiguo
-        verify(productoService).ajustarStock(500L, 10);
+        verify(productoService).ajustarStock(eq(500L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(10)) == 0));
         // 2. REAPLICAR: se descuenta (-) el stock del nuevo insumo
-        verify(productoService).ajustarStock(600L, -18);
+        verify(productoService).ajustarStock(eq(600L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(-18)) == 0));
         verify(ordenRepository).save(ordenExistente);
         assertEquals(1, ordenExistente.getDetalles().size());
         assertEquals(600L, ordenExistente.getDetalles().get(0).getMateriaPrimaId());
-        assertEquals(18, ordenExistente.getDetalles().get(0).getCantidadRequerida());
+        assertEquals(0, BigDecimal.valueOf(18).compareTo(ordenExistente.getDetalles().get(0).getCantidadRequerida()));
     }
 
     @Test
@@ -166,7 +170,7 @@ class OrdenProduccionActualizarServiceTest {
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
                 () -> ordenProduccionService.actualizar(10L, request));
-        assertTrue(ex.getMessage().contains("No se puede modificar una orden en estado COMPLETADO"));
+        assertTrue(ex.getMessage().contains("No se puede modificar una orden que ya ha finalizado su ciclo productivo"));
         verify(ordenRepository, never()).save(any());
     }
 
@@ -186,7 +190,7 @@ class OrdenProduccionActualizarServiceTest {
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
                 () -> ordenProduccionService.actualizar(10L, request));
-        assertTrue(ex.getMessage().contains("No se puede modificar una orden en estado CANCELADO"));
+        assertTrue(ex.getMessage().contains("No se puede modificar una orden que ya ha finalizado su ciclo productivo"));
         verify(ordenRepository, never()).save(any());
     }
 
@@ -206,7 +210,7 @@ class OrdenProduccionActualizarServiceTest {
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
                 () -> ordenProduccionService.actualizar(10L, request));
-        assertTrue(ex.getMessage().contains("No se puede cambiar la cantidad o centro de trabajo"));
+        assertTrue(ex.getMessage().contains("En fase de producción activa, solo se permite extender la fecha estimada de finalización"));
         verify(ordenRepository, never()).save(any());
     }
 
@@ -226,7 +230,34 @@ class OrdenProduccionActualizarServiceTest {
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
                 () -> ordenProduccionService.actualizar(10L, request));
-        assertTrue(ex.getMessage().contains("No se puede cambiar la cantidad o centro de trabajo"));
+        assertTrue(ex.getMessage().contains("En fase de producción activa, solo se permite extender la fecha estimada de finalización"));
+        verify(ordenRepository, never()).save(any());
+    }
+
+    @Test
+    void actualizarLanzaExcepcionSiEstaEnProcesoYModificaListaMateriales() {
+        ordenExistente.setEstado(EstadoOrdenProduccion.EN_PROCESO);
+
+        DetalleOrdenProduccion d1 = new DetalleOrdenProduccion();
+        d1.setMateriaPrimaId(200L);
+        d1.setCantidadRequerida(20);
+        ordenExistente.getDetalles().add(d1);
+
+        when(ordenRepository.findById(10L)).thenReturn(Optional.of(ordenExistente));
+
+        // Intenta cambiar la cantidad requerida del insumo de 20 a 35
+        OrdenProduccionUpdateRequest request = new OrdenProduccionUpdateRequest(
+                50, // Misma cantidad de producción
+                "EN_PROCESO",
+                1L, // Mismo centro
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1),
+                List.of(new DetalleOrdenRequest(200L, 35))
+        );
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> ordenProduccionService.actualizar(10L, request));
+        assertTrue(ex.getMessage().contains("En fase de producción activa, solo se permite extender la fecha estimada de finalización"));
         verify(ordenRepository, never()).save(any());
     }
 
@@ -314,7 +345,7 @@ class OrdenProduccionActualizarServiceTest {
 
         assertNotNull(respuesta);
         assertEquals(EstadoOrdenProduccion.COMPLETADO, ordenExistente.getEstado());
-        verify(productoService).ajustarStock(100L, 50.0);
+        verify(inventarioService).registrarIngresoProduccion(eq(ordenExistente.getProducto()), eq(ordenExistente.getCantidad()), any(String.class));
         assertNotNull(ordenExistente.getLoteGenerado());
         assertTrue(ordenExistente.getLoteGenerado().startsWith("LT-"));
         verify(ordenRepository).save(ordenExistente);
@@ -338,8 +369,8 @@ class OrdenProduccionActualizarServiceTest {
 
         ordenProduccionService.eliminar(10L);
 
-        verify(productoService).ajustarStock(201L, 8.0);
-        verify(productoService).ajustarStock(202L, 15.0);
+        verify(productoService).ajustarStock(eq(201L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(8)) == 0));
+        verify(productoService).ajustarStock(eq(202L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(15)) == 0));
         verify(ordenRepository).delete(ordenExistente);
     }
 
@@ -352,7 +383,7 @@ class OrdenProduccionActualizarServiceTest {
                 () -> ordenProduccionService.eliminar(10L));
         assertTrue(ex.getMessage().contains("Solo se pueden eliminar físicamente órdenes en estado PLANIFICADO"));
         verify(ordenRepository, never()).delete(any());
-        verify(productoService, never()).ajustarStock(any(), any(Double.class));
+        verify(productoService, never()).ajustarStock(any(), any(BigDecimal.class));
     }
 
     @Test

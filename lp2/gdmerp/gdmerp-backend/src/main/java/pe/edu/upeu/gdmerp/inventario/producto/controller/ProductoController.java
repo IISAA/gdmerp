@@ -1,16 +1,20 @@
 package pe.edu.upeu.gdmerp.inventario.producto.controller;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoRequest;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
 import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
-import org.springframework.data.domain.Sort;
+
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Productos")
 @RestController
@@ -26,12 +30,20 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.listar(tipoProducto));
     }
 
+    @Operation(summary = "Sugerir SKU automático para previsualización en tiempo real")
+    @GetMapping("/sugerir-sku")
+    public ResponseEntity<Map<String, String>> sugerirSku(
+            @RequestParam("almacenId") Long almacenId,
+            @RequestParam("nombreProducto") String nombreProducto) {
+        return ResponseEntity.ok(productoService.sugerirSku(almacenId, nombreProducto));
+    }
+
     @Operation(summary = "Filtro dinámico de productos con ordenamiento")
     @GetMapping("/filtrar")
     public ResponseEntity<List<ProductoResponse>> filtrar(
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) Long almacenId,
-            @RequestParam(required = false) Integer minStock,
+            @RequestParam(required = false) BigDecimal minStock,
             Sort sort
     ) {
         return ResponseEntity.ok(productoService.filtrarDinamicamente(categoriaId, almacenId, minStock, sort));

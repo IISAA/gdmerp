@@ -6,10 +6,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionUpdateRequest;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.EstadoOrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.service.OrdenProduccionService;
 import java.util.List;
 
@@ -50,6 +52,22 @@ public class OrdenProduccionController {
             @PathVariable Long id,
             @Valid @RequestBody OrdenProduccionUpdateRequest request) {
         return ResponseEntity.ok(ordenProduccionService.actualizar(id, request));
+    }
+
+    @Operation(summary = "Inicia la producción cambiando el estado a EN_PROCESO y descontando insumos según receta (BOM)")
+    @PutMapping("/{id}/iniciar")
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
+    public ResponseEntity<OrdenProduccionResponse> iniciarProduccion(@PathVariable Long id) {
+        return ResponseEntity.ok(ordenProduccionService.iniciarProduccion(id));
+    }
+
+    @Operation(summary = "Procesa la transición de estado de una orden de producción vinculada a Kardex")
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'OPERARIO')")
+    public ResponseEntity<OrdenProduccionResponse> cambiarEstado(
+            @PathVariable Long id,
+            @RequestParam EstadoOrdenProduccion nuevoEstado) {
+        return ResponseEntity.ok(ordenProduccionService.procesarTransicionEstado(id, nuevoEstado));
     }
 
     @Operation(summary = "Elimina una orden de producción")

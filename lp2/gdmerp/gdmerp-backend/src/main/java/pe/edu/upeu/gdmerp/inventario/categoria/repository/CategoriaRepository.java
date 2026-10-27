@@ -1,6 +1,7 @@
 package pe.edu.upeu.gdmerp.inventario.categoria.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     boolean existsByNombre(String nombre);
     boolean existsByNombreAndIdNot(String nombre, Long id);
+    Optional<Categoria> findByNombreIgnoreCase(String nombre);
     
     @Query("""
            SELECT new pe.edu.upeu.gdmerp.inventario.categoria.dto.ReporteCategoriaCostoDTO(

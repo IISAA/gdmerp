@@ -10,6 +10,7 @@ import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +45,7 @@ class ProductoServiceAjustarStockTest {
 
         productoService.ajustarStock(1L, 20);
 
-        assertEquals(70, producto.getStockTotal());
+        assertEquals(0, new BigDecimal("70").compareTo(producto.getStockTotal()));
         verify(productoRepository).save(producto);
     }
 
@@ -55,7 +56,7 @@ class ProductoServiceAjustarStockTest {
 
         productoService.ajustarStock(1L, -30);
 
-        assertEquals(20, producto.getStockTotal());
+        assertEquals(0, new BigDecimal("20").compareTo(producto.getStockTotal()));
         verify(productoRepository).save(producto);
     }
 
@@ -87,7 +88,7 @@ class ProductoServiceAjustarStockTest {
 
         productoService.ajustarStock(1L, 15.0);
 
-        assertEquals(65, producto.getStockTotal());
+        assertEquals(0, new BigDecimal("65").compareTo(producto.getStockTotal()));
         verify(productoRepository).save(producto);
     }
 

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.upeu.gdmerp.inventario.categoria.dto.CategoriaRequest;
 import pe.edu.upeu.gdmerp.inventario.categoria.dto.CategoriaResponse;
@@ -22,36 +23,42 @@ public class CategoriaController {
 
     @Operation(summary = "Lista todas las categorías")
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public ResponseEntity<List<CategoriaResponse>> listar() {
         return ResponseEntity.ok(categoriaService.listar());
     }
 
     @Operation(summary = "Reporte de costos y promedios por categoría con protección de nulls")
     @GetMapping("/reportes/costos")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public ResponseEntity<List<ReporteCategoriaCostoDTO>> reporteCostos() {
         return ResponseEntity.ok(categoriaService.obtenerReporteCostosPorCategoria());
     }
 
     @Operation(summary = "Busca una categoría por ID")
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public ResponseEntity<CategoriaResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.buscarPorId(id));
     }
 
     @Operation(summary = "Crea una nueva categoría")
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public ResponseEntity<CategoriaResponse> crear(@Valid @RequestBody CategoriaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.crear(request));
     }
 
     @Operation(summary = "Actualiza una categoría existente")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public ResponseEntity<CategoriaResponse> actualizar(@PathVariable Long id, @Valid @RequestBody CategoriaRequest request) {
         return ResponseEntity.ok(categoriaService.actualizar(id, request));
     }
 
     @Operation(summary = "Elimina una categoría")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         categoriaService.eliminar(id);
         return ResponseEntity.noContent().build();

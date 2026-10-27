@@ -39,6 +39,8 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
     public CentroTrabajoResponse crear(CentroTrabajoRequest request) {
         validarNombreUnico(request.nombre(), null);
+        validarCodigoUnico(request.codigo(), null);
+        
         CentroTrabajo ct = mapper.toEntity(request);
         return mapper.toResponse(repository.save(ct));
     }
@@ -48,7 +50,10 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
     public CentroTrabajoResponse actualizar(Long id, CentroTrabajoRequest request) {
         CentroTrabajo ct = getEntity(id);
+        
         validarNombreUnico(request.nombre(), id);
+        validarCodigoUnico(request.codigo(), id);
+        
         mapper.updateEntity(ct, request);
         return mapper.toResponse(repository.save(ct));
     }
@@ -70,6 +75,15 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
                 : repository.existsByNombreAndIdNot(nombre, idActual);
         if (existe) {
             throw new IllegalStateException("Ya existe un centro de trabajo con el nombre: " + nombre);
+        }
+    }
+
+    private void validarCodigoUnico(String codigo, Long idActual) {
+        boolean existe = (idActual == null)
+                ? repository.existsByCodigo(codigo)
+                : repository.existsByCodigoAndIdNot(codigo, idActual);
+        if (existe) {
+            throw new IllegalStateException("Ya existe un centro de trabajo con el código: " + codigo);
         }
     }
 

@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
@@ -29,8 +30,14 @@ public class CentroTrabajo {
     @Column(name = "NOMBRE", nullable = false, unique = true, length = 80)
     private String nombre;
 
-    @Column(name = "CAPACIDAD")
-    private Integer capacidad;
+    @Column(name = "CAPACIDAD", precision = 12, scale = 4)
+    private BigDecimal capacidad;
+
+    @Column(name = "codigo", length = 20, unique = true)
+    private String codigo;
+
+    @Column(name = "costo_hora", precision = 12, scale = 4, nullable = false)
+    private BigDecimal costoHora;
 
     @OneToMany(mappedBy = "centroTrabajo", fetch = FetchType.LAZY)
     private List<OrdenProduccion> ordenes = new ArrayList<>();

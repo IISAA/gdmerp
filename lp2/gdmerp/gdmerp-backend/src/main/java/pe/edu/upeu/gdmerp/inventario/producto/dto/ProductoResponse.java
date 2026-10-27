@@ -11,13 +11,34 @@ public record ProductoResponse(
     String nombre,
     String unidadMedida,
     BigDecimal costoPromedio,
-    Integer stockTotal,
-    Integer stockMinimo,
+    BigDecimal stockTotal,
+    BigDecimal stockActual,
+    BigDecimal stockMinimo,
     AlmacenResponse almacen,
     CategoriaResponse categoria,
     TipoProducto tipoProducto
 ) {
+    public ProductoResponse(Long id, String sku, String nombre, String unidadMedida, BigDecimal costoPromedio, BigDecimal stockTotal, BigDecimal stockMinimo, AlmacenResponse almacen, CategoriaResponse categoria, TipoProducto tipoProducto) {
+        this(id, sku, nombre, unidadMedida, costoPromedio, stockTotal, stockTotal, stockMinimo, almacen, categoria, tipoProducto);
+    }
+
+    public ProductoResponse(Long id, String sku, String nombre, String unidadMedida, BigDecimal costoPromedio, BigDecimal stockTotal, BigDecimal stockMinimo, AlmacenResponse almacen, CategoriaResponse categoria) {
+        this(id, sku, nombre, unidadMedida, costoPromedio, stockTotal, stockTotal, stockMinimo, almacen, categoria, TipoProducto.MATERIA_PRIMA);
+    }
+
     public ProductoResponse(Long id, String sku, String nombre, String unidadMedida, BigDecimal costoPromedio, Integer stockTotal, Integer stockMinimo, AlmacenResponse almacen, CategoriaResponse categoria) {
-        this(id, sku, nombre, unidadMedida, costoPromedio, stockTotal, stockMinimo, almacen, categoria, TipoProducto.MATERIA_PRIMA);
+        this(
+            id,
+            sku,
+            nombre,
+            unidadMedida,
+            costoPromedio,
+            stockTotal != null ? BigDecimal.valueOf(stockTotal) : BigDecimal.ZERO,
+            stockTotal != null ? BigDecimal.valueOf(stockTotal) : BigDecimal.ZERO,
+            stockMinimo != null ? BigDecimal.valueOf(stockMinimo) : BigDecimal.ZERO,
+            almacen,
+            categoria,
+            TipoProducto.MATERIA_PRIMA
+        );
     }
 }

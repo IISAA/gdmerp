@@ -28,8 +28,9 @@ public class OrdenProduccion {
     @Column(name = "PRODUCTO", nullable = false, length = 120)
     private String producto;
 
-    @Column(name = "CANTIDAD_PLANIFICADA", nullable = false)
-    private Integer cantidadPlanificada;
+    // Cantidad planificada con precisión decimal (escala = 4)
+    @Column(name = "CANTIDAD_PLANIFICADA", nullable = false, precision = 12, scale = 4)
+    private BigDecimal cantidadPlanificada;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ESTADO", nullable = false, length = 30)
@@ -57,7 +58,50 @@ public class OrdenProduccion {
         detalle.setOrdenProduccion(this);
     }
 
-    // Total de cabecera = suma de los subtotales de los detalles.
+    public BigDecimal getCantidad() {
+        return this.cantidadPlanificada;
+    }
+
+    public void setCantidad(BigDecimal cantidad) {
+        setCantidadPlanificada(cantidad);
+    }
+
+    public void setCantidad(Integer cantidad) {
+        setCantidadPlanificada(cantidad);
+    }
+
+    public void setCantidad(Double cantidad) {
+        setCantidadPlanificada(cantidad);
+    }
+
+    public void setCantidadPlanificada(Integer cantidad) {
+        this.cantidadPlanificada = cantidad != null ? BigDecimal.valueOf(cantidad) : null;
+    }
+
+    public void setCantidadPlanificada(Double cantidad) {
+        this.cantidadPlanificada = cantidad != null ? BigDecimal.valueOf(cantidad) : null;
+    }
+
+    public void setCantidadPlanificada(BigDecimal cantidad) {
+        this.cantidadPlanificada = cantidad;
+    }
+
+    public String getLote() {
+        return this.loteGenerado;
+    }
+
+    public EstadoOrden getEstadoOrden() {
+        return EstadoOrden.from(this.estado);
+    }
+
+    public void setEstado(EstadoOrden estadoOrden) {
+        this.estado = estadoOrden != null ? estadoOrden.toEstadoOrdenProduccion() : null;
+    }
+
+    public void setEstado(EstadoOrdenProduccion estado) {
+        this.estado = estado;
+    }
+
     public BigDecimal getTotalCostoInsumos() {
         if (detalles == null) {
             return BigDecimal.ZERO;

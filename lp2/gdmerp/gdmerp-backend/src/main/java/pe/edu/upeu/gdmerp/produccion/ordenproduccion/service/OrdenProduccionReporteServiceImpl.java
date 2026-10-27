@@ -5,8 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.inventario.producto.dto.CostoProductoDTO;
-import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoQueryService;
+import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.DetalleConsumoDTO;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.ReporteConsumoOrdenDTO;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.ResumenEstadoOrdenesDTO;
@@ -15,6 +14,7 @@ import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class OrdenProduccionReporteServiceImpl implements OrdenProduccionReporteService {
 
     private final OrdenProduccionRepository ordenRepository;
-    private final ProductoQueryService productoService;
+    private final ProductoService productoService;
 
     @Override
     @Transactional(readOnly = true)
@@ -69,8 +69,8 @@ public class OrdenProduccionReporteServiceImpl implements OrdenProduccionReporte
                 if (costoUnitario == null) {
                     costoUnitario = detalle.getCostoUnitario() != null ? detalle.getCostoUnitario() : BigDecimal.ZERO;
                 }
-                int cantidad = detalle.getCantidadRequerida() != null ? detalle.getCantidadRequerida() : 0;
-                BigDecimal costoLinea = costoUnitario.multiply(BigDecimal.valueOf(cantidad));
+                BigDecimal cantidad = detalle.getCantidadRequerida() != null ? detalle.getCantidadRequerida() : BigDecimal.ZERO;
+                BigDecimal costoLinea = costoUnitario.multiply(cantidad).setScale(2, RoundingMode.HALF_UP);
                 costoTotal = costoTotal.add(costoLinea);
                 materiales.add(new DetalleConsumoDTO(
                         detalle.getMateriaPrimaId(),
