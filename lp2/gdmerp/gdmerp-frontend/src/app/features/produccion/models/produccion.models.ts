@@ -47,6 +47,7 @@ export interface OrdenProduccionResponse {
   fechaPlanificadaInicio: string;
   fechaEstimadaFin: string;
   loteGenerado?: string | null;
+  transferidoAlmacen?: boolean;
   totalCostoInsumos: number;
   centroTrabajo: {
     id: number;

@@ -42,7 +42,7 @@
 .card-content {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem; /* Separación de 20px entre filas de campos */
   margin-top: 1rem;
 }
 
@@ -53,7 +53,25 @@
 .row-2-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.25rem; /* Separación de 20px entre columnas */
+}
+
+mat-form-field {
+  margin-bottom: 0.5rem; /* Margen de 8px para asegurar separación y visibilidad de mat-hint */
+}
+
+/* Tipografía de grado industrial para código SKU */
+.sku-input {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cat-desc {
+  color: #64748b;
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 .form-actions {

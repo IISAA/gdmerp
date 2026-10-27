@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { DashboardComponent } from '../dashboard/dashboard.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink],
-  templateUrl: './home.component.html'
+  imports: [DashboardComponent],
+  template: '<app-dashboard></app-dashboard>'
 })
 export class HomeComponent {}

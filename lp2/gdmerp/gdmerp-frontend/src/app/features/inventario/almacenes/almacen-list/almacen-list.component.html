@@ -1,0 +1,241 @@
+<mat-sidenav-container class="sidenav-container">
+
+  <!-- ========================================================================= -->
+  <!-- 1. CONTENIDO PRINCIPAL (Tabla de Almacenes)                               -->
+  <!-- ========================================================================= -->
+  <mat-sidenav-content class="sidenav-content">
+    <div class="contenedor-principal">
+
+      <!-- Header y Buscador -->
+      <div class="header-section">
+        <div>
+          <h2 class="titulo-seccion">Gestión de Almacenes</h2>
+          <p class="subtitulo-seccion">
+            Administración de bodegas, depósitos y zonas de almacenamiento físico
+          </p>
+        </div>
+
+        <div class="acciones-header">
+          <div class="buscador-caja">
+            <mat-icon class="icono-busqueda">search</mat-icon>
+            <input
+              type="text"
+              placeholder="Buscar por nombre o ubicación..."
+              (input)="onBuscar($event)"
+              class="input-busqueda"
+            />
+          </div>
+
+          <button mat-raised-button color="primary" class="btn-nuevo-almacen" (click)="abrirNuevo()">
+            <mat-icon>add</mat-icon>
+            Nuevo Almacén
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla de Datos -->
+      <div class="tabla-card">
+        <table class="tabla-datos">
+          <thead>
+            <tr>
+              <th style="width: 80px;">ID</th>
+              <th style="width: 250px;">NOMBRE DEL ALMACÉN</th>
+              <th>UBICACIÓN</th>
+              <th style="width: 150px; text-align: right;">CAPACIDAD</th>
+              <th style="width: 140px; text-align: right;">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading()) {
+              <tr>
+                <td colspan="5" class="estado-fila">
+                  <div class="spinner-inline">
+                    <span>Cargando almacenes...</span>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              @for (almacen of almacenesFiltrados(); track almacen.id) {
+                <tr class="fila-registro">
+                  <td class="col-id">#{{ almacen.id }}</td>
+                  <td class="col-nombre">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <mat-icon style="color: #64748b; font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">warehouse</mat-icon>
+                      <span class="nombre-texto">{{ almacen.nombre }}</span>
+                    </div>
+                  </td>
+                  <td class="col-ubicacion">
+                    @if (almacen.ubicacion) {
+                      <span>{{ almacen.ubicacion }}</span>
+                    } @else {
+                      <span class="sin-dato">Sin ubicación especificada</span>
+                    }
+                  </td>
+                  <td class="col-capacidad" style="text-align: right; font-weight: 600;">
+                    @if (almacen.capacidad) {
+                      <span>{{ almacen.capacidad | number:'1.0-4' }} m²</span>
+                    } @else {
+                      <span class="sin-dato">-</span>
+                    }
+                  </td>
+                  <td class="col-acciones">
+                    <div class="acciones-grupo">
+                      <button
+                        type="button"
+                        class="btn-accion btn-editar"
+                        matTooltip="Editar almacén"
+                        (click)="abrirEditar(almacen)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-accion btn-eliminar"
+                        matTooltip="Eliminar almacén"
+                        (click)="eliminar(almacen)"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="estado-fila vacio">
+                    @if (textoBusqueda()) {
+                      No se encontraron almacenes coincidentes con "{{ textoBusqueda() }}".
+                    } @else {
+                      No hay almacenes registrados en el sistema. Haz clic en <strong>+ Nuevo Almacén</strong> para registrar el primero.
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </mat-sidenav-content>
+
+  <!-- ========================================================================= -->
+  <!-- 2. PANEL LATERAL DESLIZANTE (Side Drawer / Offcanvas)                     -->
+  <!-- ========================================================================= -->
+  <mat-sidenav
+    #drawer
+    position="end"
+    mode="over"
+    [opened]="isDrawerOpen()"
+    (closed)="cerrarDrawer()"
+    class="almacen-drawer"
+  >
+    <!-- Encabezado del Cajón -->
+    <mat-toolbar class="drawer-toolbar">
+      <div class="drawer-header-info">
+        <span class="drawer-titulo">{{ drawerTitle() }}</span>
+        <span class="drawer-subtitulo">
+          {{ isEditing() ? 'Actualiza los datos del almacén' : 'Completa la información requerida' }}
+        </span>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        (click)="cerrarDrawer()"
+        aria-label="Cerrar panel"
+        class="btn-cerrar-drawer"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <!-- Formulario Reactivo -->
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="drawer-formulario">
+
+      <div class="drawer-body">
+        <!-- Campo: Nombre -->
+        <mat-form-field appearance="outline" class="campo-full">
+          <mat-label>Nombre del Almacén *</mat-label>
+          <input
+            matInput
+            formControlName="nombre"
+            placeholder="Ej. Almacén Central de Materias Primas"
+            maxlength="80"
+          />
+          @if (form.get('nombre')?.touched && form.get('nombre')?.hasError('required')) {
+            <mat-error>El nombre es obligatorio.</mat-error>
+          }
+          @if (form.get('nombre')?.hasError('maxlength')) {
+            <mat-error>El nombre no puede exceder los 80 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Campo: Ubicación -->
+        <mat-form-field appearance="outline" class="campo-full">
+          <mat-label>Ubicación / Dirección</mat-label>
+          <input
+            matInput
+            formControlName="ubicacion"
+            placeholder="Ej. Zona Industrial, Nave 4 - Tarapoto"
+            maxlength="200"
+          />
+          @if (form.get('ubicacion')?.hasError('maxlength')) {
+            <mat-error>La ubicación no puede exceder los 200 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Campo: Capacidad (Opcional) -->
+        <mat-form-field appearance="outline" class="campo-full">
+          <mat-label>Capacidad Estimada (m² o palets)</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="capacidad"
+            placeholder="Ej. 500"
+            min="0"
+            step="0.001"
+          />
+          @if (form.get('capacidad')?.hasError('min')) {
+            <mat-error>La capacidad no puede ser negativa.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Nota informativa UX -->
+        <div class="alerta-info-panel">
+          <mat-icon class="icono-alerta-info">info</mat-icon>
+          <div class="texto-alerta-info">
+            Los almacenes determinan la disponibilidad de stock físico y restringen las transferencias y despachos a planta.
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie de Acciones del Formulario -->
+      <div class="drawer-footer">
+        <button
+          mat-button
+          type="button"
+          (click)="cerrarDrawer()"
+          [disabled]="isSaving()"
+          class="btn-cancelar"
+        >
+          Cancelar
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || isSaving()"
+          class="btn-guardar"
+        >
+          @if (isSaving()) {
+            <span>Guardando...</span>
+          } @else {
+            <span>{{ isEditing() ? 'Actualizar' : 'Guardar' }}</span>
+          }
+        </button>
+      </div>
+
+    </form>
+  </mat-sidenav>
+
+</mat-sidenav-container>

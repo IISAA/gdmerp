@@ -31,9 +31,35 @@
           }
         </mat-form-field>
 
+        <!-- LISTA DE MATERIALES / RECETA SUGERIDA -->
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Lista de Materiales (Receta Sugerida)</mat-label>
+          <mat-select formControlName="listaMaterialesId" (selectionChange)="onRecetaSeleccionada($event.value)">
+            <mat-option [value]="null">
+              <em>Sin receta (Asignación manual de insumos)</em>
+            </mat-option>
+            @for (receta of recetasDisponibles(); track receta.id) {
+              <mat-option [value]="receta.id">
+                {{ receta.codigo }} (Base: {{ receta.cantidadBase | number:'1.0-4' }} {{ receta.unidadMedidaProductoTerminado || 'UND' }})
+              </mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix color="primary">account_tree</mat-icon>
+          @if (cargandoRecetas()) {
+            <mat-hint>Buscando recetas asociadas...</mat-hint>
+          } @else if (recetaAplicadaAuto()) {
+            <mat-hint style="color: #059669; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+              <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: #10b981;"></span>
+              Receta aplicada automáticamente
+            </mat-hint>
+          } @else if (recetasDisponibles().length === 0 && form.controls['productoTerminadoId'].value > 0) {
+            <mat-hint style="color: #6b7280;">Sin receta (Asignación manual de insumos)</mat-hint>
+          }
+        </mat-form-field>
+
         <mat-form-field appearance="outline" style="width: 100%;">
           <mat-label>Cantidad Planificada *</mat-label>
-          <input matInput type="number" formControlName="cantidadPlanificada" min="1">
+          <input matInput type="number" formControlName="cantidadPlanificada" min="0.0001" [step]="obtenerStepProducto()">
         </mat-form-field>
 
         <!-- CENTRO DE TRABAJO (Autocomplete S08) -->
@@ -110,12 +136,27 @@
               <div style="flex: 1;">
                 <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
                   <mat-label>Cantidad</mat-label>
-                  <input matInput type="number" formControlName="cantidadRequerida" min="1" step="1">
+                  <input matInput type="number" formControlName="cantidadRequerida" (input)="marcarFilaComoManual(i)" min="0.0001" [step]="obtenerStepMateriaPrima(i)">
                 </mat-form-field>
               </div>
 
+              <!-- Indicador de origen del insumo (Receta vs Manual) -->
+              <div style="min-width: 85px; text-align: center;">
+                @if (detalle.get('esManual')?.value) {
+                  <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background-color: #fef3c7; color: #92400e; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
+                    <mat-icon style="font-size: 13px; width: 13px; height: 13px; line-height: 13px;">edit</mat-icon>
+                    Manual
+                  </span>
+                } @else {
+                  <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 9999px; background-color: #d1fae5; color: #065f46; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
+                    <mat-icon style="font-size: 13px; width: 13px; height: 13px; line-height: 13px;">auto_awesome</mat-icon>
+                    Receta
+                  </span>
+                }
+              </div>
+
               <div>
-                <button mat-icon-button color="warn" type="button" (click)="eliminarMateriaPrima(i)">
+                <button mat-icon-button color="warn" type="button" (click)="eliminarMateriaPrima(i)" matTooltip="Eliminar insumo">
                   ✕
                 </button>
               </div>

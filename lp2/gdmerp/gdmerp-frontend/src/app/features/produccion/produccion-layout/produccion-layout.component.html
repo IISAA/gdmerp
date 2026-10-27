@@ -1,0 +1,87 @@
+<div class="modulo-produccion-wrapper">
+
+  <!-- ========================================================================= -->
+  <!-- HEADER STICKY PRINCIPAL (Barra Corporativa + Barra de Pestañas Unificadas) -->
+  <!-- ========================================================================= -->
+  <header class="main-sticky-header">
+
+    <!-- 1. Barra Corporativa -->
+    <div class="corporate-header-bar">
+      <div class="corporate-brand">
+        <span class="status-pulse-dot"></span>
+        <span class="corporate-text">Agro Peruvian Foods S.A.C. - Sistema ERP</span>
+      </div>
+    </div>
+
+    <!-- 2. Barra de Navegación de Pestañas (Hub de Fabricación) -->
+    <div class="nav-bar-container">
+      <div class="hub-brand-section">
+        <mat-icon class="hub-logo-icon">factory</mat-icon>
+        <span class="hub-module-name">Fabricación</span>
+      </div>
+
+      <nav class="hub-links">
+        <!-- Desplegable: Operaciones -->
+        <button mat-button [matMenuTriggerFor]="menuOperaciones" class="hub-menu-btn">
+          <span>Operaciones</span>
+          <mat-icon class="arrow-mini">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #menuOperaciones="matMenu">
+          <button mat-menu-item routerLink="/produccion/ordenes">
+            <mat-icon color="primary">dashboard</mat-icon>
+            <span>Tablero de Control</span>
+          </button>
+          <button mat-menu-item routerLink="/produccion/ordenes/lista">
+            <mat-icon>view_list</mat-icon>
+            <span>Listado de Órdenes</span>
+          </button>
+          <button mat-menu-item routerLink="/produccion/centros-trabajo">
+            <mat-icon>precision_manufacturing</mat-icon>
+            <span>Centros de Trabajo</span>
+          </button>
+        </mat-menu>
+
+        <!-- Desplegable: Productos -->
+        <button mat-button [matMenuTriggerFor]="menuProductos" class="hub-menu-btn">
+          <span>Productos</span>
+          <mat-icon class="arrow-mini">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #menuProductos="matMenu">
+          <button mat-menu-item routerLink="/inventario/productos">
+            <mat-icon>inventory_2</mat-icon>
+            <span>Productos</span>
+          </button>
+          <button mat-menu-item routerLink="/produccion/listas-materiales">
+            <mat-icon color="primary">account_tree</mat-icon>
+            <span>Lista de Materiales (BoM)</span>
+          </button>
+        </mat-menu>
+
+        <!-- Desplegable: Reportes -->
+        <button mat-button [matMenuTriggerFor]="menuReportes" class="hub-menu-btn">
+          <span>Reportes</span>
+          <mat-icon class="arrow-mini">arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #menuReportes="matMenu">
+          <button mat-menu-item routerLink="/reportes/ordenes-estados">
+            <mat-icon>pie_chart</mat-icon>
+            <span>Costos & Estados</span>
+          </button>
+          <button mat-menu-item routerLink="/reportes/stock-critico">
+            <mat-icon>warning</mat-icon>
+            <span>Rendimiento & Stock Crítico</span>
+          </button>
+        </mat-menu>
+      </nav>
+    </div>
+
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- VISTA HIJA ACTIVA DEL MÓDULO (Lista, Detalle, Tablero, etc.)              -->
+  <!-- ========================================================================= -->
+  <main class="hub-content-container">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

@@ -1,0 +1,140 @@
+<div class="bom-list-container">
+
+  <!-- ========================================================================= -->
+  <!-- 1. BARRA SUPERIOR: ENCABEZADO Y ACCIÓN NUEVA RECETA                       -->
+  <!-- ========================================================================= -->
+  <div class="top-nav-bar">
+    <div class="title-cluster">
+      <a routerLink="/produccion" mat-stroked-button class="btn-volver">
+        <mat-icon>arrow_back</mat-icon>
+        Volver a Producción
+      </a>
+      <div>
+        <h1 class="page-title">
+          <mat-icon class="title-icon">account_tree</mat-icon>
+          Listas de Materiales (BOM)
+        </h1>
+        <p class="page-subtitle">
+          Estructura de recetas, formulaciones y proporciones de materias primas para producción.
+        </p>
+      </div>
+    </div>
+
+    <a *hasRole="['ADMIN', 'JEFE_PRODUCCION']" routerLink="/produccion/listas-materiales/nueva" mat-flat-button color="primary" class="btn-nueva-receta">
+      <mat-icon>add</mat-icon>
+      Nueva Lista de Materiales
+    </a>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. BARRA DE BÚSQUEDA RÁPIDA                                               -->
+  <!-- ========================================================================= -->
+  <div class="filtro-section">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="buscador-field">
+      <mat-icon matPrefix class="search-icon">search</mat-icon>
+      <input
+        matInput
+        type="text"
+        placeholder="Buscar por código de receta, producto o SKU..."
+        [value]="textoBusqueda()"
+        (input)="onBuscar($event)"
+      />
+      @if (textoBusqueda()) {
+        <button mat-icon-button matSuffix (click)="limpiarBusqueda()" matTooltip="Limpiar filtro">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. TABLA DE RECETAS ESTILO ODOO (FILAS INTERACTIVAS)                      -->
+  <!-- ========================================================================= -->
+  <mat-card class="table-card">
+    @if (cargando()) {
+      <div class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+        <span>Cargando listas de materiales...</span>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table mat-table [dataSource]="listasFiltradas()" class="bom-table">
+
+          <!-- Columna: Código de Receta -->
+          <ng-container matColumnDef="codigo">
+            <th mat-header-cell *matHeaderCellDef class="th-codigo">Código de Receta</th>
+            <td mat-cell *matCellDef="let row" class="td-codigo">
+              <span class="codigo-badge">{{ row.codigo }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Columna: Producto a Fabricar -->
+          <ng-container matColumnDef="producto">
+            <th mat-header-cell *matHeaderCellDef class="th-producto">Producto a Fabricar</th>
+            <td mat-cell *matCellDef="let row" class="td-producto">
+              <div class="producto-info">
+                @if (row.skuProductoTerminado) {
+                  <span class="sku-tag">[{{ row.skuProductoTerminado }}]</span>
+                }
+                <span class="nombre-prod">{{ row.nombreProductoTerminado }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Columna: Cantidad Base -->
+          <ng-container matColumnDef="cantidadBase">
+            <th mat-header-cell *matHeaderCellDef class="th-cantidad">Cantidad Base</th>
+            <td mat-cell *matCellDef="let row" class="td-cantidad">
+              <span class="cantidad-num">{{ row.cantidadBase | number:'1.0-4' }}</span>
+              <span class="unit-tag">{{ row.unidadMedidaProductoTerminado || 'UND' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Columna: N° de Insumos -->
+          <ng-container matColumnDef="numInsumos">
+            <th mat-header-cell *matHeaderCellDef class="th-insumos">N° de Insumos</th>
+            <td mat-cell *matCellDef="let row" class="td-insumos">
+              <span class="badge-insumos">
+                <mat-icon class="icon-inline">inventory_2</mat-icon>
+                {{ row.detalles ? row.detalles.length : 0 }} insumos
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Filas de encabezado y datos con interacción Odoo -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr 
+            mat-row 
+            *matRowDef="let row; columns: displayedColumns;"
+            (click)="irADetalle(row.id)"
+            class="fila-interactiva"
+            matTooltip="Clic para ver y editar la receta">
+          </tr>
+
+          <!-- Estado Vacío -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell sin-datos-celda" [attr.colspan]="displayedColumns.length">
+              <div class="estado-vacio">
+                @if (textoBusqueda()) {
+                  <mat-icon class="vacio-icon">search_off</mat-icon>
+                  <div class="vacio-titulo">No se encontraron recetas para "{{ textoBusqueda() }}"</div>
+                  <p class="vacio-desc">Verifica el código o término ingresado.</p>
+                } @else {
+                  <mat-icon class="vacio-icon">account_tree</mat-icon>
+                  <div class="vacio-titulo">No hay listas de materiales registradas</div>
+                  <p class="vacio-desc">Registra tu primera receta para automatizar el cálculo y consumo de ingredientes.</p>
+                  <a routerLink="/produccion/listas-materiales/nueva" mat-flat-button color="primary" class="btn-crear-vacio">
+                    <mat-icon>add</mat-icon>
+                    Crear Nueva Lista
+                  </a>
+                }
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </div>
+    }
+  </mat-card>
+
+</div>

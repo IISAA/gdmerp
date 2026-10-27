@@ -1,0 +1,112 @@
+.modulo-produccion-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
+.main-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #ffffff; /* Evita que el texto de abajo se transparente */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+/* 1. Barra Corporativa Superior */
+.corporate-header-bar {
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 1.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #ffffff;
+}
+
+.corporate-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.status-pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.corporate-text {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* 2. Barra de Navegación de Pestañas (Hub de Fabricación) */
+.nav-bar-container {
+  padding: 0.4rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.hub-brand-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hub-logo-icon {
+  color: #16a34a;
+  font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.hub-module-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.hub-links {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hub-menu-btn {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0 0.75rem;
+  height: 2.2rem;
+  border-radius: 8px;
+}
+
+.hub-menu-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.arrow-mini {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+  color: #64748b;
+}
+
+.hub-content-container {
+  flex: 1;
+  padding-top: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}

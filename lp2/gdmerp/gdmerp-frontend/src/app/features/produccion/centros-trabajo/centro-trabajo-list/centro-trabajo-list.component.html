@@ -1,0 +1,268 @@
+<mat-sidenav-container class="sidenav-container">
+
+  <!-- ========================================================================= -->
+  <!-- 1. CONTENIDO PRINCIPAL (Tabla de Centros de Trabajo)                      -->
+  <!-- ========================================================================= -->
+  <mat-sidenav-content class="sidenav-content">
+    <div class="contenedor-principal">
+
+      <!-- Header y Buscador -->
+      <div class="header-section">
+        <div>
+          <h2 class="titulo-seccion">Centros de Trabajo</h2>
+          <p class="subtitulo-seccion">
+            Gestión de líneas de manufactura, tostado, refinado y empaque
+          </p>
+        </div>
+
+        <div class="acciones-header">
+          <div class="buscador-caja">
+            <mat-icon class="icono-busqueda">search</mat-icon>
+            <input
+              type="text"
+              placeholder="Buscar por nombre o código..."
+              (input)="onBuscar($event)"
+              class="input-busqueda"
+            />
+          </div>
+
+          <button mat-raised-button color="primary" class="btn-nuevo-centro" (click)="abrirNuevo()">
+            <mat-icon>add</mat-icon>
+            Nuevo Centro
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla de Datos -->
+      <div class="tabla-card">
+        <table class="tabla-datos">
+          <thead>
+            <tr>
+              <th style="width: 80px;">ID</th>
+              <th style="width: 250px;">NOMBRE DE LA LÍNEA</th>
+              <th style="width: 140px;">CÓDIGO</th>
+              <th style="width: 160px; text-align: right;">CAPACIDAD</th>
+              <th style="width: 140px; text-align: right;">COSTO / HORA</th>
+              <th style="width: 140px; text-align: right;">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading()) {
+              <tr>
+                <td colspan="6" class="estado-fila">
+                  <div class="spinner-inline">
+                    <span>Cargando centros de trabajo...</span>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              @for (centro of centrosFiltrados(); track centro.id) {
+                <tr class="fila-registro">
+                  <td class="col-id">#{{ centro.id }}</td>
+                  <td class="col-nombre">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <mat-icon style="color: #64748b; font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">precision_manufacturing</mat-icon>
+                      <span class="nombre-texto">{{ centro.nombre }}</span>
+                    </div>
+                  </td>
+                  <td class="col-codigo">
+                    @if (centro.codigo) {
+                      <span class="badge-codigo">{{ centro.codigo }}</span>
+                    } @else {
+                      <span class="sin-dato">-</span>
+                    }
+                  </td>
+                  <td class="col-capacidad" style="text-align: right; font-weight: 600;">
+                    @if (centro.capacidad) {
+                      <span>{{ centro.capacidad | number:'1.0-4' }} unidades/turno</span>
+                    } @else {
+                      <span class="sin-dato">Sin definir</span>
+                    }
+                  </td>
+                  <td class="col-costo" style="text-align: right; font-weight: 600; color: #16a34a;">
+                    @if (centro.costoHora) {
+                      <span>S/ {{ centro.costoHora | number:'1.2-2' }}</span>
+                    } @else {
+                      <span class="sin-dato">-</span>
+                    }
+                  </td>
+                  <td class="col-acciones">
+                    <div class="acciones-grupo">
+                      <button
+                        type="button"
+                        class="btn-accion btn-editar"
+                        matTooltip="Editar centro de trabajo"
+                        (click)="abrirEditar(centro)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-accion btn-eliminar"
+                        matTooltip="Eliminar centro de trabajo"
+                        (click)="eliminar(centro)"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="estado-fila vacio">
+                    @if (textoBusqueda()) {
+                      No se encontraron centros coincidentes con "{{ textoBusqueda() }}".
+                    } @else {
+                      No hay centros de trabajo registrados. Haz clic en <strong>+ Nuevo Centro</strong> para dar de alta una línea de manufactura.
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </mat-sidenav-content>
+
+  <!-- ========================================================================= -->
+  <!-- 2. PANEL LATERAL DESLIZANTE (Side Drawer / Offcanvas)                     -->
+  <!-- ========================================================================= -->
+  <mat-sidenav
+    #drawer
+    position="end"
+    mode="over"
+    [opened]="isDrawerOpen()"
+    (closed)="cerrarDrawer()"
+    class="centro-drawer"
+  >
+    <!-- Encabezado del Cajón -->
+    <mat-toolbar class="drawer-toolbar">
+      <div class="drawer-header-info">
+        <span class="drawer-titulo">{{ drawerTitle() }}</span>
+        <span class="drawer-subtitulo">
+          {{ isEditing() ? 'Actualiza los parámetros operativos' : 'Registra un centro de manufactura' }}
+        </span>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        (click)="cerrarDrawer()"
+        aria-label="Cerrar panel"
+        class="btn-cerrar-drawer"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <!-- Formulario Reactivo -->
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="drawer-formulario">
+
+      <div class="drawer-body">
+        <!-- Campo: Nombre -->
+        <mat-form-field appearance="outline" class="campo-full">
+          <mat-label>Nombre de la Línea / Centro *</mat-label>
+          <input
+            matInput
+            formControlName="nombre"
+            placeholder="Ej. Línea de Tostado y Descascarillado"
+            maxlength="80"
+          />
+          @if (form.get('nombre')?.touched && form.get('nombre')?.hasError('required')) {
+            <mat-error>El nombre es obligatorio.</mat-error>
+          }
+          @if (form.get('nombre')?.hasError('maxlength')) {
+            <mat-error>El nombre no puede exceder los 80 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Campo: Código -->
+        <mat-form-field appearance="outline" class="campo-full">
+          <mat-label>Código / Abreviatura</mat-label>
+          <input
+            matInput
+            formControlName="codigo"
+            placeholder="Ej. CT-TOST-01"
+            maxlength="20"
+          />
+          @if (form.get('codigo')?.hasError('maxlength')) {
+            <mat-error>El código no puede exceder los 20 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Campo: Capacidad -->
+        <mat-form-field appearance="outline" class="campo-full">
+          <mat-label>Capacidad Operativa (unidades por turno) *</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="capacidad"
+            placeholder="Ej. 500"
+            min="0"
+            step="0.001"
+          />
+          @if (form.get('capacidad')?.hasError('required')) {
+            <mat-error>La capacidad es requerida.</mat-error>
+          }
+          @if (form.get('capacidad')?.hasError('min')) {
+            <mat-error>La capacidad no puede ser negativa.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Campo: Costo Hora -->
+        <mat-form-field appearance="outline" class="campo-full">
+          <mat-label>Costo Estimado por Hora (S/)</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="costoHora"
+            placeholder="Ej. 45.00"
+            min="0"
+            step="0.01"
+          />
+          @if (form.get('costoHora')?.hasError('min')) {
+            <mat-error>El costo por hora no puede ser negativo.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Nota informativa UX -->
+        <div class="alerta-info-panel">
+          <mat-icon class="icono-alerta-info">info</mat-icon>
+          <div class="texto-alerta-info">
+            Los centros de trabajo se asocian a las Órdenes de Producción para calcular la capacidad disponible y los costos indirectos de manufactura.
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie de Acciones del Formulario -->
+      <div class="drawer-footer">
+        <button
+          mat-button
+          type="button"
+          (click)="cerrarDrawer()"
+          [disabled]="isSaving()"
+          class="btn-cancelar"
+        >
+          Cancelar
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || isSaving()"
+          class="btn-guardar"
+        >
+          @if (isSaving()) {
+            <span>Guardando...</span>
+          } @else {
+            <span>{{ isEditing() ? 'Actualizar' : 'Guardar' }}</span>
+          }
+        </button>
+      </div>
+
+    </form>
+  </mat-sidenav>
+
+</mat-sidenav-container>

@@ -1,0 +1,243 @@
+.lista-container {
+  min-height: 100%;
+  background: #f8fafc;
+  padding: 1.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header & Barra Superior de Navegación */
+.top-bar-acciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.cabecera-seccion {
+  display: flex;
+  align-items: flex-start; /* Alinea el botón con la parte superior del h1 */
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.textos-cabecera {
+  display: flex;
+  flex-direction: column;
+}
+
+.titulo-principal {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #0B2B20; /* Verde corporativo oscuro */
+  line-height: 1.2;
+}
+
+.subtitulo {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.btn-crear-orden {
+  background: #d97706 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+/* Barra de Filtro Activo */
+.filtro-activo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  color: #1e40af;
+  font-size: 0.875rem;
+}
+
+.filtro-activo-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filtro-tag {
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: #dbeafe;
+  font-size: 0.75rem;
+}
+
+.btn-quitar-filtro {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-quitar-filtro:hover {
+  text-decoration: underline;
+}
+
+/* Sección de Búsqueda */
+.filtro-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.buscador-form-field {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Tabla Material */
+.tabla-card {
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tabla-ordenes {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-ordenes th.mat-header-cell {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.th-id { width: 80px; }
+.th-producto { min-width: 220px; }
+.th-cantidad { width: 130px; }
+.th-estado { width: 140px; }
+.th-costo { width: 130px; text-align: right !important; }
+
+.tabla-ordenes td.mat-cell {
+  padding: 0.875rem 1rem;
+  color: #334155;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.fila-interactiva {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.fila-interactiva:hover {
+  background-color: #F4F6F8; /* Gris muy suave */
+}
+
+.id-badge {
+  font-family: monospace;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.producto-nombre { font-weight: 600; color: #0f172a; }
+
+.producto-subinfo {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.badge-estado {
+  display: inline-flex;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.725rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.col-costo {
+  text-align: right !important;
+  font-weight: 700;
+  color: #047857;
+}
+
+.col-acciones { text-align: right !important; }
+
+.acciones-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-accion-editar {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-accion-eliminar {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sin-datos-celda {
+  padding: 2.5rem 1rem !important;
+  text-align: center;
+}
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+}
+
+.vacio-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: #94a3b8;
+}
+
+.vacio-titulo { font-weight: 600; color: #0f172a; }
+.vacio-desc { margin: 0; font-size: 0.85rem; color: #64748b; }

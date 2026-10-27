@@ -1,0 +1,229 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidebar-container {
+  width: 260px;
+  background-color: #0B2B20;
+  color: #ffffff;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 1.5rem 1.25rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================================================= */
+/* LOGO CORPORATIVO                                                          */
+/* ========================================================================= */
+.sidebar-brand {
+  margin-bottom: 2rem;
+  padding-left: 0.5rem;
+}
+
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-logo-text {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.brand-subtitle {
+  font-size: 0.8rem;
+  color: #A0BDB2;
+  display: block;
+  margin-top: 0.15rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* ========================================================================= */
+/* NAVEGACIÓN                                                                */
+/* ========================================================================= */
+.nav-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #A0BDB2;
+  opacity: 0.75;
+  margin-bottom: 0.85rem;
+  padding-left: 0.5rem;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* Enlaces no activos */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  color: #A0BDB2;
+  text-decoration: none;
+  font-size: 0.925rem;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+/* Íconos no activos */
+.nav-icon {
+  font-size: 1.3rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  color: #A0BDB2;
+  transition: color 0.2s ease;
+}
+
+.nav-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Estado Activo y Hover */
+.nav-item:hover,
+.nav-item.nav-item-active {
+  background-color: #1A4D39;
+  color: #FFFFFF !important;
+  font-weight: 600;
+}
+
+.nav-item:hover .nav-icon,
+.nav-item.nav-item-active .nav-icon {
+  color: #FFFFFF !important;
+}
+
+.active-indicator {
+  display: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.nav-item-active .active-indicator {
+  display: block;
+}
+
+/* ========================================================================= */
+/* SECCIÓN USUARIO (PIE)                                                     */
+/* ========================================================================= */
+.sidebar-user-section {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.user-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #A0BDB2;
+  opacity: 0.75;
+  margin-bottom: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.user-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.03);
+  transition: background-color 0.2s ease;
+}
+
+.user-profile-card:hover {
+  background-color: #1A4D39;
+}
+
+.user-avatar-wrapper {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.user-avatar-svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 0.725rem;
+  color: #A0BDB2;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.btn-sidebar-logout {
+  background: transparent;
+  border: none;
+  color: #A0BDB2;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-sidebar-logout:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.logout-icon {
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+}

@@ -52,12 +52,12 @@
             </div>
           </td>
 
-          <td style="padding: 1rem; color: #475569;">{{ producto.categoria.nombre }}</td>
+          <td style="padding: 1rem; color: #475569;">{{ producto.categoria?.nombre || 'Sin categoría' }}</td>
 
           <td style="padding: 1rem; color: #475569;">
             <div style="display: flex; align-items: center; gap: 0.25rem;">
               <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem; color: #94a3b8;">warehouse</mat-icon>
-              {{ producto.almacen.nombre }}
+              {{ producto.almacen?.nombre || 'Sin almacén' }}
             </div>
           </td>
 
@@ -65,27 +65,28 @@
           <td style="padding: 1rem; text-align: right; font-weight: 600;">
             <div style="display: flex; flex-direction: column; align-items: flex-end;">
               <!-- Lógica de advertencia -->
-              @if (producto.stockTotal <= producto.stockMinimo) { <span
-                style="color: #dc2626; display: flex; align-items: center; gap: 0.25rem;"
-                matTooltip="Stock por debajo del mínimo permitido ({{ producto.stockMinimo }})">
-                <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">warning</mat-icon>
-                {{ producto.stockTotal }} {{ producto.unidadMedida }}
+              @if ((producto.stockTotal ?? 0) <= (producto.stockMinimo ?? 0)) {
+                <span
+                  style="color: #dc2626; display: flex; align-items: center; gap: 0.25rem;"
+                  [matTooltip]="'Stock por debajo del mínimo permitido (' + ((producto.stockMinimo ?? 0) | number:'1.0-4') + ')'">
+                  <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">warning</mat-icon>
+                  {{ (producto.stockTotal ?? 0) | number:'1.0-4' }} {{ producto.unidadMedida || '' }}
                 </span>
-                } @else {
+              } @else {
                 <span style="color: #16a34a;">
-                  {{ producto.stockTotal }} {{ producto.unidadMedida }}
+                  {{ (producto.stockTotal ?? 0) | number:'1.0-4' }} {{ producto.unidadMedida || '' }}
                 </span>
-                }
+              }
             </div>
           </td>
 
           <!-- ACCIONES -->
           <td style="padding: 1rem; text-align: right;">
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
-              <button (click)="$event.preventDefault()" [routerLink]="['/inventario/productos/editar', producto.id]"
-                style="background-color: #f59e0b; color: white; border: none; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+              <a [routerLink]="['/inventario/productos/editar', producto.id]"
+                style="background-color: #f59e0b; color: white; border: none; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;">
                 Editar
-              </button>
+              </a>
               <button (click)="eliminar(producto.id, producto.nombre)"
                 style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
                 Eliminar
@@ -97,7 +98,11 @@
         } @empty {
         <tr>
           <td colspan="6" style="text-align: center; padding: 3rem; color: #64748b;">
-            No se encontraron productos coincidentes con "{{ textoBusqueda() }}".
+            @if (textoBusqueda()) {
+              No se encontraron productos coincidentes con "{{ textoBusqueda() }}".
+            } @else {
+              No hay productos registrados en el sistema. Haz clic en <strong>+ Nuevo Producto</strong> para crear el primero.
+            }
           </td>
         </tr>
         }

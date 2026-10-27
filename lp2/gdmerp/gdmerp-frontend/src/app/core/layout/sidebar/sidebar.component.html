@@ -1,27 +1,88 @@
-<aside style="width: 250px; background: #1f2937; color: white; height: 100vh; padding: 1rem; display: flex; flex-direction: column;">
-  <div style="margin-bottom: 2rem;">
-    <h2 style="margin: 0; font-size: 1.5rem; font-weight: bold; color: #f59e0b;">GDMERP</h2>
-    <span style="font-size: 0.8rem; color: #9ca3af;">Producción & Retail</span>
+<aside class="sidebar-container">
+
+  <!-- Logo Corporativo -->
+  <div class="sidebar-brand">
+    <div class="brand-title-row">
+      <span class="brand-logo-text">GDMERP</span>
+    </div>
+    <span class="brand-subtitle">Producción & Retail</span>
   </div>
-  <nav style="display: flex; flex-direction: column; gap: 0.5rem;">
-    <!-- Dashboard / Inicio general -->
-    <a routerLink="/home" routerLinkActive="active" style="color: #d1d5db; text-decoration: none; padding: 0.75rem; border-radius: 0.375rem; display: flex; align-items: center; gap: 0.5rem;">
-      <span>🏠</span> Inicio
+
+  <!-- Grupo: Navegación -->
+  <div class="nav-section-label">NAVEGACIÓN</div>
+
+  <nav class="sidebar-nav">
+
+    <!-- 1. Dashboard -->
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">grid_view</mat-icon>
+      <span class="nav-text">Dashboard</span>
+      <span class="active-indicator"></span>
     </a>
 
-    <!-- Módulo de Producción (Órdenes, Centros de Trabajo) -->
-    <a *hasRole="['ADMIN', 'JEFE_PRODUCCION']" routerLink="/produccion/ordenes" routerLinkActive="active" style="color: #d1d5db; text-decoration: none; padding: 0.75rem; border-radius: 0.375rem; display: flex; align-items: center; gap: 0.5rem;">
-      <span>🏭</span> Tablero de Producción
+    <!-- 2. Inventario y Kardex -->
+    <a
+      *hasRole="['ADMIN', 'ALMACENERO']"
+      routerLink="/inventario/productos"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">account_balance_wallet</mat-icon>
+      <span class="nav-text">Inventario y Kardex</span>
+      <span class="active-indicator"></span>
     </a>
 
-    <!-- Módulo de Inventario (Productos, Almacenes, Categorías) -->
-    <a *hasRole="['ADMIN', 'ALMACENERO']" routerLink="/inventario" routerLinkActive="active" style="color: #d1d5db; text-decoration: none; padding: 0.75rem; border-radius: 0.375rem; display: flex; align-items: center; gap: 0.5rem;">
-      <span>📦</span> Inventario y Kardex
+    <!-- 3. Producción -->
+    <a
+      *hasRole="['ADMIN', 'JEFE_PRODUCCION', 'OPERARIO']"
+      routerLink="/produccion/ordenes"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">factory</mat-icon>
+      <span class="nav-text">Producción</span>
+      <span class="active-indicator"></span>
     </a>
 
-    <!-- Módulo de Punto de Venta / Ventas -->
-    <a *hasRole="['ADMIN', 'VENDEDOR', 'CAJERO']" routerLink="/ventas" routerLinkActive="active" style="color: #d1d5db; text-decoration: none; padding: 0.75rem; border-radius: 0.375rem; display: flex; align-items: center; gap: 0.5rem;">
-      <span>💰</span> Punto de Venta
-    </a>
   </nav>
+
+  <!-- Pie del Sidebar: Perfil de Usuario de Keycloak -->
+  <div class="sidebar-user-section">
+    <div class="user-section-label">USUARIO</div>
+
+    <div class="user-profile-card">
+      <div class="user-avatar-wrapper">
+        <!-- SVG Avatar circular elegante -->
+        <svg class="user-avatar-svg" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="19" fill="#134e35" stroke="#22c55e" stroke-width="2"/>
+          <circle cx="20" cy="15" r="6" fill="#86efac"/>
+          <path d="M8 33c0-6 5.4-9 12-9s12 3 12 9" fill="#86efac"/>
+        </svg>
+      </div>
+
+      <!-- Datos Reales del Usuario autenticado -->
+      <div class="user-info">
+        <span class="user-name" [title]="authService.username() || authService.getUsername() || 'Usuario'">
+          {{ authService.username() || authService.getUsername() || 'Usuario' }}
+        </span>
+        <span class="user-role">{{ primaryRole() }}</span>
+      </div>
+
+      <!-- Cierre de Sesión Único -->
+      <button
+        type="button"
+        class="btn-sidebar-logout"
+        matTooltip="Cerrar sesión"
+        (click)="logout()"
+        aria-label="Cerrar sesión"
+      >
+        <mat-icon class="logout-icon">logout</mat-icon>
+      </button>
+    </div>
+  </div>
+
 </aside>

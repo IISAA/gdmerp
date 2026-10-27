@@ -1,0 +1,251 @@
+<div class="dashboard-page">
+
+  <!-- Encabezado Principal -->
+  <header class="dashboard-header">
+    <h1 class="dashboard-title">Dashboard de Manufactura y Stock</h1>
+  </header>
+
+  <!-- FILA 1: KPIs Principales (3 tarjetas) -->
+  <section class="kpi-grid">
+
+    <!-- KPI 1: Eficiencia de Producción -->
+    <div class="card kpi-card">
+      <div class="kpi-info">
+        <span class="kpi-label">Eficiencia de Producción</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value">92.4%</span>
+          <span class="kpi-trend">↑</span>
+        </div>
+      </div>
+      <div class="mini-chart" aria-hidden="true">
+        <span class="chart-bar" style="height: 14px;"></span>
+        <span class="chart-bar" style="height: 24px;"></span>
+        <span class="chart-bar" style="height: 18px;"></span>
+        <span class="chart-bar" style="height: 30px;"></span>
+        <span class="chart-bar" style="height: 26px;"></span>
+      </div>
+    </div>
+
+    <!-- KPI 2: Órdenes Activas -->
+    <div class="card kpi-card clickable-card" [routerLink]="['/produccion/ordenes']" title="Ver órdenes de producción">
+      <div class="kpi-info">
+        <span class="kpi-label">Órdenes Activas</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value">{{ ordenesActivas() }}</span>
+        </div>
+      </div>
+      <div class="kpi-right-column">
+        <div class="status-toggle-pill" title="Línea activa">
+          <span class="toggle-knob"></span>
+        </div>
+        <div class="mini-chart" aria-hidden="true">
+          <span class="chart-bar" style="height: 14px;"></span>
+          <span class="chart-bar" style="height: 20px;"></span>
+          <span class="chart-bar" style="height: 32px;"></span>
+          <span class="chart-bar" style="height: 22px;"></span>
+          <span class="chart-bar" style="height: 28px;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI 3: Valor del Inventario -->
+    <div class="card kpi-card clickable-card" [routerLink]="['/inventario/productos']" title="Ver inventario de productos">
+      <div class="kpi-info">
+        <span class="kpi-label">Valor del Inventario</span>
+        <div class="kpi-value-row">
+          <span class="kpi-value">S/. 450,280</span>
+        </div>
+      </div>
+      <div class="mini-chart" aria-hidden="true">
+        <span class="chart-bar" style="height: 12px;"></span>
+        <span class="chart-bar" style="height: 20px;"></span>
+        <span class="chart-bar" style="height: 16px;"></span>
+        <span class="chart-bar" style="height: 26px;"></span>
+        <span class="chart-bar" style="height: 32px;"></span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- FILA 2: Métricas Detalladas (3 tarjetas) -->
+  <section class="metrics-grid">
+
+    <!-- Tarjeta: Control de Merma -->
+    <div class="card metric-card">
+      <h2 class="card-title">Control de Merma</h2>
+      <div class="metric-center">
+        <div class="big-metric">2.1%</div>
+        <div class="gauge-wrapper">
+          <svg viewBox="0 0 160 85" class="gauge-svg">
+            <!-- Pista gris -->
+            <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#E2E8F0" stroke-width="14" stroke-linecap="round"/>
+            <!-- Arco verde de nivel óptimo (~70% progreso) -->
+            <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#16A34A" stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="188.5" stroke-dashoffset="56.5"/>
+          </svg>
+          <span class="gauge-label">Nivel óptimo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta: Consumo de Insumos -->
+    <div class="card metric-card">
+      <h2 class="card-title">Consumo de Insumos</h2>
+      <div class="metric-center">
+        <div class="big-metric">86%</div>
+        <div class="breakdown-list">
+          <div class="breakdown-item">
+            <div class="breakdown-name-wrapper">
+              <span class="bullet bullet-green"></span>
+              <span class="breakdown-name">Cacao en Grano</span>
+            </div>
+            <span class="breakdown-pct">(12%)</span>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-name-wrapper">
+              <span class="bullet bullet-light-green"></span>
+              <span class="breakdown-name">Azúcar</span>
+            </div>
+            <span class="breakdown-pct">(5%)</span>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-name-wrapper">
+              <span class="bullet bullet-dark"></span>
+              <span class="breakdown-name">Empaques</span>
+            </div>
+            <span class="breakdown-pct">(8%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta: Estado de Órdenes de Producción -->
+    <div class="card metric-card">
+      <h2 class="card-title">Estado de Órdenes de Producción</h2>
+      <div class="orders-table-wrapper">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th class="th-estado">Estado</th>
+              <th class="th-cantidad">Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="status-badge badge-planificado">PLANIFICADO</span>
+              </td>
+              <td class="td-cantidad">{{ totalPlanificadas() }} lotes</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="status-badge badge-en-proceso">EN PROCESO</span>
+              </td>
+              <td class="td-cantidad">{{ totalEnProceso() }} lotes</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="status-badge badge-completado">COMPLETADO</span>
+              </td>
+              <td class="td-cantidad">{{ totalCompletadas() }} lotes</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="status-badge badge-cancelado">CANCELADO</span>
+              </td>
+              <td class="td-cantidad">{{ totalCanceladas() }} lotes</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- FILA 3: Alertas y Banner Corporativo (2 tarjetas) -->
+  <section class="bottom-grid">
+
+    <!-- Tarjeta Verde Bosque Oscuro: Alertas de Planta -->
+    <div class="card dark-forest-card">
+      <h2 class="dark-card-title">Alertas de Planta</h2>
+      <div class="alerts-content">
+        <p class="alert-line">3 lotes en tránsito</p>
+        <p class="alert-line">Nivel de Stock de Empaques estable</p>
+      </div>
+    </div>
+
+    <!-- Banner Corporativo con Hojas de Cacao -->
+    <div class="card cacao-banner-card">
+      <div class="banner-text-content">
+        <div class="banner-brand">
+          <!-- Icono SVG de hoja de cacao -->
+          <svg class="banner-cacao-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2C6.5 2 2 6.5 2 12c0 5 3.5 9.2 8.2 9.9.5.1.8-.3.8-.8v-2.2c-3.1.7-3.8-1.5-3.8-1.5-.5-1.3-1.2-1.7-1.2-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.6 1.2 3.2.9.1-.7.4-1.2.7-1.5-2.5-.3-5.1-1.2-5.1-5.5 0-1.2.4-2.2 1.1-3-.1-.3-.5-1.4.1-3 0 0 .9-.3 3 1.1.9-.3 1.8-.4 2.8-.4s1.9.1 2.8.4c2.1-1.4 3-1.1 3-1.1.6 1.6.2 2.7.1 3 .7.8 1.1 1.8 1.1 3 0 4.3-2.6 5.2-5.1 5.5.4.3.7.9.7 1.9v2.8c0 .5.3.9.8.8C18.5 21.2 22 17 22 12c0-5.5-4.5-10-10-10z" style="display:none;"/>
+            <path d="M12 3C7 3 3 7.5 3 13c0 4.5 3 8 9 8s9-3.5 9-8c0-5.5-4-10-9-10zm0 2c3.5 0 6.5 3.5 6.5 8s-3 6-6.5 6-6.5-1.5-6.5-6 3-8 6.5-8z" fill="currentColor" opacity="0.3"/>
+            <path d="M12 3v18M7 7c2 2 3 5 3 7M17 7c-2 2-3 5-3 7" stroke="currentColor" stroke-linecap="round"/>
+          </svg>
+          <span class="banner-brand-text">GDMERP</span>
+        </div>
+        <h3 class="banner-title">Monitoreo en Tiempo Real -</h3>
+        <p class="banner-subtitle">Asegura la calidad de la pasta de cacao</p>
+      </div>
+
+      <!-- Ilustración Botánica de Hojas y Mazorca de Cacao -->
+      <div class="banner-illustration" aria-hidden="true">
+        <svg viewBox="0 0 280 180" class="cacao-botanical-svg">
+          <defs>
+            <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#34D399" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#059669" stop-opacity="0.7" />
+            </linearGradient>
+            <linearGradient id="podGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#10B981" stop-opacity="0.95" />
+              <stop offset="100%" stop-color="#047857" stop-opacity="0.85" />
+            </linearGradient>
+          </defs>
+
+          <!-- Hoja Superior Izquierda -->
+          <g transform="translate(60, 20) rotate(-35)">
+            <path d="M 0 0 C 40 -30 90 -20 120 0 C 90 30 40 30 0 0 Z" fill="url(#leafGrad)" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 0 0 L 120 0" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 25 0 L 40 -15 M 50 0 L 70 -18 M 80 0 L 100 -12" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 25 0 L 40 15 M 50 0 L 70 18 M 80 0 L 100 12" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+
+          <!-- Hoja Superior Derecha -->
+          <g transform="translate(140, 10) rotate(25)">
+            <path d="M 0 0 C 40 -35 95 -25 130 0 C 95 35 40 35 0 0 Z" fill="url(#leafGrad)" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 0 0 L 130 0" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 30 0 L 50 -18 M 65 0 L 90 -20 M 100 0 L 118 -10" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 30 0 L 50 18 M 65 0 L 90 20 M 100 0 L 118 10" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+
+          <!-- Hoja Inferior Izquierda -->
+          <g transform="translate(50, 110) rotate(-15)">
+            <path d="M 0 0 C 35 -25 80 -15 110 0 C 80 25 35 25 0 0 Z" fill="url(#leafGrad)" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 0 0 L 110 0" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 25 0 L 40 -12 M 50 0 L 70 -14 M 80 0 L 95 -8" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M 25 0 L 40 12 M 50 0 L 70 14 M 80 0 L 95 8" stroke="#064E3B" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+
+          <!-- Mazorca de Cacao Central (Cacao Pod con estrías botánicas) -->
+          <g transform="translate(180, 100) rotate(55)">
+            <path d="M 0 -45 C 32 -30 38 30 0 50 C -38 30 -32 -30 0 -45 Z" fill="url(#podGrad)" stroke="#064E3B" stroke-width="2.5"/>
+            <!-- Estrías longitudinales de la mazorca -->
+            <path d="M 0 -45 Q 12 0 0 50" fill="none" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 0 -45 Q -12 0 0 50" fill="none" stroke="#064E3B" stroke-width="2"/>
+            <path d="M 0 -45 Q 24 5 0 50" fill="none" stroke="#064E3B" stroke-width="1.5"/>
+            <path d="M 0 -45 Q -24 5 0 50" fill="none" stroke="#064E3B" stroke-width="1.5"/>
+            <!-- Textura rugosa de corteza de cacao -->
+            <circle cx="5" cy="-10" r="1.5" fill="#064E3B"/>
+            <circle cx="-6" cy="15" r="1.5" fill="#064E3B"/>
+            <circle cx="10" cy="18" r="1.2" fill="#064E3B"/>
+            <circle cx="-8" cy="-18" r="1.2" fill="#064E3B"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+  </section>
+
+</div>

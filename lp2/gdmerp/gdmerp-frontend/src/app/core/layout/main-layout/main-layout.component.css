@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* 1. Contenedor Principal: 100vh y overflow: hidden */
+.global-layout-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #F4F6F8;
+}
+
+/* Sidebar estricto Verde Bosque */
+.global-sidenav {
+  width: 260px;
+  background-color: #0B2B20;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 2. Contenedor de Contenido: Flexbox columna al 100% de altura y overflow hidden */
+.global-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: #F4F6F8;
+}
+
+/* Barra superior: elemento fijo en el flujo flex */
+.global-header {
+  flex-shrink: 0;
+  width: 100%;
+  z-index: 50;
+}
+
+/* 3. Contenedor del router-outlet: flex-grow: 1, scroll vertical independiente */
+.page-content-scroll {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0;
+  min-height: 0; /* Permite que el flex item scrollee correctamente sin desbordar la ventana */
+  box-sizing: border-box;
+  background-color: #F4F6F8;
+}

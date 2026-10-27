@@ -1,0 +1,444 @@
+.dashboard-page {
+  padding: 1.5rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboard-header {
+  margin-bottom: 1.75rem;
+}
+
+.dashboard-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+/* Base para todas las tarjetas */
+.card {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  padding: 1.5rem 1.65rem;
+  box-sizing: border-box;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.clickable-card {
+  cursor: pointer;
+}
+
+.clickable-card:hover {
+  transform: translateY(-2px);
+}
+
+/* ========================================================================= */
+/* FILA 1: KPIs Principales                                                  */
+/* ========================================================================= */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  min-height: 110px;
+}
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-label {
+  color: #475569;
+  font-size: 0.925rem;
+  font-weight: 500;
+  margin-bottom: 0.65rem;
+}
+
+.kpi-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.kpi-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.kpi-trend {
+  color: #10b981;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.mini-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 34px;
+  padding-bottom: 2px;
+}
+
+.chart-bar {
+  width: 6.5px;
+  background-color: #10b981;
+  border-radius: 3px 3px 0 0;
+  display: inline-block;
+  transition: height 0.3s ease;
+}
+
+.kpi-right-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
+}
+
+.status-toggle-pill {
+  width: 32px;
+  height: 16px;
+  background-color: #bbf7d0;
+  border-radius: 9999px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.toggle-knob {
+  width: 12px;
+  height: 12px;
+  background-color: #16a34a;
+  border-radius: 50%;
+  margin-left: auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================================================= */
+/* FILA 2: Métricas Detalladas                                               */
+/* ========================================================================= */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.85rem 0;
+}
+
+.metric-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.big-metric {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  margin-bottom: 0.4rem;
+}
+
+/* Gauge semi-circular */
+.gauge-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.gauge-svg {
+  width: 150px;
+  height: 80px;
+}
+
+.gauge-label {
+  font-size: 0.825rem;
+  color: #334155;
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+/* Desglose de Insumos */
+.breakdown-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.4rem;
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.breakdown-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.bullet-green {
+  background-color: #10b981;
+}
+
+.bullet-light-green {
+  background-color: #86efac;
+}
+
+.bullet-dark {
+  background-color: #1e293b;
+}
+
+.breakdown-name {
+  color: #334155;
+  font-weight: 500;
+}
+
+.breakdown-pct {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Tabla de Estados de Órdenes */
+.orders-table-wrapper {
+  width: 100%;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table thead th {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.th-estado {
+  text-align: left;
+}
+
+.th-cantidad {
+  text-align: right;
+}
+
+.orders-table tbody td {
+  padding: 0.55rem 0;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.td-cantidad {
+  text-align: right;
+  font-weight: 600;
+  color: #334155;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badge-planificado {
+  background-color: #2563eb;
+}
+
+.badge-en-proceso {
+  background-color: #eab308;
+}
+
+.badge-completado {
+  background-color: #16a34a;
+}
+
+.badge-cancelado {
+  background-color: #dc2626;
+}
+
+/* ========================================================================= */
+/* FILA 3: Alertas y Banner Corporativo                                      */
+/* ========================================================================= */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 1.25rem;
+}
+
+/* Tarjeta Verde Bosque Oscuro */
+.dark-forest-card {
+  background-color: #0b251c;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 125px;
+}
+
+.dark-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.75rem 0;
+}
+
+.alerts-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.alert-line {
+  font-size: 0.925rem;
+  color: #d1fae5;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Banner Corporativo con Cacao */
+.cacao-banner-card {
+  background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #10b981 100%);
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 1.75rem;
+  border: none;
+  min-height: 125px;
+}
+
+.banner-text-content {
+  position: relative;
+  z-index: 2;
+  max-width: 65%;
+}
+
+.banner-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.4rem;
+}
+
+.banner-cacao-icon {
+  width: 20px;
+  height: 20px;
+  color: #a7f3d0;
+}
+
+.banner-brand-text {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+}
+
+.banner-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.banner-subtitle {
+  font-size: 0.85rem;
+  color: #d1fae5;
+  margin: 0.25rem 0 0 0;
+  opacity: 0.95;
+}
+
+.banner-illustration {
+  position: absolute;
+  right: -10px;
+  bottom: -15px;
+  width: 230px;
+  height: 150px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cacao-botanical-svg {
+  width: 100%;
+  height: 100%;
+  opacity: 0.88;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .kpi-grid,
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    padding: 1rem;
+  }
+
+  .kpi-grid,
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .banner-illustration {
+    opacity: 0.4;
+  }
+}

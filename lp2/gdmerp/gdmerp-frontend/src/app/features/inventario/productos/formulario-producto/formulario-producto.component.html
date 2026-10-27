@@ -14,7 +14,7 @@
       <mat-card-header>
         <mat-icon mat-card-avatar color="primary">inventory_2</mat-icon>
         <mat-card-title>Información General</mat-card-title>
-        <mat-card-subtitle>Datos principales de identificación</mat-card-subtitle>
+        <mat-card-subtitle>Datos principales de identificación y clasificación</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content class="card-content">
         
@@ -29,26 +29,64 @@
         <div class="row-2-cols">
           <mat-form-field appearance="outline">
             <mat-label>Código SKU</mat-label>
-            <input matInput formControlName="sku" placeholder="Ej. ACE-COC-500">
+            <input 
+              matInput 
+              formControlName="sku" 
+              placeholder="Ej. APF-AIN-ACVE-0001" 
+              class="sku-input"
+              (input)="skuEditadoManualmente.set(true)">
+            
+            @if (!isEditMode()) {
+              <button 
+                mat-icon-button 
+                matSuffix 
+                type="button" 
+                (click)="regenerarSku()" 
+                matTooltip="Regenerar SKU automático"
+                aria-label="Regenerar SKU automático">
+                <mat-icon>autorenew</mat-icon>
+              </button>
+            }
+
+            <mat-hint>Sugerido automáticamente (editable)</mat-hint>
+
+            @if (form.get('sku')?.touched && form.get('sku')?.hasError('required')) {
+              <mat-error>El SKU es requerido</mat-error>
+            }
+            @if (form.get('sku')?.hasError('maxlength')) {
+              <mat-error>El SKU no puede superar 30 caracteres</mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Tipo de Producto</mat-label>
+            <mat-label>Tipo de Producto (Rol Operativo)</mat-label>
             <mat-select formControlName="tipoProducto">
-              @for (tipo of tiposProducto(); track tipo) {
-                <mat-option [value]="tipo">{{ tipo }}</mat-option>
+              @for (tipo of tiposProducto(); track tipo.valor) {
+                <mat-option [value]="tipo.valor">{{ tipo.label }}</mat-option>
               }
             </mat-select>
+            @if (form.get('tipoProducto')?.touched && form.get('tipoProducto')?.hasError('required')) {
+              <mat-error>El tipo de producto es obligatorio</mat-error>
+            }
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Categoría</mat-label>
+          <mat-label>Familia Comercial / Categoría</mat-label>
           <mat-select formControlName="categoriaId">
             @for (cat of categorias(); track cat.id) {
-              <mat-option [value]="cat.id">{{ cat.nombre }}</mat-option>
+              <mat-option [value]="cat.id">
+                {{ cat.nombre }}
+                @if (cat.descripcion) {
+                  <span class="cat-desc"> — {{ cat.descripcion }}</span>
+                }
+              </mat-option>
             }
           </mat-select>
+          <mat-hint>Clasificación comercial del producto en el catálogo</mat-hint>
+          @if (form.get('categoriaId')?.touched && form.get('categoriaId')?.hasError('required')) {
+            <mat-error>La categoría es obligatoria</mat-error>
+          }
         </mat-form-field>
 
       </mat-card-content>
@@ -59,7 +97,7 @@
       <mat-card-header>
         <mat-icon mat-card-avatar color="accent">local_shipping</mat-icon>
         <mat-card-title>Logística y Finanzas</mat-card-title>
-        <mat-card-subtitle>Gestión de stock y costos</mat-card-subtitle>
+        <mat-card-subtitle>Gestión de stock, almacenes y costos</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content class="card-content">
 
@@ -71,24 +109,40 @@
                 <mat-option [value]="alm.id">{{ alm.nombre }}</mat-option>
               }
             </mat-select>
+            @if (form.get('almacenId')?.touched && form.get('almacenId')?.hasError('required')) {
+              <mat-error>El almacén es obligatorio</mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Unidad de Medida</mat-label>
-            <input matInput formControlName="unidadMedida" placeholder="uds, kg, lts">
+            <mat-select formControlName="unidadMedida">
+              @for (grupo of gruposUnidadesMedida(); track grupo.categoria) {
+                <mat-optgroup [label]="grupo.nombre">
+                  @for (um of grupo.unidades; track um.codigo) {
+                    <mat-option [value]="um.codigo">
+                      {{ um.codigo }} - {{ um.nombre }} ({{ um.simbolo }})
+                    </mat-option>
+                  }
+                </mat-optgroup>
+              }
+            </mat-select>
+            @if (form.get('unidadMedida')?.touched && form.get('unidadMedida')?.hasError('required')) {
+              <mat-error>La unidad de medida es obligatoria</mat-error>
+            }
           </mat-form-field>
         </div>
 
         <div class="row-2-cols">
           <mat-form-field appearance="outline">
             <mat-label>Stock Mínimo (Alerta)</mat-label>
-            <input matInput type="number" formControlName="stockMinimo">
+            <input matInput type="number" formControlName="stockMinimo" [step]="obtenerStepStockMinimo()" min="0">
             <mat-icon matSuffix matTooltip="El sistema alertará si el stock cae por debajo de este número">info</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Costo Promedio (S/)</mat-label>
-            <input matInput type="number" formControlName="costoPromedio">
+            <input matInput type="number" formControlName="costoPromedio" step="0.0001" min="0">
           </mat-form-field>
         </div>
 

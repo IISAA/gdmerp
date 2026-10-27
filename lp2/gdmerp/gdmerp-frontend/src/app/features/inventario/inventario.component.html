@@ -1,0 +1,53 @@
+<div class="inventario-wrapper">
+  <!-- Navegación por pestañas del Hub de Inventario -->
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="inventario-tab-nav">
+    <a
+      mat-tab-link
+      routerLink="/inventario/productos"
+      routerLinkActive="mdc-tab-active"
+      #rlaProductos="routerLinkActive"
+      [active]="rlaProductos.isActive"
+    >
+      <mat-icon class="tab-icon">inventory_2</mat-icon>
+      Productos
+    </a>
+
+    <a
+      mat-tab-link
+      routerLink="/inventario/almacenes"
+      routerLinkActive="mdc-tab-active"
+      #rlaAlmacenes="routerLinkActive"
+      [active]="rlaAlmacenes.isActive"
+    >
+      <mat-icon class="tab-icon">warehouse</mat-icon>
+      Almacenes
+    </a>
+
+    <a
+      mat-tab-link
+      routerLink="/inventario/categorias"
+      routerLinkActive="mdc-tab-active"
+      #rlaCategorias="routerLinkActive"
+      [active]="rlaCategorias.isActive"
+    >
+      <mat-icon class="tab-icon">category</mat-icon>
+      Categorías
+    </a>
+
+    <a
+      mat-tab-link
+      routerLink="/inventario/unidades-medida"
+      routerLinkActive="mdc-tab-active"
+      #rlaUnidades="routerLinkActive"
+      [active]="rlaUnidades.isActive"
+    >
+      <mat-icon class="tab-icon">straighten</mat-icon>
+      Unidades de Medida
+    </a>
+  </nav>
+
+  <!-- Panel y outlet donde se renderizan los submódulos hijos -->
+  <mat-tab-nav-panel #tabPanel class="inventario-tab-panel">
+    <router-outlet></router-outlet>
+  </mat-tab-nav-panel>
+</div>

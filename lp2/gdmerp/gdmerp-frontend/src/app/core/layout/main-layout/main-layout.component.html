@@ -1,10 +1,14 @@
-<div
-  style="display: flex; height: 100vh; background-color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif;">
-  <app-sidebar></app-sidebar>
-  <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-    <app-header></app-header>
-    <main style="flex: 1; padding: 2rem; overflow-y: auto;">
+<mat-sidenav-container class="global-layout-container">
+  <!-- Sidebar lateral izquierdo fijo -->
+  <mat-sidenav mode="side" opened [disableClose]="true" class="global-sidenav">
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
+
+  <!-- Contenedor derecho de contenido -->
+  <mat-sidenav-content class="global-sidenav-content">
+    <!-- Contenedor del router-outlet con scroll independiente -->
+    <main class="page-content-scroll">
       <router-outlet></router-outlet>
     </main>
-  </div>
-</div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

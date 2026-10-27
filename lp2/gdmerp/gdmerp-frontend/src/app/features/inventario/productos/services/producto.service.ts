@@ -38,4 +38,11 @@ export class ProductoService {
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  sugerirSku(almacenId: number, nombreProducto: string): Observable<{ skuSugerido: string }> {
+    const params = new HttpParams()
+      .set('almacenId', almacenId.toString())
+      .set('nombreProducto', nombreProducto);
+    return this.http.get<{ skuSugerido: string }>(`${this.apiUrl}/sugerir-sku`, { params });
+  }
 }

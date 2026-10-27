@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,7 +11,7 @@ import { ProductoResponse } from '../models/producto.model';
 @Component({
   selector: 'app-lista-productos',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, DecimalPipe, RouterLink, FormsModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './lista-productos.component.html',
   styleUrls: ['./lista-productos.component.css'] // O .scss según tu configuración
 })
@@ -29,10 +29,11 @@ export class ListaProductosComponent implements OnInit {
     if (!termino) return this.productos();
 
     return this.productos().filter(p => 
-      p.nombre.toLowerCase().includes(termino) ||
-      p.sku.toLowerCase().includes(termino) ||
-      p.tipoProducto.toLowerCase().includes(termino) ||
-      p.categoria.nombre.toLowerCase().includes(termino)
+      (p.nombre && p.nombre.toLowerCase().includes(termino)) ||
+      (p.sku && p.sku.toLowerCase().includes(termino)) ||
+      (p.tipoProducto && p.tipoProducto.toLowerCase().includes(termino)) ||
+      (p.categoria?.nombre && p.categoria.nombre.toLowerCase().includes(termino)) ||
+      (p.almacen?.nombre && p.almacen.nombre.toLowerCase().includes(termino))
     );
   });
 
@@ -74,3 +75,6 @@ export class ListaProductosComponent implements OnInit {
     }
   }
 }
+
+export { ListaProductosComponent as ProductoListComponent };
+

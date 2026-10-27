@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormBuilder, FormArray, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -21,6 +21,7 @@ import { Producto } from '../../models/producto.model';
   standalone: true,
   imports: [
     CommonModule,
+    DecimalPipe,
     ReactiveFormsModule,
     RouterLink,
     MatAutocompleteModule,
@@ -53,7 +54,7 @@ export class EditarOrdenComponent implements OnInit {
 
   readonly form: FormGroup = this.fb.group({
     productoTerminadoId: [0],
-    cantidadPlanificada: [100, [Validators.required, Validators.min(1)]],
+    cantidadPlanificada: [100, [Validators.required, Validators.min(0.0001)]],
     estado: [EstadoOrdenProduccion.PLANIFICADO, [Validators.required]],
     centroTrabajoId: [0, [Validators.required, Validators.min(1)]],
     fechaPlanificadaInicio: ['', [Validators.required]],
@@ -179,7 +180,7 @@ export class EditarOrdenComponent implements OnInit {
     const detalleGroup = this.fb.group({
       materiaPrimaId: [materiaPrimaId, [Validators.required, Validators.min(1)]],
       materiaPrimaNombre: [materiaPrimaNombre],
-      cantidadRequerida: [cantidadRequerida, [Validators.required, Validators.min(1)]],
+      cantidadRequerida: [cantidadRequerida, [Validators.required, Validators.min(0.0001)]],
       costoUnitario: [costoUnitario]
     });
     this.detalles.push(detalleGroup);
@@ -187,6 +188,13 @@ export class EditarOrdenComponent implements OnInit {
 
   eliminarMateriaPrima(index: number): void {
     this.detalles.removeAt(index);
+  }
+
+  protected obtenerStepMateriaPrima(index: number): string {
+    const fila = this.detalles.at(index);
+    const mpId = Number(fila?.get('materiaPrimaId')?.value);
+    const mp = this.materiasPrimas().find(p => p.id === mpId);
+    return ['UND', 'CAJ', 'SAC'].includes(mp?.unidadMedida?.toUpperCase() || '') ? '1' : '0.001';
   }
 
   protected obtenerMateriasPrimasFiltradas(index: number): Producto[] {

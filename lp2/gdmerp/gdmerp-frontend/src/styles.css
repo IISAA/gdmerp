@@ -1,5 +1,35 @@
 /* You can add global styles to this file, and also import other style files */
 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #F4F6F8;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ========================================================================= */
+/* FIX SCROLL & NAVBAR OVERFLOW                                              */
+/* ========================================================================= */
+
+/* Contenedor principal sin scroll global */
+mat-sidenav-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Contenedor lateral flex: evita el scroll de la barra superior */
+mat-sidenav-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #F4F6F8;
+}
+
 /* Estilos de notificaciones de grado industrial (MatSnackBar) */
 .success-snackbar {
   --mat-snack-bar-button-color: #ffffff;

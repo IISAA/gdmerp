@@ -1,0 +1,28 @@
+.inventario-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inventario-tab-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0 1rem;
+}
+
+.tab-icon {
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.inventario-tab-panel {
+  flex: 1;
+  background-color: transparent;
+  padding-top: 1rem;
+}
