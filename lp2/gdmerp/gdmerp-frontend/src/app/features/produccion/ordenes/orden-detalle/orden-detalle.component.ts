@@ -63,6 +63,7 @@ export class OrdenDetalleComponent implements OnInit {
 
   readonly orden = signal<OrdenProduccionResponse | null>(null);
   readonly isLoading = signal<boolean>(true);
+  readonly cargandoPdf = signal<boolean>(false);
 
   // Catálogo de insumos disponibles (Materias Primas)
   readonly insumosDisponibles = signal<InsumoDisponible[]>([]);
@@ -327,10 +328,34 @@ export class OrdenDetalleComponent implements OnInit {
 
   imprimirOrden(): void {
     const ordenActual = this.orden();
-    if (!ordenActual) return;
+    if (!ordenActual || !ordenActual.id) return;
 
-    console.log(`[UI] Imprimir/Exportar reporte de orden #${ordenActual.id}`);
-    window.print();
+    if (this.cargandoPdf()) return;
+    this.cargandoPdf.set(true);
+
+    this.snackBar.open('Generando reporte PDF de auditoría...', '', {
+      duration: 2500
+    });
+
+    this.ordenService.obtenerReportePdf(ordenActual.id).subscribe({
+      next: (blob: Blob) => {
+        this.cargandoPdf.set(false);
+        const fileURL = URL.createObjectURL(blob);
+        window.open(fileURL, '_blank');
+
+        setTimeout(() => {
+          URL.revokeObjectURL(fileURL);
+        }, 60000);
+      },
+      error: (err) => {
+        this.cargandoPdf.set(false);
+        console.error('Error al generar el reporte PDF:', err);
+        this.snackBar.open('Error al generar el reporte PDF de la orden.', 'Cerrar', {
+          duration: 5000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
   }
 
   imprimirExportar(): void {

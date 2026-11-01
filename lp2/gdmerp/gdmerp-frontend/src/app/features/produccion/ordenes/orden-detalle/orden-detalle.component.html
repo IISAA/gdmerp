@@ -156,8 +156,9 @@
 
       @if(orden()?.estado === 'COMPLETADO' || orden()?.estado === 'CANCELADO') {
         <!-- La orden es inmutable. Solo mostrar opción de imprimir/exportar -->
-        <button mat-stroked-button (click)="imprimirOrden()">
-          <mat-icon>print</mat-icon> Imprimir Reporte
+        <button mat-stroked-button (click)="imprimirOrden()" [disabled]="cargandoPdf()">
+          <mat-icon>{{ cargandoPdf() ? 'hourglass_top' : 'picture_as_pdf' }}</mat-icon>
+          {{ cargandoPdf() ? 'Generando PDF...' : 'Imprimir Reporte (PDF)' }}
         </button>
       }
     </div>

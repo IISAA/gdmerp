@@ -48,3 +48,38 @@ mat-sidenav-content {
   color: #ffffff !important;
   font-weight: 500;
 }
+
+/* ========================================================================= */
+/* ESTILOS DE RESPALDO PARA IMPRESIÓN (FALLBACK CTRL + P)                    */
+/* ========================================================================= */
+@media print {
+  mat-sidenav,
+  mat-toolbar,
+  .sidebar,
+  .topbar,
+  .navbar,
+  .app-header,
+  .app-sidebar,
+  button,
+  .mat-mdc-button-base,
+  .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body,
+  mat-sidenav-container,
+  mat-sidenav-content,
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  table, mat-card, tr {
+    page-break-inside: avoid !important;
+  }
+}

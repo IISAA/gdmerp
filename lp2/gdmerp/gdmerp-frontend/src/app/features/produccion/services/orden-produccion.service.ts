@@ -84,4 +84,13 @@ export class OrdenProduccionService {
       tap(() => this.listar())
     );
   }
+
+  /**
+   * Obtiene el reporte oficial de auditoría de la orden en formato binario PDF.
+   */
+  obtenerReportePdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/reporte-pdf`, {
+      responseType: 'blob'
+    });
+  }
 }

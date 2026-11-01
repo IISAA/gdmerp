@@ -8,11 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionUpdateRequest;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.EstadoOrdenProduccion;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.service.OrdenProduccionService;
+import pe.edu.upeu.gdmerp.produccion.ordenproduccion.service.ReportePdfService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import java.util.List;
 
 @Tag(name = "Órdenes de Producción")
@@ -21,6 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrdenProduccionController {
     private final OrdenProduccionService ordenProduccionService;
+    private final OrdenProduccionRepository ordenRepository;
+    private final ReportePdfService reportePdfService;
 
     @Operation(summary = "Lista todas las órdenes de producción")
     @GetMapping
@@ -75,5 +83,23 @@ public class OrdenProduccionController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         ordenProduccionService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Genera el reporte oficial en PDF de la orden de producción")
+    @GetMapping(value = "/{id}/reporte-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> obtenerReportePdf(@PathVariable Long id) {
+        OrdenProduccion orden = ordenRepository.findByIdWithRelaciones(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Orden de producción no encontrada con ID: " + id));
+
+        byte[] pdfBytes = reportePdfService.generarReporteOrdenProduccion(orden);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Orden_" + id + ".pdf");
+        headers.setContentLength(pdfBytes.length);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
     }
 }
