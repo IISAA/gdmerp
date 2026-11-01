@@ -11,7 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { HasRoleDirective } from '../../../../core/directives/has-role.directive';
+import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { OrdenProduccionService } from '../../services/orden-produccion.service';
 import { EstadoOrdenProduccion } from '../../models/produccion.models';
 
@@ -85,8 +85,9 @@ export class OrdenListComponent implements OnInit {
     'id',
     'producto',
     'cantidadPlanificada',
+    'horasTrabajadas',
     'estado',
-    'totalCostoInsumos'
+    'costoTotal'
   ];
 
   // 6. Métricas reactivas (Dashboard KPIs)

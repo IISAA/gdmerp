@@ -13,8 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { OrdenProduccionService } from '../../services/orden-produccion.service';
 import { EstadoOrdenProduccion, OrdenProduccionUpdateRequest } from '../../models/produccion.models';
-import { ProductoService } from '../../services/producto.service';
-import { Producto } from '../../models/producto.model';
+import { ProductoService } from '../../../inventario/productos/services/producto.service';
+import { Producto } from '../../../inventario/productos/models/producto.model';
 
 @Component({
   selector: 'app-editar-orden',
@@ -51,10 +51,13 @@ export class EditarOrdenComponent implements OnInit {
   errorMessage = '';
 
   protected readonly materiasPrimas = signal<Producto[]>([]);
+  protected readonly costoOperativo = signal<number>(0);
+  protected readonly costoTotal = signal<number>(0);
 
   readonly form: FormGroup = this.fb.group({
     productoTerminadoId: [0],
     cantidadPlanificada: [100, [Validators.required, Validators.min(0.0001)]],
+    horasTrabajadas: [0, [Validators.min(0)]],
     estado: [EstadoOrdenProduccion.PLANIFICADO, [Validators.required]],
     centroTrabajoId: [0, [Validators.required, Validators.min(1)]],
     fechaPlanificadaInicio: ['', [Validators.required]],
@@ -127,11 +130,14 @@ export class EditarOrdenComponent implements OnInit {
         this.form.patchValue({
           productoTerminadoId: orden.productoTerminadoId,
           cantidadPlanificada: orden.cantidadPlanificada,
+          horasTrabajadas: orden.horasTrabajadas ?? 0,
           estado: orden.estado,
           centroTrabajoId: orden.centroTrabajo ? orden.centroTrabajo.id : 0,
           fechaPlanificadaInicio: orden.fechaPlanificadaInicio ? orden.fechaPlanificadaInicio.split('T')[0] : '',
           fechaEstimadaFin: orden.fechaEstimadaFin ? orden.fechaEstimadaFin.split('T')[0] : ''
         });
+        this.costoOperativo.set(orden.costoOperativo ?? 0);
+        this.costoTotal.set(orden.costoTotal ?? 0);
 
         // 2. Reconstruimos los insumos en el FormArray
         this.detalles.clear();
@@ -272,6 +278,7 @@ export class EditarOrdenComponent implements OnInit {
     // Construimos el DTO exacto para el PUT
     const request: OrdenProduccionUpdateRequest = {
       cantidadPlanificada: Number(raw.cantidadPlanificada),
+      horasTrabajadas: raw.horasTrabajadas != null ? Number(raw.horasTrabajadas) : 0,
       estado: raw.estado as EstadoOrdenProduccion,
       centroTrabajoId: Number(raw.centroTrabajoId),
       fechaPlanificadaInicio: this.formatFecha(raw.fechaPlanificadaInicio),

@@ -9,8 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { CentroTrabajoService } from '../../services/centro-trabajo.service';
-import { CentroTrabajo, CentroTrabajoRequest } from '../../models/centro-trabajo.model';
+import { CentroTrabajoService } from '../services/centro-trabajo.service';
+import { CentroTrabajo, CentroTrabajoRequest } from '../models/centro-trabajo.model';
 
 @Component({
   selector: 'app-centro-trabajo-list',
@@ -69,9 +69,9 @@ export class CentroTrabajoListComponent implements OnInit {
   // Formulario Reactivo dentro del Sidenav
   readonly form: FormGroup = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(80)]],
-    codigo: ['', [Validators.maxLength(20)]],
+    codigo: ['', [Validators.required, Validators.maxLength(20)]],
     capacidad: [1, [Validators.required, Validators.min(0)]],
-    costoHora: [null, [Validators.min(0)]]
+    costoHora: [null, [Validators.required, Validators.min(0)]]
   });
 
   ngOnInit(): void {

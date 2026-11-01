@@ -187,6 +187,14 @@
               </td>
             </ng-container>
 
+            <!-- Columna Horas Trabajadas -->
+            <ng-container matColumnDef="horasTrabajadas">
+              <th mat-header-cell *matHeaderCellDef class="th-horas col-mobile-hide">HORAS</th>
+              <td mat-cell *matCellDef="let orden" class="col-mobile-hide">
+                <span>{{ (orden.horasTrabajadas ?? 0) | number:'1.0-2' }}</span> hrs
+              </td>
+            </ng-container>
+
             <!-- Columna Estado -->
             <ng-container matColumnDef="estado">
               <th mat-header-cell *matHeaderCellDef class="th-estado">ESTADO</th>
@@ -201,11 +209,11 @@
               </td>
             </ng-container>
 
-            <!-- Columna Costo Insumos -->
-            <ng-container matColumnDef="totalCostoInsumos">
-              <th mat-header-cell *matHeaderCellDef class="th-costo">COSTO</th>
+            <!-- Columna Costo Total -->
+            <ng-container matColumnDef="costoTotal">
+              <th mat-header-cell *matHeaderCellDef class="th-costo">COSTO TOTAL</th>
               <td mat-cell *matCellDef="let orden" class="col-costo">
-                {{ orden.totalCostoInsumos | currency:'PEN':'S/ ':'1.2-2' }}
+                {{ (orden.costoTotal ?? orden.totalCostoInsumos ?? 0) | currency:'PEN':'S/ ':'1.2-2' }}
               </td>
             </ng-container>
 

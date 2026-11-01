@@ -9,7 +9,7 @@ import { ProduccionLayoutComponent } from './features/produccion/produccion-layo
 import { OrdenListComponent } from './features/produccion/ordenes/orden-list/orden-list.component';
 import { OrdenesListaComponent } from './features/produccion/ordenes/ordenes-lista/ordenes-lista.component';
 import { OrdenDetalleComponent } from './features/produccion/ordenes/orden-detalle/orden-detalle.component';
-import { CentroTrabajoListComponent } from './features/produccion/centros-trabajo/centro-trabajo-list/centro-trabajo-list.component';
+import { CentroTrabajoListComponent } from './features/produccion/centro-trabajo/centro-trabajo-list/centro-trabajo-list.component';
 import { ListaMaterialesListComponent } from './features/produccion/lista-materiales/lista-materiales-list/lista-materiales-list.component';
 import { ListaMaterialesFormComponent } from './features/produccion/lista-materiales/lista-materiales-form/lista-materiales-form.component';
 

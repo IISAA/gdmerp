@@ -17,10 +17,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { OrdenProduccionService } from '../../services/orden-produccion.service';
 import { EstadoOrdenProduccion, OrdenProduccionRequest } from '../../models/produccion.models';
 
-import { ProductoService } from '../../services/producto.service';
-import { Producto } from '../../models/producto.model';
-import { CentroTrabajoService } from '../../services/centro-trabajo.service';
-import { CentroTrabajo } from '../../models/centro-trabajo.model';
+import { ProductoService } from '../../../inventario/productos/services/producto.service';
+import { Producto } from '../../../inventario/productos/models/producto.model';
+import { CentroTrabajoService } from '../../centro-trabajo/services/centro-trabajo.service';
+import { CentroTrabajo } from '../../centro-trabajo/models/centro-trabajo.model';
 import { ListaMaterialesService } from '../../services/lista-materiales.service';
 import { ListaMaterialesResponse } from '../../models/lista-materiales.model';
 
@@ -95,6 +95,7 @@ export class CrearOrdenComponent implements OnInit {
     productoTerminadoId: [0, [Validators.required, Validators.min(1)]],
     listaMaterialesId: [null], // Selector opcional de receta sugerida
     cantidadPlanificada: [100, [Validators.required, Validators.min(0.0001)]],
+    horasTrabajadas: [0, [Validators.min(0)]],
     estado: [EstadoOrdenProduccion.PLANIFICADO, [Validators.required]],
     centroTrabajoId: [0, [Validators.required, Validators.min(1)]],
     fechaPlanificadaInicio: [this.getTodayDateString(), [Validators.required]],
@@ -381,6 +382,7 @@ export class CrearOrdenComponent implements OnInit {
     const request: OrdenProduccionRequest = {
       productoTerminadoId: Number(raw.productoTerminadoId),
       cantidadPlanificada: Number(raw.cantidadPlanificada),
+      horasTrabajadas: raw.horasTrabajadas != null ? Number(raw.horasTrabajadas) : 0,
       estado: raw.estado as EstadoOrdenProduccion,
       centroTrabajoId: Number(raw.centroTrabajoId),
       fechaPlanificadaInicio: this.formatFecha(raw.fechaPlanificadaInicio),

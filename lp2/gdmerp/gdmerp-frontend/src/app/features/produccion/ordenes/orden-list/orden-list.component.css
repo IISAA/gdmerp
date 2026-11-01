@@ -298,8 +298,9 @@
 .th-id { width: 80px; }
 .th-producto { min-width: 220px; }
 .th-cantidad { width: 130px; }
+.th-horas { width: 110px; }
 .th-estado { width: 140px; }
-.th-costo { width: 130px; text-align: right !important; }
+.th-costo { width: 140px; text-align: right !important; }
 
 .tabla-ordenes td.mat-cell {
   padding: 0.875rem 1rem;
@@ -379,4 +380,10 @@
   margin: 0;
   font-size: 0.85rem;
   color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .col-mobile-hide {
+    display: none !important;
+  }
 }

@@ -5,7 +5,7 @@ import {
   TemplateRef,
   ViewContainerRef
 } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 /**
  * Directiva estructural para mostrar u ocultar elementos del DOM en función

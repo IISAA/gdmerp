@@ -17,6 +17,7 @@ export interface OrdenProduccionRequest {
   centroTrabajoId: number;
   fechaPlanificadaInicio: string;
   fechaEstimadaFin: string;
+  horasTrabajadas?: number;
   detalles: DetalleOrdenRequest[];
 }
 
@@ -26,6 +27,7 @@ export interface OrdenProduccionUpdateRequest {
   centroTrabajoId: number;
   fechaPlanificadaInicio: string;
   fechaEstimadaFin: string;
+  horasTrabajadas?: number;
   detalles: DetalleOrdenRequest[];
 }
 
@@ -49,6 +51,9 @@ export interface OrdenProduccionResponse {
   loteGenerado?: string | null;
   transferidoAlmacen?: boolean;
   totalCostoInsumos: number;
+  horasTrabajadas?: number;
+  costoOperativo?: number;
+  costoTotal?: number;
   centroTrabajo: {
     id: number;
     nombre: string;

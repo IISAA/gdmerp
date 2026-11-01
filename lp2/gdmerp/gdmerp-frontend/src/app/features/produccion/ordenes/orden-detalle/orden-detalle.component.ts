@@ -16,9 +16,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { OrdenProduccionService } from '../../services/orden-produccion.service';
-import { ProductoService } from '../../services/producto.service';
+import { ProductoService } from '../../../inventario/productos/services/producto.service';
 import { OrdenProduccionResponse, EstadoOrdenProduccion } from '../../models/produccion.models';
-import { HasRoleDirective } from '../../../../core/directives/has-role.directive';
+import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 
 export interface InsumoDisponible {
   id: number;

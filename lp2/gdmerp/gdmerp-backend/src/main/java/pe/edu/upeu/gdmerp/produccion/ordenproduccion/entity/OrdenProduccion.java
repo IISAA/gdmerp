@@ -45,6 +45,15 @@ public class OrdenProduccion {
     @Column(name = "LOTE_GENERADO", length = 50)
     private String loteGenerado;
 
+    @Column(name = "HORAS_TRABAJADAS", precision = 10, scale = 2)
+    private BigDecimal horasTrabajadas;
+
+    @Column(name = "COSTO_OPERATIVO", precision = 12, scale = 2)
+    private BigDecimal costoOperativo;
+
+    @Column(name = "COSTO_TOTAL", precision = 12, scale = 2)
+    private BigDecimal costoTotal;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CENTRO_TRABAJO_ID", nullable = false)
     private CentroTrabajo centroTrabajo;
@@ -113,5 +122,29 @@ public class OrdenProduccion {
                     BigDecimal b = (subtotal != null) ? subtotal : BigDecimal.ZERO;
                     return a.add(b);
                 });
+    }
+
+    public BigDecimal getHorasTrabajadas() {
+        return horasTrabajadas;
+    }
+
+    public void setHorasTrabajadas(BigDecimal horasTrabajadas) {
+        this.horasTrabajadas = horasTrabajadas;
+    }
+
+    public BigDecimal getCostoOperativo() {
+        return costoOperativo;
+    }
+
+    public void setCostoOperativo(BigDecimal costoOperativo) {
+        this.costoOperativo = costoOperativo;
+    }
+
+    public BigDecimal getCostoTotal() {
+        return costoTotal;
+    }
+
+    public void setCostoTotal(BigDecimal costoTotal) {
+        this.costoTotal = costoTotal;
     }
 }

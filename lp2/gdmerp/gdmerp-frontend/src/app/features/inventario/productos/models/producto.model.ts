@@ -26,6 +26,8 @@ export interface ProductoResponse {
   tipoProducto: TipoProducto | string;
 }
 
+export type Producto = ProductoResponse;
+
 export interface ProductoRequest {
   sku: string;
   nombre: string;

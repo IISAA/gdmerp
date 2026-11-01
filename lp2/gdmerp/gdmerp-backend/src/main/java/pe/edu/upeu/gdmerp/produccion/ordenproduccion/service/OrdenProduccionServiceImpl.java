@@ -84,6 +84,18 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
         ProductoResponse pt = productoService.buscarPorId(request.productoTerminadoId());
         op.setProducto(pt.nombre());
 
+        // Cálculo de horas trabajadas y costos operativos / total
+        BigDecimal horas = request.horasTrabajadas() != null
+                ? request.horasTrabajadas().setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal costoHora = (centro != null && centro.getCostoHora() != null)
+                ? centro.getCostoHora()
+                : BigDecimal.ZERO;
+        BigDecimal costoOperativo = horas.multiply(costoHora).setScale(2, RoundingMode.HALF_UP);
+        op.setHorasTrabajadas(horas);
+        op.setCostoOperativo(costoOperativo);
+        op.setCostoTotal(costoOperativo);
+
         // 1. DESCUENTO DE MATERIAS PRIMAS (FEFO) Y OBTENCIÓN DE DATOS
         if (request.detalles() != null && !request.detalles().isEmpty()) {
             request.detalles().forEach(detalleReq -> {
@@ -160,6 +172,18 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
         CentroTrabajo centro = centroTrabajoRepository.findById(request.centroTrabajoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Centro de trabajo no encontrado"));
         orden.setCentroTrabajo(centro);
+
+        // Actualizar horas trabajadas y recalcular costos operativos y costo total
+        BigDecimal horas = request.horasTrabajadas() != null
+                ? request.horasTrabajadas().setScale(2, RoundingMode.HALF_UP)
+                : (orden.getHorasTrabajadas() != null ? orden.getHorasTrabajadas() : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        BigDecimal costoHora = (centro != null && centro.getCostoHora() != null)
+                ? centro.getCostoHora()
+                : BigDecimal.ZERO;
+        BigDecimal costoOperativo = horas.multiply(costoHora).setScale(2, RoundingMode.HALF_UP);
+        orden.setHorasTrabajadas(horas);
+        orden.setCostoOperativo(costoOperativo);
+        orden.setCostoTotal(costoOperativo);
 
         // REGLA DE NEGOCIO: Transición a EN_PROCESO -> Valida y descuenta según Lista de Materiales (BOM)
         if (estadoAnterior == EstadoOrdenProduccion.PLANIFICADO && estadoNuevo == EstadoOrdenProduccion.EN_PROCESO) {

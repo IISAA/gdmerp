@@ -37,6 +37,10 @@ public record OrdenProduccionRequest(
     @JsonAlias({"centro_trabajo_id"})
     Long centroTrabajoId,
 
+    @JsonProperty("horasTrabajadas")
+    @JsonAlias({"horas_trabajadas", "horas"})
+    BigDecimal horasTrabajadas,
+
     @NotEmpty(message = "Debe incluir al menos un insumo en el detalle")
     @Valid
     List<DetalleOrdenRequest> detalles
@@ -47,6 +51,27 @@ public record OrdenProduccionRequest(
 
     public BigDecimal cantidad() {
         return cantidadPlanificada;
+    }
+
+    public OrdenProduccionRequest(
+        Long productoTerminadoId,
+        BigDecimal cantidadPlanificada,
+        EstadoOrdenProduccion estado,
+        LocalDateTime fechaPlanificadaInicio,
+        LocalDateTime fechaEstimadaFin,
+        Long centroTrabajoId,
+        List<DetalleOrdenRequest> detalles
+    ) {
+        this(
+            productoTerminadoId,
+            cantidadPlanificada,
+            estado,
+            fechaPlanificadaInicio,
+            fechaEstimadaFin,
+            centroTrabajoId,
+            BigDecimal.ZERO,
+            detalles
+        );
     }
 
     public OrdenProduccionRequest(
@@ -65,6 +90,29 @@ public record OrdenProduccionRequest(
             fechaPlanificadaInicio,
             fechaEstimadaFin,
             centroTrabajoId,
+            BigDecimal.ZERO,
+            detalles
+        );
+    }
+
+    public OrdenProduccionRequest(
+        Long productoTerminadoId,
+        Integer cantidadPlanificada,
+        EstadoOrdenProduccion estado,
+        LocalDateTime fechaPlanificadaInicio,
+        LocalDateTime fechaEstimadaFin,
+        Long centroTrabajoId,
+        BigDecimal horasTrabajadas,
+        List<DetalleOrdenRequest> detalles
+    ) {
+        this(
+            productoTerminadoId,
+            cantidadPlanificada != null ? BigDecimal.valueOf(cantidadPlanificada) : null,
+            estado,
+            fechaPlanificadaInicio,
+            fechaEstimadaFin,
+            centroTrabajoId,
+            horasTrabajadas != null ? horasTrabajadas : BigDecimal.ZERO,
             detalles
         );
     }

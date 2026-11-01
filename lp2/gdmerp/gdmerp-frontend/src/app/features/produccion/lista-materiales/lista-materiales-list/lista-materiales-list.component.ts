@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { HasRoleDirective } from '../../../../core/directives/has-role.directive';
+import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { ListaMaterialesService } from '../../services/lista-materiales.service';
 import { ListaMaterialesResponse } from '../../models/lista-materiales.model';
 

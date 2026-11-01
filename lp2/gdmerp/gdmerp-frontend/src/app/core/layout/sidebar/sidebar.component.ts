@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HasRoleDirective } from '../../directives/has-role.directive';
+import { HasRoleDirective } from '../../../shared/directives/has-role.directive';
 import { AuthService } from '../../services/auth.service';
 
 @Component({

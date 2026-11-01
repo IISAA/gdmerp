@@ -16,6 +16,9 @@ public record OrdenProduccionResponse(
     LocalDateTime fechaEstimadaFin,
     String loteGenerado,
     BigDecimal totalCostoInsumos,
+    BigDecimal horasTrabajadas,
+    BigDecimal costoOperativo,
+    BigDecimal costoTotal,
     CentroTrabajoResponse centroTrabajo,
     List<DetalleOrdenResponse> detalles
 ) {
@@ -25,5 +28,36 @@ public record OrdenProduccionResponse(
 
     public BigDecimal cantidad() {
         return cantidadPlanificada;
+    }
+
+    public OrdenProduccionResponse(
+        Long id,
+        Long productoTerminadoId,
+        String producto,
+        BigDecimal cantidadPlanificada,
+        EstadoOrdenProduccion estado,
+        LocalDateTime fechaPlanificadaInicio,
+        LocalDateTime fechaEstimadaFin,
+        String loteGenerado,
+        BigDecimal totalCostoInsumos,
+        CentroTrabajoResponse centroTrabajo,
+        List<DetalleOrdenResponse> detalles
+    ) {
+        this(
+            id,
+            productoTerminadoId,
+            producto,
+            cantidadPlanificada,
+            estado,
+            fechaPlanificadaInicio,
+            fechaEstimadaFin,
+            loteGenerado,
+            totalCostoInsumos,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            centroTrabajo,
+            detalles
+        );
     }
 }

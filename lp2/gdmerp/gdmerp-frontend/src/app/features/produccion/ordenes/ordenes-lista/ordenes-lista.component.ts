@@ -8,7 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
-import { HasRoleDirective } from '../../../../core/directives/has-role.directive';
+import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 import { OrdenProduccionService } from '../../services/orden-produccion.service';
 import { EstadoOrdenProduccion } from '../../models/produccion.models';
 

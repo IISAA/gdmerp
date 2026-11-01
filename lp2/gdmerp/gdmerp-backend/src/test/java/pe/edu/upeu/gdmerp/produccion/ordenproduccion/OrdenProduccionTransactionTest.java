@@ -68,6 +68,7 @@ class OrdenProduccionTransactionTest {
         centro = new CentroTrabajo();
         centro.setNombre("CT-" + sufijo);
         centro.setCapacidad(BigDecimal.valueOf(10));
+        centro.setCostoHora(new BigDecimal("25.00"));
         centro = centroRepository.save(centro);
 
         int cantidadInsumo = 6;
@@ -116,6 +117,7 @@ class OrdenProduccionTransactionTest {
         centro = new CentroTrabajo();
         centro.setNombre("CT-RB-" + sufijo);
         centro.setCapacidad(BigDecimal.valueOf(10));
+        centro.setCostoHora(new BigDecimal("25.00"));
         centro = centroRepository.save(centro);
 
         Producto insumoAntes = productoRepository.findById(insumo.getId()).orElseThrow();

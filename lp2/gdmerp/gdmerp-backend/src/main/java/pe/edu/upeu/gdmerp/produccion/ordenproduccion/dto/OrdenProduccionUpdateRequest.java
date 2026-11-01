@@ -1,5 +1,7 @@
 package pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +26,10 @@ public record OrdenProduccionUpdateRequest(
     @NotNull(message = "La fecha estimada de fin es obligatoria")
     LocalDateTime fechaEstimadaFin,
 
+    @JsonProperty("horasTrabajadas")
+    @JsonAlias({"horas_trabajadas", "horas"})
+    BigDecimal horasTrabajadas,
+
     @Valid
     List<DetalleOrdenRequest> detalles
 ) {
@@ -40,6 +46,7 @@ public record OrdenProduccionUpdateRequest(
             centroTrabajoId,
             fechaPlanificadaInicio,
             fechaEstimadaFin,
+            null,
             detalles
         );
     }
@@ -57,6 +64,25 @@ public record OrdenProduccionUpdateRequest(
             centroTrabajoId,
             fechaPlanificadaInicio,
             fechaEstimadaFin,
+            null,
+            detalles
+        );
+    }
+
+    public OrdenProduccionUpdateRequest(
+            BigDecimal cantidadPlanificada,
+            String estado,
+            Long centroTrabajoId,
+            LocalDateTime fechaPlanificadaInicio,
+            LocalDateTime fechaEstimadaFin,
+            List<DetalleOrdenRequest> detalles) {
+        this(
+            cantidadPlanificada,
+            estado,
+            centroTrabajoId,
+            fechaPlanificadaInicio,
+            fechaEstimadaFin,
+            null,
             detalles
         );
     }
