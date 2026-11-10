@@ -170,6 +170,18 @@ public class SecurityConfig {
                         // Reglas de negocio: Compras
                         .requestMatchers("/api/v1/compras/**").hasAnyRole("ADMIN", "SUPERVISOR")
 
+                        // Reglas de negocio: Catalogo
+                        .requestMatchers(HttpMethod.GET, "/api/v1/catalogo/**").hasAnyRole("ADMIN", "ALMACENERO", "JEFE_PRODUCCION", "OPERARIO", "VENDEDOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/catalogo/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/catalogo/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/catalogo/**").hasRole("ADMIN")
+
+                        // Reglas de negocio: Terceros (CRM)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/terceros/**").hasAnyRole("ADMIN", "VENDEDOR", "SUPERVISOR", "ALMACENERO")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/terceros/**").hasAnyRole("ADMIN", "VENDEDOR", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/terceros/**").hasAnyRole("ADMIN", "VENDEDOR", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/terceros/**").hasAnyRole("ADMIN", "SUPERVISOR")
+
                         // Todo lo demás requiere estar autenticado
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
