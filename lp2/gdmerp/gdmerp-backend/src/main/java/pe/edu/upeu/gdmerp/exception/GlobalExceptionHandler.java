@@ -51,6 +51,12 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
+    // Regla de Negocio: Solvencia / saldo insuficiente en caja chica o rendiciones (RN-FIN-01).
+    @ExceptionHandler(SolvenciaInsuficienteException.class)
+    public ResponseEntity<Map<String, Object>> handleSolvenciaInsuficiente(SolvenciaInsuficienteException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     // Regla de Negocio: Stock Físico insuficiente para consumos de recetas / órdenes.
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<Map<String, Object>> handleInsufficientStock(InsufficientStockException ex) {

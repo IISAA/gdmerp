@@ -159,6 +159,14 @@ public class SecurityConfig {
                                 "/api/v1/ordenes-produccion/*/completar")
                         .hasAnyRole("ADMIN", "JEFE_PRODUCCION", "OPERARIO")
 
+                        // Reglas de negocio: Finanzas
+                        .requestMatchers("/api/v1/finanzas/sesiones", "/api/v1/finanzas/sesiones/**", "/api/v1/finanzas/denominaciones").hasAnyRole("ADMIN", "ADMIN_FINANZAS", "SUPERVISOR", "CAJERO", "VENDEDOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/finanzas/**", "/api/v1/cajas-chicas/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/finanzas/**", "/api/v1/cajas-chicas/**").hasAnyRole("ADMIN", "ADMIN_FINANZAS", "SUPERVISOR", "CAJERO")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/finanzas/**", "/api/v1/cajas-chicas/**").hasAnyRole("ADMIN", "ADMIN_FINANZAS", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/finanzas/**", "/api/v1/cajas-chicas/**").hasAnyRole("ADMIN", "ADMIN_FINANZAS", "SUPERVISOR", "CAJERO")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/finanzas/**", "/api/v1/cajas-chicas/**").hasAnyRole("ADMIN", "ADMIN_FINANZAS")
+
                         // Todo lo demás requiere estar autenticado
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
