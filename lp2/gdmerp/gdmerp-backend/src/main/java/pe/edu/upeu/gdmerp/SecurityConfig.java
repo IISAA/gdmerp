@@ -33,13 +33,30 @@ public class SecurityConfig {
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            java.util.Set<String> rolesCrudos = new java.util.LinkedHashSet<>();
+
             Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
-            Object roles = realmAccess == null ? null : realmAccess.get("roles");
-            if (!(roles instanceof Collection<?> lista)) {
-                return List.<GrantedAuthority>of();
+            if (realmAccess != null && realmAccess.get("roles") instanceof Collection<?> listaRealm) {
+                listaRealm.stream().filter(java.util.Objects::nonNull).map(Object::toString).forEach(rolesCrudos::add);
             }
-            return lista.stream()
-                    .map(rol -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + rol))
+
+            Map<String, Object> resourceAccess = jwt.getClaimAsMap("resource_access");
+            if (resourceAccess != null) {
+                for (Object clienteObj : resourceAccess.values()) {
+                    if (clienteObj instanceof Map<?, ?> clienteMap && clienteMap.get("roles") instanceof Collection<?> listaCliente) {
+                        listaCliente.stream().filter(java.util.Objects::nonNull).map(Object::toString).forEach(rolesCrudos::add);
+                    }
+                }
+            }
+
+            return rolesCrudos.stream()
+                    .map(rol -> {
+                        String normalizado = rol.trim().toUpperCase();
+                        if (normalizado.startsWith("ROLE_")) {
+                            return (GrantedAuthority) new SimpleGrantedAuthority(normalizado);
+                        }
+                        return (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + normalizado);
+                    })
                     .toList();
         });
         return converter;
@@ -73,8 +90,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints Públicos
                         .requestMatchers("/actuator/**", "/swagger-ui.html", "/swagger-ui/**",
-                                "/v3/api-docs/**")
+                                "/v3/api-docs/**", "/api/v1/personas/**")
                         .permitAll()
+
+                        // Reglas de negocio: Ventas y Delivery
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/ventas", "/api/v1/ventas/**").denyAll()
+                        .requestMatchers("/api/v1/ventas/auditoria", "/api/v1/ventas/reporte-omnicanal").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers("/api/v1/ventas/delivery/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/ventas").hasAnyRole("ADMIN", "VENDEDOR", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ventas/resumen").hasAnyRole("ADMIN", "VENDEDOR", "SUPERVISOR")
+                        .requestMatchers("/api/v1/ventas/*/solicitar-anulacion").hasAnyRole("ADMIN", "VENDEDOR", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/ventas/*/anular", "/api/v1/ventas/*/rechazar-anulacion").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/ventas/*/anular", "/api/v1/ventas/*/rechazar-anulacion").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/ventas/*/rechazar-anulacion").hasAnyRole("ADMIN", "SUPERVISOR")
+                        .requestMatchers("/api/v1/ventas/**").hasAnyRole("ADMIN", "VENDEDOR", "SUPERVISOR")
 
                         // Reglas de negocio: Inventario
                         .requestMatchers(HttpMethod.GET, "/api/v1/almacenes/**",
