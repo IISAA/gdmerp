@@ -2,6 +2,9 @@ package pe.edu.upeu.gdmerp.inventario.unidadmedida.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
@@ -36,6 +39,7 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
      */
     @Override
     @Transactional
+    @Cacheable(value = "unidadesMedida", key = "#soloActivos != null ? #soloActivos : 'all'")
     public List<UnidadMedidaResponse> listar(Boolean soloActivos) {
         long total = unidadMedidaRepository.count();
         if (total < CatalogoEstandarUnidades.UMBRAL_MINIMO) {
@@ -67,7 +71,8 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
     @Transactional(readOnly = true)
     public UnidadMedidaResponse obtenerPorCodigo(String codigo) {
         UnidadMedida unidad = unidadMedidaRepository.findByCodigoIgnoreCase(codigo)
-                .orElseThrow(() -> new ResourceNotFoundException("Unidad de medida no encontrada con código: " + codigo));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Unidad de medida no encontrada con código: " + codigo));
         return unidadMedidaMapper.toResponse(unidad);
     }
 
@@ -75,17 +80,20 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "unidadesMedida", allEntries = true)
     public UnidadMedidaResponse crear(UnidadMedidaRequest request) {
         String codigoNormalizado = request.codigo().trim().toUpperCase();
 
         if (unidadMedidaRepository.existsByCodigoIgnoreCase(codigoNormalizado)) {
-            throw new IllegalArgumentException("Ya existe una unidad de medida registrada con el código: " + codigoNormalizado);
+            throw new IllegalArgumentException(
+                    "Ya existe una unidad de medida registrada con el código: " + codigoNormalizado);
         }
 
         UnidadMedida entidad = unidadMedidaMapper.toEntity(request);
         entidad.setCodigo(codigoNormalizado);
 
-        // Si permiteDecimales no viene explícito, asignar por convención según la categoría
+        // Si permiteDecimales no viene explícito, asignar por convención según la
+        // categoría
         if (request.permiteDecimales() == null) {
             entidad.setPermiteDecimales(request.categoria() != CategoriaUnidadMedida.UNIDAD_EMPAQUE);
         }
@@ -100,6 +108,7 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "unidadesMedida", allEntries = true)
     public UnidadMedidaResponse actualizar(Long id, UnidadMedidaRequest request) {
         UnidadMedida entidad = unidadMedidaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Unidad de medida no encontrada con ID: " + id));
@@ -127,6 +136,7 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "unidadesMedida", allEntries = true)
     public void cambiarEstado(Long id, boolean activo) {
         UnidadMedida entidad = unidadMedidaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Unidad de medida no encontrada con ID: " + id));
@@ -139,12 +149,12 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
     // ─── Sincronización Idempotente ───────────────────────────────────────────
 
     /**
-     * Itera el catálogo canónico ({@link CatalogoEstandarUnidades#getCatalogo()}) e
-     * inserta sólo las unidades cuyo código aún no existe en la tabla.
-     * Operación idempotente: segura de ejecutar N veces sin duplicados.
+     * Itera el catálogo canónico e inserta sólo las unidades cuyo código aún no
+     * existe.
      */
     @Override
     @Transactional
+    @CacheEvict(value = "unidadesMedida", allEntries = true)
     public SincronizacionEstandaresResponse sincronizarEstandares() {
         List<UnidadSeed> catalogo = CatalogoEstandarUnidades.getCatalogo();
         List<String> codigosNuevos = new ArrayList<>();
@@ -175,7 +185,8 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
         int insertadas = codigosNuevos.size();
         String mensaje = insertadas == 0
                 ? "Catálogo ya estaba completo. Ninguna unidad nueva insertada."
-                : String.format("Sincronización completada: %d unidades insertadas, %d ya existían.", insertadas, omitidas);
+                : String.format("Sincronización completada: %d unidades insertadas, %d ya existían.", insertadas,
+                        omitidas);
 
         log.info("Sincronización estándares: insertadas={}, omitidas={}", insertadas, omitidas);
         return new SincronizacionEstandaresResponse(insertadas, omitidas, codigosNuevos, mensaje);

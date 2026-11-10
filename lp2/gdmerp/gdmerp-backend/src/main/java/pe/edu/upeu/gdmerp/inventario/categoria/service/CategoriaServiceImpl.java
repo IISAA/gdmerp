@@ -11,6 +11,9 @@ import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.mapper.CategoriaMapper;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
@@ -24,6 +27,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @Cacheable(value = "categorias")
     public List<CategoriaResponse> listar() {
         return categoriaRepository.findAll().stream().map(categoriaMapper::toResponse).toList();
     }
@@ -38,6 +42,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    @CacheEvict(value = "categorias", allEntries = true)
     public CategoriaResponse crear(CategoriaRequest request) {
         validarNombreUnico(request.nombre(), null);
         return categoriaMapper.toResponse(categoriaRepository.save(categoriaMapper.toEntity(request)));
@@ -46,6 +51,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    @CacheEvict(value = "categorias", allEntries = true)
     public CategoriaResponse actualizar(Long id, CategoriaRequest request) {
         Categoria categoria = getCategoriaEntity(id);
         validarNombreUnico(request.nombre(), id);
@@ -56,10 +62,12 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    @CacheEvict(value = "categorias", allEntries = true)
     public void eliminar(Long id) {
         Categoria categoria = getCategoriaEntity(id);
         if (productoRepository.existsByCategoriaId(id)) {
-            throw new IllegalStateException("No se puede eliminar la categoría con id " + id + " porque tiene productos asociados");
+            throw new IllegalStateException(
+                    "No se puede eliminar la categoría con id " + id + " porque tiene productos asociados");
         }
         categoriaRepository.delete(categoria);
     }
@@ -75,7 +83,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     private Categoria getCategoriaEntity(Long id) {
         return categoriaRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada con id " + id));
     }
 
     @Override

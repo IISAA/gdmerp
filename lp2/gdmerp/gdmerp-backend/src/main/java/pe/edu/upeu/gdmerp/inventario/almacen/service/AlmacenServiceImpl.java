@@ -1,4 +1,5 @@
 package pe.edu.upeu.gdmerp.inventario.almacen.service;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,9 @@ import pe.edu.upeu.gdmerp.inventario.almacen.entity.Almacen;
 import pe.edu.upeu.gdmerp.inventario.almacen.mapper.AlmacenMapper;
 import pe.edu.upeu.gdmerp.inventario.almacen.repository.AlmacenRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
@@ -22,6 +26,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @Cacheable(value = "almacenes")
     public List<AlmacenResponse> listar() {
         return almacenRepository.findAll().stream().map(almacenMapper::toResponse).toList();
     }
@@ -36,6 +41,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    @CacheEvict(value = "almacenes", allEntries = true)
     public AlmacenResponse crear(AlmacenRequest request) {
         validarNombreUnico(request.nombre(), null);
         return almacenMapper.toResponse(almacenRepository.save(almacenMapper.toEntity(request)));
@@ -44,6 +50,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    @CacheEvict(value = "almacenes", allEntries = true)
     public AlmacenResponse actualizar(Long id, AlmacenRequest request) {
         Almacen almacen = getAlmacenEntity(id);
         validarNombreUnico(request.nombre(), id);
@@ -54,10 +61,12 @@ public class AlmacenServiceImpl implements AlmacenService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
+    @CacheEvict(value = "almacenes", allEntries = true)
     public void eliminar(Long id) {
         Almacen almacen = getAlmacenEntity(id);
         if (productoRepository.existsByAlmacenId(id)) {
-            throw new IllegalStateException("No se puede eliminar el almacén con id " + id + " porque tiene productos asociados");
+            throw new IllegalStateException(
+                    "No se puede eliminar el almacén con id " + id + " porque tiene productos asociados");
         }
         almacenRepository.delete(almacen);
     }
@@ -73,6 +82,6 @@ public class AlmacenServiceImpl implements AlmacenService {
 
     private Almacen getAlmacenEntity(Long id) {
         return almacenRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Almacén no encontrado con id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Almacén no encontrado con id " + id));
     }
 }
