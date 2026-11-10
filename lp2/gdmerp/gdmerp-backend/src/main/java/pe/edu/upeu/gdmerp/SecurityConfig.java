@@ -167,6 +167,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/finanzas/**", "/api/v1/cajas-chicas/**").hasAnyRole("ADMIN", "ADMIN_FINANZAS", "SUPERVISOR", "CAJERO")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/finanzas/**", "/api/v1/cajas-chicas/**").hasAnyRole("ADMIN", "ADMIN_FINANZAS")
 
+                        // Reglas de negocio: Compras
+                        .requestMatchers("/api/v1/compras/**").hasAnyRole("ADMIN", "SUPERVISOR")
+
                         // Todo lo demás requiere estar autenticado
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
