@@ -72,6 +72,54 @@
       <span class="active-indicator"></span>
     </a>
 
+    <!-- 6. Compras -->
+    <a
+      *hasRole="['ADMIN', 'SUPERVISOR']"
+      routerLink="/compras"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">shopping_cart</mat-icon>
+      <span class="nav-text">Compras</span>
+      <span class="active-indicator"></span>
+    </a>
+
+    <!-- 7. Catálogo -->
+    <a
+      *hasRole="['ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'VENDEDOR']"
+      routerLink="/catalogo"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">category</mat-icon>
+      <span class="nav-text">Catálogo</span>
+      <span class="active-indicator"></span>
+    </a>
+
+    <!-- 8. Terceros / CRM -->
+    <a
+      *hasRole="['ADMIN', 'VENDEDOR', 'SUPERVISOR', 'ALMACENERO']"
+      routerLink="/terceros"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">groups</mat-icon>
+      <span class="nav-text">Terceros (CRM)</span>
+      <span class="active-indicator"></span>
+    </a>
+
+    <!-- 9. Control de Caja -->
+    <a
+      *hasRole="['ADMIN', 'ADMIN_FINANZAS', 'SUPERVISOR', 'CAJERO', 'VENDEDOR']"
+      routerLink="/caja"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">payments</mat-icon>
+      <span class="nav-text">Control de Caja</span>
+      <span class="active-indicator"></span>
+    </a>
+
   </nav>
 
   <!-- Pie del Sidebar: Perfil de Usuario de Keycloak -->

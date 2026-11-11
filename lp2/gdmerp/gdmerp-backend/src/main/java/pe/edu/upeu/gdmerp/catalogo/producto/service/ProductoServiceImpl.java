@@ -10,7 +10,6 @@ import pe.edu.upeu.gdmerp.catalogo.producto.dto.ProductoRequest;
 import pe.edu.upeu.gdmerp.catalogo.producto.dto.ProductoResponse;
 import pe.edu.upeu.gdmerp.catalogo.producto.entity.Producto;
 import pe.edu.upeu.gdmerp.catalogo.producto.repository.ProductoRepository;
-import pe.edu.upeu.gdmerp.exception.BusinessConflictException;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
 
 import java.util.List;
@@ -96,44 +95,6 @@ public class ProductoServiceImpl implements ProductoService {
             throw new ResourceNotFoundException("Producto no encontrado con ID: " + id);
         }
         productoRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional
-    public void descontarStock(Long id, Integer cantidad) {
-        // [RN-VEN-01] Control Atómico de Existencias con Bloqueo Pesimista (SELECT FOR UPDATE):
-        // Garantiza aislamiento serializable ante ventas concurrentes en mostrador o delivery.
-        // Si el stock actual es insuficiente, aborta la transacción lanzando BusinessConflictException.
-        Producto producto = productoRepository.findByIdForUpdate(id)
-                .or(() -> productoRepository.findById(id))
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
-
-        if (producto.getStock() < cantidad) {
-            throw new BusinessConflictException("Stock insuficiente para el producto '" + producto.getNombre()
-                    + "'. Stock disponible: " + producto.getStock() + ", solicitado: " + cantidad);
-        }
-
-        producto.setStock(producto.getStock() - cantidad);
-        productoRepository.save(producto);
-    }
-
-    @Override
-    @Transactional
-    public void aumentarStock(Long id, Integer cantidad) {
-        restaurarStock(id, cantidad);
-    }
-
-    @Override
-    @Transactional
-    public void restaurarStock(Long id, Integer cantidad) {
-        // [RN-VEN-09] Restitución Atómica de Existencias por Anulación de Venta:
-        // Suma de vuelta la cantidad exacta vendida al inventario general del producto en catálogo.
-        Producto producto = productoRepository.findByIdForUpdate(id)
-                .or(() -> productoRepository.findById(id))
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
-
-        producto.setStock(producto.getStock() + cantidad);
-        productoRepository.save(producto);
     }
 
     private ProductoResponse toResponse(Producto p) {

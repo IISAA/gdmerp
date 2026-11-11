@@ -41,14 +41,6 @@ public interface OrdenProduccionRepository extends JpaRepository<OrdenProduccion
            """)
     Optional<OrdenProduccion> findByIdWithRelaciones(@Param("id") Long id);
 
-    @Query("""
-           SELECT o FROM OrdenProduccion o
-           LEFT JOIN FETCH o.centroTrabajo
-           LEFT JOIN FETCH o.detalles
-           WHERE o.id = :id
-           """)
-    Optional<OrdenProduccion> findByIdConDetalles(@Param("id") Long id);
-
     @EntityGraph(attributePaths = {"centroTrabajo", "detalles", "detalles.insumo"})
     @Query("SELECT o FROM OrdenProduccion o WHERE o.id = :id")
     Optional<OrdenProduccion> findByIdWithDetalles(@Param("id") Long id);

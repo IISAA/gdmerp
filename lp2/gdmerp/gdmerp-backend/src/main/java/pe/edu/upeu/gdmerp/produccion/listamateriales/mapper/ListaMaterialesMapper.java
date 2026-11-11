@@ -16,6 +16,13 @@ public interface ListaMaterialesMapper {
     @Mapping(target = "unidadMedidaProductoTerminado", source = "productoTerminado.unidadMedida")
     ListaMaterialesResponse toResponse(ListaMateriales listaMateriales);
 
+    @Mapping(target = "productoTerminadoId", source = "productoTerminado.id")
+    @Mapping(target = "nombreProductoTerminado", source = "productoTerminado.nombre")
+    @Mapping(target = "skuProductoTerminado", source = "productoTerminado.sku")
+    @Mapping(target = "unidadMedidaProductoTerminado", source = "productoTerminado.unidadMedida")
+    @Mapping(target = "detalles", ignore = true)
+    ListaMaterialesResponse toListResponse(ListaMateriales listaMateriales);
+
     @Mapping(target = "insumoId", source = "insumo.id")
     @Mapping(target = "nombreInsumo", source = "insumo.nombre")
     @Mapping(target = "skuInsumo", source = "insumo.sku")

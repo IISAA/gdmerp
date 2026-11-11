@@ -55,6 +55,9 @@ public class TransaccionFinanciera {
     @Column(name = "NUMERO_COMPROBANTE", length = 50)
     private String numeroComprobante;
 
+    @Column(name = "VENTA_ID")
+    private Long ventaId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CATEGORIA_FINANCIERA", nullable = false)
     private CategoriaFinanciera categoriaFinanciera;

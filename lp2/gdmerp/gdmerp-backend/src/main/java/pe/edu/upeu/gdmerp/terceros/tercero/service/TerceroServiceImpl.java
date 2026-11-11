@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.BusinessConflictException;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.terceros.event.ProveedorRegistradoEvent;
+import pe.edu.upeu.gdmerp.shared.event.ProveedorRegistradoEvent;
 import pe.edu.upeu.gdmerp.terceros.tercero.dto.TerceroRequest;
 import pe.edu.upeu.gdmerp.terceros.tercero.dto.TerceroResponse;
 import pe.edu.upeu.gdmerp.terceros.tercero.entity.Tercero;
@@ -27,12 +27,9 @@ public class TerceroServiceImpl implements TerceroService {
     @Override
     @Transactional(readOnly = true)
     public List<TerceroResponse> listar(String tipo) {
-        List<Tercero> lista;
-        if (tipo != null && !tipo.isBlank() && !tipo.equalsIgnoreCase("TODOS")) {
-            lista = terceroRepository.findByTipoTerceroAndActivoTrueOrderByIdDesc(tipo.trim().toUpperCase());
-        } else {
-            lista = terceroRepository.findByActivoTrueOrderByIdDesc();
-        }
+        List<Tercero> lista = (tipo != null && !tipo.isBlank() && !tipo.equalsIgnoreCase("TODOS"))
+                ? terceroRepository.findByTipoTerceroAndActivoTrueOrderByIdDesc(tipo.trim().toUpperCase())
+                : terceroRepository.findByActivoTrueOrderByIdDesc();
         return lista.stream().map(this::toResponse).toList();
     }
 
@@ -47,31 +44,18 @@ public class TerceroServiceImpl implements TerceroService {
     @Override
     @Transactional
     public TerceroResponse crear(TerceroRequest req) {
-        terceroRepository.findByNumeroDocumento(req.getNumeroDocumento().trim()).ifPresent(t -> {
+        String documento = req.getNumeroDocumento().trim();
+        terceroRepository.findByNumeroDocumento(documento).ifPresent(t -> {
             throw new BusinessConflictException("Ya existe un tercero registrado con el documento: " + req.getNumeroDocumento());
         });
 
-        String tipoNorm = req.getTipoTercero() != null ? req.getTipoTercero().trim().toUpperCase() : "CLIENTE";
-
-        Tercero tercero = Tercero.builder()
-                .tipoDocumento(req.getTipoDocumento().trim().toUpperCase())
-                .numeroDocumento(req.getNumeroDocumento().trim())
-                .razonSocial(req.getRazonSocial().trim())
-                .tipoTercero(tipoNorm)
-                .telefono(req.getTelefono() != null ? req.getTelefono().trim() : null)
-                .direccion(req.getDireccion() != null ? req.getDireccion().trim() : null)
-                .correo(req.getCorreo() != null ? req.getCorreo().trim() : null)
-                .activo(true)
-                .fechaCreacion(LocalDateTime.now())
-                .build();
+        Tercero tercero = new Tercero();
+        tercero.setActivo(true);
+        tercero.setFechaCreacion(LocalDateTime.now());
+        aplicarDatosDesdeRequest(tercero, req);
 
         Tercero guardado = terceroRepository.save(tercero);
-
-        // Notificación desacoplada mediante evento de dominio a otros módulos (Compras)
-        if ("PROVEEDOR".equalsIgnoreCase(tipoNorm) || "AMBOS".equalsIgnoreCase(tipoNorm)) {
-            syncProveedor(guardado);
-        }
-
+        notificarProveedorSiCorresponde(guardado);
         return toResponse(guardado);
     }
 
@@ -83,26 +67,14 @@ public class TerceroServiceImpl implements TerceroService {
 
         terceroRepository.findByNumeroDocumento(req.getNumeroDocumento().trim()).ifPresent(otro -> {
             if (!otro.getId().equals(id)) {
-                throw new BusinessConflictException("El número de documento " + req.getNumeroDocumento() + " ya pertenece a otro tercero.");
+                throw new BusinessConflictException(
+                        "El número de documento " + req.getNumeroDocumento() + " ya pertenece a otro tercero.");
             }
         });
 
-        String tipoNorm = req.getTipoTercero() != null ? req.getTipoTercero().trim().toUpperCase() : "CLIENTE";
-
-        tercero.setTipoDocumento(req.getTipoDocumento().trim().toUpperCase());
-        tercero.setNumeroDocumento(req.getNumeroDocumento().trim());
-        tercero.setRazonSocial(req.getRazonSocial().trim());
-        tercero.setTipoTercero(tipoNorm);
-        tercero.setTelefono(req.getTelefono() != null ? req.getTelefono().trim() : null);
-        tercero.setDireccion(req.getDireccion() != null ? req.getDireccion().trim() : null);
-        tercero.setCorreo(req.getCorreo() != null ? req.getCorreo().trim() : null);
-
+        aplicarDatosDesdeRequest(tercero, req);
         Tercero guardado = terceroRepository.save(tercero);
-
-        if ("PROVEEDOR".equalsIgnoreCase(tipoNorm) || "AMBOS".equalsIgnoreCase(tipoNorm)) {
-            syncProveedor(guardado);
-        }
-
+        notificarProveedorSiCorresponde(guardado);
         return toResponse(guardado);
     }
 
@@ -115,21 +87,36 @@ public class TerceroServiceImpl implements TerceroService {
         terceroRepository.save(t);
     }
 
-    private void syncProveedor(Tercero t) {
-        if (eventPublisher != null && t.getNumeroDocumento() != null && t.getNumeroDocumento().trim().length() == 11) {
-            try {
-                ProveedorRegistradoEvent event = new ProveedorRegistradoEvent(
-                        t.getNumeroDocumento().trim(),
-                        t.getRazonSocial(),
-                        t.getTelefono(),
-                        t.getCorreo(),
-                        t.getDireccion()
-                );
-                eventPublisher.publishEvent(event);
-                log.info("Publicado evento ProveedorRegistradoEvent para {} desde CRM Terceros.", t.getRazonSocial());
-            } catch (Exception e) {
-                log.warn("No se pudo publicar evento de proveedor: {}", e.getMessage());
-            }
+    private void aplicarDatosDesdeRequest(Tercero tercero, TerceroRequest req) {
+        String tipoNorm = req.getTipoTercero() != null ? req.getTipoTercero().trim().toUpperCase() : "CLIENTE";
+        tercero.setTipoDocumento(req.getTipoDocumento().trim().toUpperCase());
+        tercero.setNumeroDocumento(req.getNumeroDocumento().trim());
+        tercero.setRazonSocial(req.getRazonSocial().trim());
+        tercero.setTipoTercero(tipoNorm);
+        tercero.setTelefono(req.getTelefono() != null ? req.getTelefono().trim() : null);
+        tercero.setDireccion(req.getDireccion() != null ? req.getDireccion().trim() : null);
+        tercero.setCorreo(req.getCorreo() != null ? req.getCorreo().trim() : null);
+    }
+
+    private void notificarProveedorSiCorresponde(Tercero t) {
+        String tipo = t.getTipoTercero();
+        if ((!"PROVEEDOR".equalsIgnoreCase(tipo) && !"AMBOS".equalsIgnoreCase(tipo))
+                || eventPublisher == null
+                || t.getNumeroDocumento() == null
+                || t.getNumeroDocumento().trim().length() != 11) {
+            return;
+        }
+        try {
+            eventPublisher.publishEvent(new ProveedorRegistradoEvent(
+                    t.getNumeroDocumento().trim(),
+                    t.getRazonSocial(),
+                    t.getTelefono(),
+                    t.getCorreo(),
+                    t.getDireccion()
+            ));
+            log.info("Publicado evento ProveedorRegistradoEvent para {} desde CRM Terceros.", t.getRazonSocial());
+        } catch (Exception e) {
+            log.warn("No se pudo publicar evento de proveedor: {}", e.getMessage());
         }
     }
 

@@ -1,57 +1,58 @@
 package pe.edu.upeu.gdmerp.finanzas.cajachica.service;
 
-import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCosto;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCostoId;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.AsignacionCajaCentroCostoRepository;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CentroCosto;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CentroCostoRepository;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoRequest;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse;
-
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
 import pe.edu.upeu.gdmerp.exception.SolvenciaInsuficienteException;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CajaChicaResponse;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoRequest;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.DetalleRendicionRequest;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.DetalleRendicionResponse;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.RendicionCajaChicaRequest;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.RendicionCajaChicaResponse;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.RendicionResumenDto;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.ReporteRendicionesAgregadoDto;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCosto;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCostoId;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CajaChica;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CentroCosto;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.DetalleRendicionCajaChica;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.EstadoRendicion;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.RendicionCajaChica;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.AsignacionCajaCentroCostoRepository;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CajaChicaRepository;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CentroCostoRepository;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.RendicionCajaChicaRepository;
+import pe.edu.upeu.gdmerp.shared.event.ValidacionProductoSolicitadaEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService {
 
     private final CajaChicaRepository cajaChicaRepository;
     private final RendicionCajaChicaRepository rendicionRepository;
-    private final ProductoService productoService;
-    private final pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CentroCostoRepository centroCostoRepository;
-    private final pe.edu.upeu.gdmerp.finanzas.cajachica.repository.AsignacionCajaCentroCostoRepository asignacionRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final CentroCostoRepository centroCostoRepository;
+    private final AsignacionCajaCentroCostoRepository asignacionRepository;
 
     public RendicionCajaChicaServiceImpl(
             CajaChicaRepository cajaChicaRepository,
             RendicionCajaChicaRepository rendicionRepository,
-            ProductoService productoService,
-            pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CentroCostoRepository centroCostoRepository,
-            pe.edu.upeu.gdmerp.finanzas.cajachica.repository.AsignacionCajaCentroCostoRepository asignacionRepository) {
+            ApplicationEventPublisher eventPublisher,
+            CentroCostoRepository centroCostoRepository,
+            AsignacionCajaCentroCostoRepository asignacionRepository) {
         this.cajaChicaRepository = cajaChicaRepository;
         this.rendicionRepository = rendicionRepository;
-        this.productoService = productoService;
+        this.eventPublisher = eventPublisher;
         this.centroCostoRepository = centroCostoRepository;
         this.asignacionRepository = asignacionRepository;
     }
@@ -70,8 +71,7 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
                 .saldoDisponible(saldoInicial)
                 .build();
 
-        CajaChica guardada = cajaChicaRepository.save(caja);
-        return mapToCajaChicaResponse(guardada);
+        return mapToCajaChicaResponse(cajaChicaRepository.save(caja));
     }
 
     @Override
@@ -85,21 +85,9 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
     @Override
     @Transactional(readOnly = true)
     public CajaChicaResponse obtenerCajaChica(Long id) {
-        CajaChica caja = buscarCajaChicaOFallar(id);
-        return mapToCajaChicaResponse(caja);
+        return mapToCajaChicaResponse(buscarCajaChicaOFallar(id));
     }
 
-    /**
-     * ========================================================================
-     * TRANSICIÓN DE ESTADO CON REGLA DE NEGOCIO REAL (ANULACIÓN CON EFECTO COLATERAL)
-     * ========================================================================
-     * 1. Validación de idempotencia: Si la rendición ya se encuentra en estado ANULADO,
-     *    se rechaza con IllegalStateException (manejada -> HTTP 409 Conflict).
-     * 2. Transición de Estado: Pasa de su estado actual a EstadoRendicion.ANULADO.
-     * 3. Efecto Colateral Financiero Real: Restituye el saldo debitado a la Caja Chica
-     *    (caja.saldoDisponible += rendicion.montoTotal).
-     * ========================================================================
-     */
     @Override
     @Transactional
     public RendicionCajaChicaResponse anularRendicion(Long id) {
@@ -107,54 +95,19 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
                 .orElseThrow(() -> new ResourceNotFoundException("Rendición no encontrada con id: " + id));
 
         if (rendicion.getEstado() == EstadoRendicion.ANULADO) {
-            throw new IllegalStateException("RN-FIN-02: La rendición con código " + rendicion.getCodigo() +
-                    " ya se encuentra en estado ANULADO y no se puede anular nuevamente.");
+            throw new IllegalStateException("RN-FIN-02: La rendición con código " + rendicion.getCodigo()
+                    + " ya se encuentra en estado ANULADO y no se puede anular nuevamente.");
         }
 
         rendicion.setEstado(EstadoRendicion.ANULADO);
-
-        // [EFECTO COLATERAL REAL]: Restitución del monto rendido al saldo disponible de la Caja Chica
         CajaChica caja = rendicion.getCajaChica();
         caja.setSaldoDisponible(caja.getSaldoDisponible().add(rendicion.getMontoTotal()));
         cajaChicaRepository.save(caja);
+        reintegrarSaldosPorCentroCosto(rendicion, caja);
 
-        // Restitución presupuestal por Centro de Costo M:N
-        if (rendicion.getDetalles() != null && caja.getAsignacionesPresupuesto() != null) {
-            for (DetalleRendicionCajaChica det : rendicion.getDetalles()) {
-                if (det.getCentroCosto() != null) {
-                    caja.getAsignacionesPresupuesto().stream()
-                            .filter(a -> a.getCentroCosto() != null && a.getCentroCosto().getId().equals(det.getCentroCosto().getId()))
-                            .findFirst()
-                            .ifPresent(asig -> asig.reintegrarSaldo(det.getSubtotal()));
-                }
-            }
-        }
-
-        RendicionCajaChica guardada = rendicionRepository.save(rendicion);
-        return mapToRendicionResponse(guardada);
+        return mapToRendicionResponse(rendicionRepository.save(rendicion));
     }
 
-    /**
-     * ========================================================================
-     * OPERACIÓN DE DOMINIO CABECERA-DETALLE CON TRANSACCIÓN ATÓMICA
-     * ========================================================================
-     * Cumple con los criterios 4 y 6 de la rúbrica:
-     * 1. Comunicación Inter-módulo: Valida la existencia del producto en el
-     *    módulo 'catalogo' mediante ProductoService (expuesto vía @NamedInterface).
-     * 2. Cálculo de Totales: El método de dominio rendicion.calcularTotal()
-     *    calcula subtotales (precio * cantidad) y acumula el monto total en memoria.
-     * 3. Regla de Negocio Real (RN-FIN-01): Control de Liquidez / Solvencia de Caja.
-     *    Si montoTotal > saldoDisponible de la Caja Chica, se lanza
-     *    SolvenciaInsuficienteException (manejada por GlobalExceptionHandler -> HTTP 400).
-     * 4. Regla de Negocio Real (RN-FIN-06): Control Presupuestal por Centro de Costo.
-     *    Si el gasto imputado supera el saldoDisponible de la AsignacionCajaCentroCosto,
-     *    se rechaza y se lanza SolvenciaInsuficienteException.
-     * 5. Transacción Atómica (@Transactional):
-     *    - Caso Éxito: Se descuenta saldoDisponible de Caja Chica y Centro de Costo,
-     *      persistiéndose cabecera y detalles en un único commit atómico.
-     *    - Caso Rollback: Ante una excepción, Spring revierte toda mutación.
-     * ========================================================================
-     */
     @Override
     @Transactional
     public RendicionCajaChicaResponse registrarRendicion(RendicionCajaChicaRequest request) {
@@ -163,7 +116,6 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
         }
 
         CajaChica cajaChica = buscarCajaChicaOFallar(request.getCajaChicaId());
-
         RendicionCajaChica rendicion = RendicionCajaChica.builder()
                 .codigo(request.getCodigo())
                 .responsable(request.getResponsable())
@@ -173,67 +125,14 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
                 .build();
 
         for (DetalleRendicionRequest detReq : request.getDetalles()) {
-            // [LÍMITES DE MÓDULO]: Comunicación síncrona desacoplada con módulo 'catalogo'
-            if (detReq.getProductoId() != null) {
-                productoService.buscarPorId(detReq.getProductoId());
-            }
-
-            pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CentroCosto centroCosto = null;
-            if (detReq.getCentroCostoId() != null) {
-                centroCosto = centroCostoRepository.findById(detReq.getCentroCostoId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Centro de costo no encontrado con id: " + detReq.getCentroCostoId()));
-            }
-
-            BigDecimal subtotalDetalle = detReq.getPrecioUnitario().multiply(BigDecimal.valueOf(detReq.getCantidad()));
-
-            // [RN-FIN-06]: Control de Solvencia Presupuestal por Centro de Costo
-            if (centroCosto != null && cajaChica.getAsignacionesPresupuesto() != null) {
-                var asignacionOpt = cajaChica.getAsignacionesPresupuesto().stream()
-                        .filter(a -> a.getCentroCosto() != null && a.getCentroCosto().getId().equals(detReq.getCentroCostoId()))
-                        .findFirst();
-
-                if (asignacionOpt.isPresent()) {
-                    pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCosto asig = asignacionOpt.get();
-                    if (subtotalDetalle.compareTo(asig.getSaldoDisponible()) > 0) {
-                        throw new SolvenciaInsuficienteException(
-                                "RN-FIN-06: El gasto para el Centro de Costo " + centroCosto.getCodigoCc() +
-                                " (S/ " + subtotalDetalle + ") excede el saldo presupuestal disponible asignado (S/ " +
-                                asig.getSaldoDisponible() + ")"
-                        );
-                    }
-                    asig.descontarSaldo(subtotalDetalle);
-                }
-            }
-
-            DetalleRendicionCajaChica detalle = DetalleRendicionCajaChica.builder()
-                    .concepto(detReq.getConcepto())
-                    .cantidad(detReq.getCantidad())
-                    .precioUnitario(detReq.getPrecioUnitario())
-                    .subtotal(subtotalDetalle)
-                    .productoId(detReq.getProductoId())
-                    .centroCosto(centroCosto)
-                    .build();
-
-            rendicion.agregarDetalle(detalle);
+            rendicion.agregarDetalle(construirYValidarDetalleRendicion(detReq, cajaChica));
         }
 
-        // [CABECERA-DETALLE]: Cálculo de subtotales y total acumulado de dominio
         rendicion.calcularTotal();
+        validarYDescontarSolvenciaCaja(cajaChica, rendicion.getMontoTotal());
 
-        // [REGLA DE NEGOCIO REAL RN-FIN-01]: Solvencia de Caja Chica / Control de Liquidez
-        if (rendicion.getMontoTotal().compareTo(cajaChica.getSaldoDisponible()) > 0) {
-            throw new SolvenciaInsuficienteException(
-                    "RN-FIN-01: El monto total de la rendición (S/ " + rendicion.getMontoTotal() +
-                    ") supera la solvencia/saldo disponible de Caja Chica (S/ " + cajaChica.getSaldoDisponible() + ")"
-            );
-        }
-
-        // [TRANSACCIÓN ATÓMICA]: Mutación y persistencia conjunta (Commit atómico)
-        cajaChica.setSaldoDisponible(cajaChica.getSaldoDisponible().subtract(rendicion.getMontoTotal()));
         cajaChicaRepository.save(cajaChica);
-
-        RendicionCajaChica rendicionGuardada = rendicionRepository.save(rendicion);
-        return mapToRendicionResponse(rendicionGuardada);
+        return mapToRendicionResponse(rendicionRepository.save(rendicion));
     }
 
     @Override
@@ -256,19 +155,9 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
     @Override
     @Transactional(readOnly = true)
     public Page<RendicionCajaChicaResponse> listarPaginado(Pageable pageable) {
-        return rendicionRepository.findAll(pageable)
-                .map(this::mapToRendicionResponse);
+        return rendicionRepository.findAll(pageable).map(this::mapToRendicionResponse);
     }
 
-    /**
-     * ========================================================================
-     * CONSULTAS EMPRESARIALES: FILTROS DINÁMICOS COMBINADOS Y ORDENAMIENTO
-     * ========================================================================
-     * Permite múltiples combinaciones de parámetros de búsqueda opcionales
-     * (caja, estado, responsable, rango de fechas, rango de montos) junto con
-     * paginación y ordenamiento dinámico multi-campo.
-     * ========================================================================
-     */
     @Override
     @Transactional(readOnly = true)
     public Page<RendicionCajaChicaResponse> buscarConFiltros(
@@ -285,14 +174,6 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
         ).map(this::mapToRendicionResponse);
     }
 
-    /**
-     * ========================================================================
-     * PROYECCIÓN DE RESUMEN (CONSTRUCTOR EXPRESSION DTO)
-     * ========================================================================
-     * Utiliza la cláusula JPQL 'SELECT new ...' para construir directamente DTOs
-     * planos en la base de datos sin sobrecosto de memoria por entidades ORM.
-     * ========================================================================
-     */
     @Override
     @Transactional(readOnly = true)
     public List<RendicionResumenDto> obtenerResumen(Long cajaChicaId) {
@@ -302,15 +183,6 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
         return rendicionRepository.obtenerResumenProyectado(cajaChicaId);
     }
 
-    /**
-     * ========================================================================
-     * REPORTE AGREGADO DEFENSIVO (0 / 0.00 en vez de NULL)
-     * ========================================================================
-     * Realiza agregaciones matemáticas (SUM, AVG, MAX, MIN, COUNT).
-     * Si no existen registros coincidentes, garantiza numéricamente 0 / 0.00
-     * en lugar de devolver null.
-     * ========================================================================
-     */
     @Override
     @Transactional(readOnly = true)
     public ReporteRendicionesAgregadoDto obtenerReporteAgregado(Long cajaChicaId) {
@@ -323,31 +195,28 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
 
     @Override
     @Transactional
-    public pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse asignarPresupuestoCentroCosto(Long cajaChicaId, Long centroCostoId, BigDecimal montoAsignado) {
+    public AsignacionCajaCentroCostoResponse asignarPresupuestoCentroCosto(
+            Long cajaChicaId, Long centroCostoId, BigDecimal montoAsignado) {
         CajaChica caja = buscarCajaChicaOFallar(cajaChicaId);
-        pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CentroCosto cc = centroCostoRepository.findById(centroCostoId)
+        CentroCosto cc = centroCostoRepository.findById(centroCostoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Centro de costo no encontrado con id: " + centroCostoId));
 
-        pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCosto asignacion = null;
-        if (caja.getAsignacionesPresupuesto() != null) {
-            asignacion = caja.getAsignacionesPresupuesto().stream()
-                    .filter(a -> a.getCentroCosto() != null && a.getCentroCosto().getId().equals(centroCostoId))
-                    .findFirst()
-                    .orElse(null);
-        }
+        Optional<AsignacionCajaCentroCosto> existente = buscarAsignacionPorCentroCosto(caja, centroCostoId);
+        AsignacionCajaCentroCosto asignacion;
 
-        if (asignacion != null) {
+        if (existente.isPresent()) {
+            asignacion = existente.get();
             BigDecimal diferencia = montoAsignado.subtract(asignacion.getPresupuestoAsignado());
-            asignacion.setPresupuestoAsignado(montoAsignado);
             BigDecimal nuevoSaldo = asignacion.getSaldoDisponible().add(diferencia);
             if (nuevoSaldo.compareTo(BigDecimal.ZERO) < 0) {
                 throw new IllegalArgumentException("No se puede reducir el presupuesto por debajo de lo ya consumido");
             }
+            asignacion.setPresupuestoAsignado(montoAsignado);
             asignacion.setSaldoDisponible(nuevoSaldo);
             asignacion.setActivo(true);
         } else {
-            asignacion = pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCosto.builder()
-                    .id(new pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCostoId(cajaChicaId, centroCostoId))
+            asignacion = AsignacionCajaCentroCosto.builder()
+                    .id(new AsignacionCajaCentroCostoId(cajaChicaId, centroCostoId))
                     .cajaChica(caja)
                     .centroCosto(cc)
                     .presupuestoAsignado(montoAsignado)
@@ -364,7 +233,7 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
 
     @Override
     @Transactional(readOnly = true)
-    public List<pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse> listarPresupuestosPorCaja(Long cajaChicaId) {
+    public List<AsignacionCajaCentroCostoResponse> listarPresupuestosPorCaja(Long cajaChicaId) {
         buscarCajaChicaOFallar(cajaChicaId);
         return asignacionRepository.findByCajaChicaId(cajaChicaId).stream()
                 .map(this::mapToAsignacionResponse)
@@ -373,9 +242,9 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
 
     @Override
     @Transactional(readOnly = true)
-    public List<pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse> listarCentrosCosto() {
+    public List<CentroCostoResponse> listarCentrosCosto() {
         return centroCostoRepository.findByActivoTrueOrderByCodigoCcAsc().stream()
-                .map(c -> pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse.builder()
+                .map(c -> CentroCostoResponse.builder()
                         .id(c.getId())
                         .codigoCc(c.getCodigoCc())
                         .nombreArea(c.getNombreArea())
@@ -386,18 +255,17 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
 
     @Override
     @Transactional
-    public pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse crearCentroCosto(pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoRequest request) {
+    public CentroCostoResponse crearCentroCosto(CentroCostoRequest request) {
         String codigoLimpio = request.getCodigoCc().trim().toUpperCase();
         if (centroCostoRepository.existsByCodigoCc(codigoLimpio)) {
             throw new IllegalArgumentException("Ya existe un centro de costo con el código: " + codigoLimpio);
         }
-        pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CentroCosto cc = pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CentroCosto.builder()
+        CentroCosto cc = centroCostoRepository.save(CentroCosto.builder()
                 .codigoCc(codigoLimpio)
                 .nombreArea(request.getNombreArea().trim())
                 .activo(true)
-                .build();
-        cc = centroCostoRepository.save(cc);
-        return pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse.builder()
+                .build());
+        return CentroCostoResponse.builder()
                 .id(cc.getId())
                 .codigoCc(cc.getCodigoCc())
                 .nombreArea(cc.getNombreArea())
@@ -405,8 +273,84 @@ public class RendicionCajaChicaServiceImpl implements RendicionCajaChicaService 
                 .build();
     }
 
-    private pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse mapToAsignacionResponse(pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCosto a) {
-        return pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse.builder()
+    private DetalleRendicionCajaChica construirYValidarDetalleRendicion(
+            DetalleRendicionRequest detReq, CajaChica cajaChica) {
+        if (detReq.getProductoId() != null) {
+            eventPublisher.publishEvent(
+                    new ValidacionProductoSolicitadaEvent(detReq.getProductoId(), "finanzas.cajachica"));
+        }
+
+        CentroCosto centroCosto = null;
+        if (detReq.getCentroCostoId() != null) {
+            centroCosto = centroCostoRepository.findById(detReq.getCentroCostoId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Centro de costo no encontrado con id: " + detReq.getCentroCostoId()));
+        }
+
+        BigDecimal subtotalDetalle = detReq.getPrecioUnitario()
+                .multiply(BigDecimal.valueOf(detReq.getCantidad()));
+
+        descontarPresupuestoCentroCosto(cajaChica, centroCosto, subtotalDetalle);
+
+        return DetalleRendicionCajaChica.builder()
+                .concepto(detReq.getConcepto())
+                .cantidad(detReq.getCantidad())
+                .precioUnitario(detReq.getPrecioUnitario())
+                .subtotal(subtotalDetalle)
+                .productoId(detReq.getProductoId())
+                .centroCosto(centroCosto)
+                .build();
+    }
+
+    private void descontarPresupuestoCentroCosto(
+            CajaChica cajaChica, CentroCosto centroCosto, BigDecimal subtotalDetalle) {
+        if (centroCosto == null) {
+            return;
+        }
+        buscarAsignacionPorCentroCosto(cajaChica, centroCosto.getId()).ifPresent(asig -> {
+            if (subtotalDetalle.compareTo(asig.getSaldoDisponible()) > 0) {
+                throw new SolvenciaInsuficienteException(
+                        "RN-FIN-06: El gasto para el Centro de Costo " + centroCosto.getCodigoCc()
+                                + " (S/ " + subtotalDetalle + ") excede el saldo presupuestal disponible asignado (S/ "
+                                + asig.getSaldoDisponible() + ")");
+            }
+            asig.descontarSaldo(subtotalDetalle);
+        });
+    }
+
+    private void validarYDescontarSolvenciaCaja(CajaChica cajaChica, BigDecimal montoTotal) {
+        if (montoTotal.compareTo(cajaChica.getSaldoDisponible()) > 0) {
+            throw new SolvenciaInsuficienteException(
+                    "RN-FIN-01: El monto total de la rendición (S/ " + montoTotal
+                            + ") supera la solvencia/saldo disponible de Caja Chica (S/ "
+                            + cajaChica.getSaldoDisponible() + ")");
+        }
+        cajaChica.setSaldoDisponible(cajaChica.getSaldoDisponible().subtract(montoTotal));
+    }
+
+    private void reintegrarSaldosPorCentroCosto(RendicionCajaChica rendicion, CajaChica caja) {
+        if (rendicion.getDetalles() == null || caja.getAsignacionesPresupuesto() == null) {
+            return;
+        }
+        for (DetalleRendicionCajaChica det : rendicion.getDetalles()) {
+            if (det.getCentroCosto() != null) {
+                buscarAsignacionPorCentroCosto(caja, det.getCentroCosto().getId())
+                        .ifPresent(asig -> asig.reintegrarSaldo(det.getSubtotal()));
+            }
+        }
+    }
+
+    private Optional<AsignacionCajaCentroCosto> buscarAsignacionPorCentroCosto(CajaChica caja, Long centroCostoId) {
+        if (caja.getAsignacionesPresupuesto() == null || centroCostoId == null) {
+            return Optional.empty();
+        }
+        return caja.getAsignacionesPresupuesto().stream()
+                .filter(a -> a.getCentroCosto() != null && a.getCentroCosto().getId().equals(centroCostoId))
+                .findFirst();
+    }
+
+    private AsignacionCajaCentroCostoResponse mapToAsignacionResponse(AsignacionCajaCentroCosto a) {
+        return AsignacionCajaCentroCostoResponse.builder()
                 .cajaChicaId(a.getCajaChica().getId())
                 .centroCostoId(a.getCentroCosto().getId())
                 .codigoCc(a.getCentroCosto().getCodigoCc())

@@ -39,7 +39,7 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
      */
     @Override
     @Transactional
-    @Cacheable(value = "unidadesMedida", key = "#soloActivos != null ? #soloActivos : 'all'")
+    @Cacheable(value = "unidadesMedida", key = "#soloActivos != null ? #soloActivos : 'all'", unless = "#result == null || #result.isEmpty()")
     public List<UnidadMedidaResponse> listar(Boolean soloActivos) {
         long total = unidadMedidaRepository.count();
         if (total < CatalogoEstandarUnidades.UMBRAL_MINIMO) {
@@ -61,6 +61,7 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "unidadesMedida", key = "#id", unless = "#result == null")
     public UnidadMedidaResponse obtenerPorId(Long id) {
         UnidadMedida unidad = unidadMedidaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Unidad de medida no encontrada con ID: " + id));
@@ -69,6 +70,7 @@ public class UnidadMedidaServiceImpl implements UnidadMedidaService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "unidadesMedida", key = "'cod:' + #codigo.trim().toUpperCase()", unless = "#result == null")
     public UnidadMedidaResponse obtenerPorCodigo(String codigo) {
         UnidadMedida unidad = unidadMedidaRepository.findByCodigoIgnoreCase(codigo)
                 .orElseThrow(

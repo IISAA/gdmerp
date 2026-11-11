@@ -13,7 +13,7 @@ import pe.edu.upeu.gdmerp.ventas.delivery.dto.PedidoDeliveryResponse;
 import pe.edu.upeu.gdmerp.ventas.delivery.entity.EstadoDelivery;
 import pe.edu.upeu.gdmerp.ventas.delivery.entity.PedidoDelivery;
 import pe.edu.upeu.gdmerp.ventas.delivery.repository.PedidoDeliveryRepository;
-import pe.edu.upeu.gdmerp.ventas.event.DeliveryEntregadoEvent;
+import pe.edu.upeu.gdmerp.shared.event.DeliveryEntregadoEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

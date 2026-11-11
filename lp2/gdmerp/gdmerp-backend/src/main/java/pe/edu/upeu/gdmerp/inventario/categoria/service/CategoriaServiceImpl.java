@@ -10,10 +10,11 @@ import pe.edu.upeu.gdmerp.inventario.categoria.dto.ReporteCategoriaCostoDTO;
 import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.mapper.CategoriaMapper;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import pe.edu.upeu.gdmerp.shared.event.CategoriaEliminacionSolicitadaEvent;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
@@ -21,13 +22,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoriaServiceImpl implements CategoriaService {
     private final CategoriaRepository categoriaRepository;
-    private final ProductoRepository productoRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final CategoriaMapper categoriaMapper;
 
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
-    @Cacheable(value = "categorias")
+    @Cacheable(value = "categorias", key = "'all'", unless = "#result == null || #result.isEmpty()")
     public List<CategoriaResponse> listar() {
         return categoriaRepository.findAll().stream().map(categoriaMapper::toResponse).toList();
     }
@@ -35,6 +36,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @Cacheable(value = "categorias", key = "#id", unless = "#result == null")
     public CategoriaResponse buscarPorId(Long id) {
         return categoriaMapper.toResponse(getCategoriaEntity(id));
     }
@@ -65,10 +67,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     @CacheEvict(value = "categorias", allEntries = true)
     public void eliminar(Long id) {
         Categoria categoria = getCategoriaEntity(id);
-        if (productoRepository.existsByCategoriaId(id)) {
-            throw new IllegalStateException(
-                    "No se puede eliminar la categoría con id " + id + " porque tiene productos asociados");
-        }
+        eventPublisher.publishEvent(new CategoriaEliminacionSolicitadaEvent(categoria.getId(), categoria.getNombre()));
         categoriaRepository.delete(categoria);
     }
 

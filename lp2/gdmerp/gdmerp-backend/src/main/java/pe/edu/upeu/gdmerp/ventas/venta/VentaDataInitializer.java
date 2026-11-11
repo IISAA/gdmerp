@@ -4,16 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
-import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import pe.edu.upeu.gdmerp.shared.event.ConsultaProductosVentaEvent;
+import pe.edu.upeu.gdmerp.shared.event.ConsultaProductosVentaEvent.ProductoVentaSnapshot;
 import pe.edu.upeu.gdmerp.ventas.auditoria.service.AuditoriaService;
 import pe.edu.upeu.gdmerp.ventas.delivery.entity.EstadoDelivery;
 import pe.edu.upeu.gdmerp.ventas.delivery.entity.PedidoDelivery;
@@ -31,12 +31,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Inicializador de datos semilla de prueba para el módulo de Ventas POS y Omnicanalidad.
- * Provee ventas realistas desacoplado mediante ProductoService (@NamedInterface).
+ * Consulta los productos de Inventario de forma desacoplada vía {@link ConsultaProductosVentaEvent}.
  */
 @Slf4j
 @Component
@@ -46,14 +44,13 @@ import java.util.stream.Collectors;
 public class VentaDataInitializer implements CommandLineRunner {
 
     private final VentaRepository ventaRepository;
-    private final ProductoService productoService;
+    private final ApplicationEventPublisher eventPublisher;
     private final PedidoDeliveryRepository deliveryRepository;
     private final AuditoriaService auditoriaService;
     private final NumeroTicketService numeroTicketService;
 
-    private static final String ID_VENDEDOR1 = "5f624b7a-e931-4923-842d-74623e510bba"; // vendedor1
-    private static final String ID_ADMIN = "383b8059-6a43-4c78-a9c1-b7594539b98d";     // admin
-    private static final String ID_SUPERVISOR = "c568d3f9-7e54-4683-b5c1-6245709e090e"; // supervisor
+    private static final String ID_VENDEDOR1 = "5f624b7a-e931-4923-842d-74623e510bba";
+    private static final String ID_ADMIN = "383b8059-6a43-4c78-a9c1-b7594539b98d";
 
     @Override
     @Transactional
@@ -68,7 +65,8 @@ public class VentaDataInitializer implements CommandLineRunner {
         if (prevAuth == null) {
             SecurityContextHolder.getContext().setAuthentication(
                     new UsernamePasswordAuthenticationToken("system-initializer", null,
-                            List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_ALMACENERO")))
+                            List.of(new SimpleGrantedAuthority("ROLE_ADMIN"),
+                                    new SimpleGrantedAuthority("ROLE_ALMACENERO")))
             );
         }
         try {
@@ -81,67 +79,31 @@ public class VentaDataInitializer implements CommandLineRunner {
     }
 
     private void ejecutarCargaSemilla() {
-        List<ProductoResponse> listaProductos = productoService.listar();
-        if (listaProductos.isEmpty()) {
+        ConsultaProductosVentaEvent consulta = ConsultaProductosVentaEvent.todos();
+        eventPublisher.publishEvent(consulta);
+        Map<Long, ProductoVentaSnapshot> productosPorId = consulta.resultados();
+        if (productosPorId.isEmpty()) {
             log.warn("No se encontraron productos en catálogo para generar ventas semilla.");
             return;
         }
 
-        Map<Long, ProductoResponse> productosPorId = listaProductos.stream()
-                .collect(Collectors.toMap(ProductoResponse::id, Function.identity(), (a, b) -> a));
-
+        List<ProductoVentaSnapshot> listaProductos = new ArrayList<>(productosPorId.values());
         Long primerProdId = listaProductos.get(0).id();
         Long segundoProdId = listaProductos.size() > 1 ? listaProductos.get(1).id() : primerProdId;
-
         LocalDateTime ahora = LocalDateTime.now();
 
-        // 1. Venta POS Hoy - Efectivo
-        Venta v1 = crearVenta(
-                ahora.minusHours(2),
-                EstadoVenta.REGISTRADA,
-                MetodoPagoVenta.EFECTIVO,
-                "María Elena Flores Ramos",
-                ID_VENDEDOR1,
-                1L,
-                "DEMO-OP-001",
-                List.of(
-                        new ItemSeed(primerProdId, 2),
-                        new ItemSeed(segundoProdId, 1)
-                ),
-                productosPorId
-        );
+        crearVenta(ahora.minusHours(2), EstadoVenta.REGISTRADA, MetodoPagoVenta.EFECTIVO,
+                "María Elena Flores Ramos", ID_VENDEDOR1, 1L, "DEMO-OP-001",
+                List.of(new ItemSeed(primerProdId, 2), new ItemSeed(segundoProdId, 1)), productosPorId);
 
-        // 2. Venta POS Hoy - Yape
-        Venta v2 = crearVenta(
-                ahora.minusHours(3),
-                EstadoVenta.REGISTRADA,
-                MetodoPagoVenta.YAPE,
-                "Juan Carlos Quispe Huamán",
-                ID_VENDEDOR1,
-                1L,
-                "DEMO-OP-002",
-                List.of(
-                        new ItemSeed(primerProdId, 1)
-                ),
-                productosPorId
-        );
+        crearVenta(ahora.minusHours(3), EstadoVenta.REGISTRADA, MetodoPagoVenta.YAPE,
+                "Juan Carlos Quispe Huamán", ID_VENDEDOR1, 1L, "DEMO-OP-002",
+                List.of(new ItemSeed(primerProdId, 1)), productosPorId);
 
-        // 3. Venta POS Hoy - Tarjeta con Delivery vinculado
-        Venta v3 = crearVenta(
-                ahora.minusHours(4),
-                EstadoVenta.REGISTRADA,
-                MetodoPagoVenta.TARJETA,
-                "Empresa Agroindustrial del Valle SAC",
-                ID_ADMIN,
-                1L,
-                "DEMO-OP-003",
-                List.of(
-                        new ItemSeed(segundoProdId, 3)
-                ),
-                productosPorId
-        );
+        Venta v3 = crearVenta(ahora.minusHours(4), EstadoVenta.REGISTRADA, MetodoPagoVenta.TARJETA,
+                "Empresa Agroindustrial del Valle SAC", ID_ADMIN, 1L, "DEMO-OP-003",
+                List.of(new ItemSeed(segundoProdId, 3)), productosPorId);
 
-        // Vincular a pedido delivery
         deliveryRepository.save(PedidoDelivery.builder()
                 .ventaId(v3.getId())
                 .codigoPedido("DEL-AUTO-001")
@@ -155,20 +117,9 @@ public class VentaDataInitializer implements CommandLineRunner {
                 .fechaPactada(ahora.plusHours(1))
                 .build());
 
-        // 4. Venta Anulada (para probar reporte y auditoría)
-        Venta v4 = crearVenta(
-                ahora.minusDays(1),
-                EstadoVenta.ANULADA,
-                MetodoPagoVenta.EFECTIVO,
-                "Cliente Cancelado",
-                ID_VENDEDOR1,
-                1L,
-                "DEMO-OP-004",
-                List.of(
-                        new ItemSeed(primerProdId, 1)
-                ),
-                productosPorId
-        );
+        crearVenta(ahora.minusDays(1), EstadoVenta.ANULADA, MetodoPagoVenta.EFECTIVO,
+                "Cliente Cancelado", ID_VENDEDOR1, 1L, "DEMO-OP-004",
+                List.of(new ItemSeed(primerProdId, 1)), productosPorId);
 
         log.info("Ventas de prueba cargadas exitosamente.");
     }
@@ -182,12 +133,10 @@ public class VentaDataInitializer implements CommandLineRunner {
             Long sesionCajaId,
             String operacionId,
             List<ItemSeed> items,
-            Map<Long, ProductoResponse> productos) {
-
-        String ticket = numeroTicketService.siguiente();
+            Map<Long, ProductoVentaSnapshot> productos) {
 
         Venta venta = Venta.builder()
-                .numeroTicket(ticket)
+                .numeroTicket(numeroTicketService.siguiente())
                 .fecha(fecha)
                 .estado(estado)
                 .metodoPago(metodoPago)
@@ -199,19 +148,17 @@ public class VentaDataInitializer implements CommandLineRunner {
                 .build();
 
         BigDecimal total = BigDecimal.ZERO;
-
         for (ItemSeed item : items) {
-            ProductoResponse prod = productos.get(item.productoId);
+            ProductoVentaSnapshot prod = productos.get(item.productoId);
             if (prod == null) {
                 continue;
             }
-
-            BigDecimal precio = prod.costoPromedio() != null && prod.costoPromedio().compareTo(BigDecimal.ZERO) > 0
-                    ? prod.costoPromedio()
+            BigDecimal precio = prod.precioUnitario() != null && prod.precioUnitario().compareTo(BigDecimal.ZERO) > 0
+                    ? prod.precioUnitario()
                     : new BigDecimal("25.00");
             BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(item.cantidad));
 
-            DetalleVenta det = DetalleVenta.builder()
+            venta.getDetalles().add(DetalleVenta.builder()
                     .venta(venta)
                     .productoId(prod.id())
                     .loteId(null)
@@ -219,18 +166,14 @@ public class VentaDataInitializer implements CommandLineRunner {
                     .precioUnitario(precio)
                     .cantidad(item.cantidad)
                     .subtotal(subtotal)
-                    .build();
-
-            venta.getDetalles().add(det);
+                    .build());
             total = total.add(subtotal);
         }
 
         total = total.setScale(2, RoundingMode.HALF_UP);
         BigDecimal subtotal = total.divide(new BigDecimal("1.18"), 2, RoundingMode.HALF_UP);
-        BigDecimal igv = total.subtract(subtotal);
-
         venta.setSubtotal(subtotal);
-        venta.setIgv(igv);
+        venta.setIgv(total.subtract(subtotal));
         venta.setTotal(total);
 
         Venta guardada = ventaRepository.save(venta);

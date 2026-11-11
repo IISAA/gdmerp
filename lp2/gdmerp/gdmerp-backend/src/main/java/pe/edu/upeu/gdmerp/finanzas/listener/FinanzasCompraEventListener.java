@@ -2,13 +2,14 @@ package pe.edu.upeu.gdmerp.finanzas.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
-import pe.edu.upeu.gdmerp.compras.event.CompraAnuladaEvent;
-import pe.edu.upeu.gdmerp.compras.event.CompraRegistradaEvent;
-import pe.edu.upeu.gdmerp.compras.event.PagoCompraRegistradoEvent;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import pe.edu.upeu.gdmerp.finanzas.api.FinanzasApi;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.MetodoPago;
+import pe.edu.upeu.gdmerp.shared.event.CompraAnuladaEvent;
+import pe.edu.upeu.gdmerp.shared.event.CompraRegistradaEvent;
+import pe.edu.upeu.gdmerp.shared.event.PagoCompraRegistradoEvent;
 
 @Slf4j
 @Component
@@ -17,7 +18,7 @@ public class FinanzasCompraEventListener {
 
     private final FinanzasApi finanzasApi;
 
-    @ApplicationModuleListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT, fallbackExecution = true)
     public void onCompraRegistrada(CompraRegistradaEvent event) {
         log.info("Finanzas: procesando CompraRegistradaEvent para comprobante: {}", event.numeroComprobante());
         finanzasApi.registrarFacturaCompraPendiente(
@@ -28,7 +29,7 @@ public class FinanzasCompraEventListener {
         );
     }
 
-    @ApplicationModuleListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT, fallbackExecution = true)
     public void onPagoCompraRegistrado(PagoCompraRegistradoEvent event) {
         log.info("Finanzas: procesando PagoCompraRegistradoEvent para comprobante: {}", event.numeroComprobante());
         MetodoPago metodo = parseMetodoPago(event.metodoPago());
@@ -41,7 +42,7 @@ public class FinanzasCompraEventListener {
         );
     }
 
-    @ApplicationModuleListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT, fallbackExecution = true)
     public void onCompraAnulada(CompraAnuladaEvent event) {
         log.info("Finanzas: procesando CompraAnuladaEvent para comprobante: {}", event.numeroComprobante());
         finanzasApi.anularFacturaCompra(event.numeroComprobante());

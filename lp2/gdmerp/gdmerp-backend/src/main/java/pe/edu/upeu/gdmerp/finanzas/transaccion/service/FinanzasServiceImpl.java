@@ -1,20 +1,23 @@
 package pe.edu.upeu.gdmerp.finanzas.transaccion.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
+import pe.edu.upeu.gdmerp.finanzas.mapper.FinanzasMapper;
+import pe.edu.upeu.gdmerp.finanzas.reporte.dto.FlujoCajaResumenResponse;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.dto.CategoriaFinancieraRequest;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.dto.CategoriaFinancieraResponse;
-import pe.edu.upeu.gdmerp.finanzas.reporte.dto.FlujoCajaResumenResponse;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.dto.TransaccionFinancieraRequest;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.dto.TransaccionFinancieraResponse;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.CategoriaFinanciera;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.EstadoFinanciero;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.TipoFinanciero;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.TransaccionFinanciera;
-import pe.edu.upeu.gdmerp.finanzas.mapper.FinanzasMapper;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.repository.CategoriaFinancieraRepository;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.repository.TransaccionFinancieraRepository;
+import pe.edu.upeu.gdmerp.shared.event.ConsultaVentaPorTicketEvent;
+import pe.edu.upeu.gdmerp.shared.event.PagoVentaRegistradoEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,14 +28,17 @@ public class FinanzasServiceImpl implements FinanzasService {
     private final CategoriaFinancieraRepository categoriaRepository;
     private final TransaccionFinancieraRepository transaccionRepository;
     private final FinanzasMapper finanzasMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public FinanzasServiceImpl(
             CategoriaFinancieraRepository categoriaRepository,
             TransaccionFinancieraRepository transaccionRepository,
-            FinanzasMapper finanzasMapper) {
+            FinanzasMapper finanzasMapper,
+            ApplicationEventPublisher eventPublisher) {
         this.categoriaRepository = categoriaRepository;
         this.transaccionRepository = transaccionRepository;
         this.finanzasMapper = finanzasMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     // --- CATEGORÍAS FINANCIERAS ---
@@ -154,15 +160,19 @@ public class FinanzasServiceImpl implements FinanzasService {
         entity.setEstado(request.getEstado() != null ? request.getEstado() : EstadoFinanciero.PAGADO);
         entity.setTipoComprobante(request.getTipoComprobante());
         entity.setNumeroComprobante(request.getNumeroComprobante());
+        entity.setVentaId(request.getVentaId());
         entity.setCategoriaFinanciera(categoria);
 
-        return finanzasMapper.toTransaccionResponse(transaccionRepository.save(entity));
+        TransaccionFinanciera guardada = transaccionRepository.save(entity);
+        publicarEventoPagoVentaSiCorresponde(guardada);
+        return finanzasMapper.toTransaccionResponse(guardada);
     }
 
     @Override
     @Transactional
     public TransaccionFinancieraResponse actualizarTransaccion(Long id, TransaccionFinancieraRequest request) {
         TransaccionFinanciera entity = buscarTransaccionOFallar(id);
+        EstadoFinanciero estadoAnterior = entity.getEstado();
 
         if (transaccionRepository.existsByCodigoAndIdNot(request.getCodigo(), id)) {
             throw new IllegalArgumentException("Ya existe otra transacción financiera con el código: " + request.getCodigo());
@@ -182,17 +192,29 @@ public class FinanzasServiceImpl implements FinanzasService {
         }
         entity.setTipoComprobante(request.getTipoComprobante());
         entity.setNumeroComprobante(request.getNumeroComprobante());
+        if (request.getVentaId() != null) {
+            entity.setVentaId(request.getVentaId());
+        }
         entity.setCategoriaFinanciera(categoria);
 
-        return finanzasMapper.toTransaccionResponse(transaccionRepository.save(entity));
+        TransaccionFinanciera guardada = transaccionRepository.save(entity);
+        if (estadoAnterior != EstadoFinanciero.PAGADO && guardada.getEstado() == EstadoFinanciero.PAGADO) {
+            publicarEventoPagoVentaSiCorresponde(guardada);
+        }
+        return finanzasMapper.toTransaccionResponse(guardada);
     }
 
     @Override
     @Transactional
     public TransaccionFinancieraResponse cambiarEstadoTransaccion(Long id, EstadoFinanciero nuevoEstado) {
         TransaccionFinanciera entity = buscarTransaccionOFallar(id);
+        EstadoFinanciero estadoAnterior = entity.getEstado();
         entity.setEstado(nuevoEstado);
-        return finanzasMapper.toTransaccionResponse(transaccionRepository.save(entity));
+        TransaccionFinanciera guardada = transaccionRepository.save(entity);
+        if (estadoAnterior != EstadoFinanciero.PAGADO && nuevoEstado == EstadoFinanciero.PAGADO) {
+            publicarEventoPagoVentaSiCorresponde(guardada);
+        }
+        return finanzasMapper.toTransaccionResponse(guardada);
     }
 
     @Override
@@ -236,6 +258,33 @@ public class FinanzasServiceImpl implements FinanzasService {
                 .cuentasPorPagarPendientes(cuentasPorPagar)
                 .totalTransacciones(todas.size())
                 .build();
+    }
+
+    private void publicarEventoPagoVentaSiCorresponde(TransaccionFinanciera transaccion) {
+        if (transaccion.getTipo() != TipoFinanciero.INGRESO || transaccion.getEstado() != EstadoFinanciero.PAGADO) {
+            return;
+        }
+        Long ventaId = resolverVentaId(transaccion);
+        if (ventaId != null) {
+            eventPublisher.publishEvent(new PagoVentaRegistradoEvent(
+                    ventaId,
+                    transaccion.getId(),
+                    transaccion.getMonto()
+            ));
+        }
+    }
+
+    private Long resolverVentaId(TransaccionFinanciera transaccion) {
+        if (transaccion.getVentaId() != null) {
+            return transaccion.getVentaId();
+        }
+        String numeroComprobante = transaccion.getNumeroComprobante();
+        if (numeroComprobante == null || numeroComprobante.isBlank()) {
+            return null;
+        }
+        ConsultaVentaPorTicketEvent consulta = new ConsultaVentaPorTicketEvent(numeroComprobante.trim());
+        eventPublisher.publishEvent(consulta);
+        return consulta.ventaIdEncontrado().get();
     }
 
     private CategoriaFinanciera buscarCategoriaOFallar(Long id) {

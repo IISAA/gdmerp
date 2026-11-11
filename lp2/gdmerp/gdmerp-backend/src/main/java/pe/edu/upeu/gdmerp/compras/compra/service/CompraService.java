@@ -1,9 +1,14 @@
 package pe.edu.upeu.gdmerp.compras.compra.service;
 
-import pe.edu.upeu.gdmerp.compras.compra.dto.*;
-import pe.edu.upeu.gdmerp.compras.proveedor.dto.*;
-import pe.edu.upeu.gdmerp.compras.insumo.dto.*;
+import pe.edu.upeu.gdmerp.compras.compra.dto.AmortizarPagoRequest;
+import pe.edu.upeu.gdmerp.compras.compra.dto.CompraReporte;
+import pe.edu.upeu.gdmerp.compras.compra.dto.CompraRequest;
+import pe.edu.upeu.gdmerp.compras.compra.dto.CompraResponse;
+import pe.edu.upeu.gdmerp.compras.compra.dto.PagoCompraResponse;
 import pe.edu.upeu.gdmerp.compras.compra.entity.EstadoCompra;
+import pe.edu.upeu.gdmerp.compras.insumo.dto.InsumoDto;
+import pe.edu.upeu.gdmerp.compras.proveedor.dto.ProveedorRequest;
+import pe.edu.upeu.gdmerp.compras.proveedor.dto.ProveedorResponse;
 
 import java.time.LocalDate;
 import java.util.List;

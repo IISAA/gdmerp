@@ -1,12 +1,13 @@
 package pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity;
 
 /**
- * Enumeración que define los estados permitidos en el ciclo de vida de una orden de producción.
+ * Alias de estado de orden de producción alineado con las transiciones de Kardex.
  */
 public enum EstadoOrden {
     PLANIFICADO,
     EN_PROCESO,
     COMPLETADO,
+    FINALIZADA,
     CANCELADO;
 
     public EstadoOrdenProduccion toEstadoOrdenProduccion() {

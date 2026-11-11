@@ -1,6 +1,9 @@
 package pe.edu.upeu.gdmerp.produccion.centrotrabajo.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,19 +13,20 @@ import pe.edu.upeu.gdmerp.produccion.centrotrabajo.dto.CentroTrabajoResponse;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.mapper.CentroTrabajoMapper;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
-import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
+import pe.edu.upeu.gdmerp.shared.event.CentroTrabajoEliminacionSolicitadaEvent;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CentroTrabajoServiceImpl implements CentroTrabajoService {
     private final CentroTrabajoRepository repository;
-    private final OrdenProduccionRepository ordenProduccionRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final CentroTrabajoMapper mapper;
 
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'OPERARIO', 'ALMACENERO')")
+    @Cacheable(value = "centrosTrabajo", key = "'all'", unless = "#result == null || #result.isEmpty()")
     public List<CentroTrabajoResponse> listar() {
         return repository.findAll().stream().map(mapper::toResponse).toList();
     }
@@ -30,6 +34,7 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'OPERARIO', 'ALMACENERO')")
+    @Cacheable(value = "centrosTrabajo", key = "#id", unless = "#result == null")
     public CentroTrabajoResponse buscarPorId(Long id) {
         return mapper.toResponse(getEntity(id));
     }
@@ -37,6 +42,7 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
+    @CacheEvict(value = "centrosTrabajo", allEntries = true)
     public CentroTrabajoResponse crear(CentroTrabajoRequest request) {
         validarNombreUnico(request.nombre(), null);
         validarCodigoUnico(request.codigo(), null);
@@ -48,6 +54,7 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
+    @CacheEvict(value = "centrosTrabajo", allEntries = true)
     public CentroTrabajoResponse actualizar(Long id, CentroTrabajoRequest request) {
         CentroTrabajo ct = getEntity(id);
         
@@ -61,11 +68,10 @@ public class CentroTrabajoServiceImpl implements CentroTrabajoService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
+    @CacheEvict(value = "centrosTrabajo", allEntries = true)
     public void eliminar(Long id) {
         CentroTrabajo ct = getEntity(id);
-        if (ordenProduccionRepository.existsByCentroTrabajoId(id)) {
-            throw new IllegalStateException("No se puede eliminar el centro de trabajo con id " + id + " porque tiene órdenes de producción asociadas");
-        }
+        eventPublisher.publishEvent(new CentroTrabajoEliminacionSolicitadaEvent(ct.getId(), ct.getNombre()));
         repository.delete(ct);
     }
 

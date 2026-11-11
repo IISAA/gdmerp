@@ -1,5 +1,6 @@
 package pe.edu.upeu.gdmerp.produccion.listamateriales.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,11 @@ import java.util.Optional;
 
 @Repository
 public interface ListaMaterialesRepository extends JpaRepository<ListaMateriales, Long> {
+
+    @Override
+    @EntityGraph(attributePaths = {"productoTerminado"})
+    List<ListaMateriales> findAll();
+
     Optional<ListaMateriales> findByCodigo(String codigo);
     @Query("SELECT DISTINCT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles d LEFT JOIN FETCH d.insumo WHERE lm.productoTerminado.id = :productoId")
     List<ListaMateriales> findByProductoTerminadoId(@Param("productoId") Long productoId);

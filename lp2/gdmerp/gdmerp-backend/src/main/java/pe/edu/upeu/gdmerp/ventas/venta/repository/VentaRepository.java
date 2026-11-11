@@ -31,6 +31,8 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
 
     Optional<Venta> findByOperacionId(String operacionId);
 
+    Optional<Venta> findByNumeroTicket(String numeroTicket);
+
     @EntityGraph(attributePaths = "detalles")
     @Query("""
         SELECT v FROM Venta v

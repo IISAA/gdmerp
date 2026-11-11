@@ -32,7 +32,7 @@ public class ListaMaterialesServiceImpl implements ListaMaterialesService {
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'ALMACENERO')")
     public List<ListaMaterialesResponse> listar() {
         return listaMaterialesRepository.findAll().stream()
-                .map(mapper::toResponse)
+                .map(mapper::toListResponse)
                 .toList();
     }
 

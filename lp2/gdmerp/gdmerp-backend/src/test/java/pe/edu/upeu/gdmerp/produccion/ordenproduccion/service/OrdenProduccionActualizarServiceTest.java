@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
 import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService;
@@ -21,6 +22,7 @@ import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.EstadoOrdenProduccio
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.mapper.OrdenProduccionMapper;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
+import pe.edu.upeu.gdmerp.shared.event.OrdenProduccionCompletadaEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -52,6 +54,9 @@ class OrdenProduccionActualizarServiceTest {
 
     @Mock
     private ListaMaterialesRepository listaMaterialesRepository;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private OrdenProduccionServiceImpl ordenProduccionService;
@@ -345,7 +350,12 @@ class OrdenProduccionActualizarServiceTest {
 
         assertNotNull(respuesta);
         assertEquals(EstadoOrdenProduccion.COMPLETADO, ordenExistente.getEstado());
-        verify(inventarioService).registrarIngresoProduccion(eq(ordenExistente.getProducto()), eq(ordenExistente.getCantidad()), any(String.class));
+        verify(eventPublisher).publishEvent(argThat((Object ev) ->
+                ev instanceof OrdenProduccionCompletadaEvent completed
+                        && Long.valueOf(10L).equals(completed.ordenId())
+                        && Long.valueOf(100L).equals(completed.productoTerminadoId())
+                        && ordenExistente.getCantidad().compareTo(completed.cantidadProducida()) == 0
+        ));
         assertNotNull(ordenExistente.getLoteGenerado());
         assertTrue(ordenExistente.getLoteGenerado().startsWith("LT-"));
         verify(ordenRepository).save(ordenExistente);

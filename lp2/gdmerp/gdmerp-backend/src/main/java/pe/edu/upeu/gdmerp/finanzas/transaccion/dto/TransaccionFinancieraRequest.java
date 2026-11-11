@@ -40,10 +40,16 @@ public class TransaccionFinancieraRequest {
     @NotNull(message = "El ID de la categoría financiera es obligatorio")
     private Long categoriaFinancieraId;
 
+    private Long ventaId;
+
     public TransaccionFinancieraRequest() {
     }
 
     public TransaccionFinancieraRequest(String codigo, String concepto, BigDecimal monto, LocalDate fechaTransaccion, TipoFinanciero tipo, EstadoFinanciero estado, String tipoComprobante, String numeroComprobante, Long categoriaFinancieraId) {
+        this(codigo, concepto, monto, fechaTransaccion, tipo, estado, tipoComprobante, numeroComprobante, categoriaFinancieraId, null);
+    }
+
+    public TransaccionFinancieraRequest(String codigo, String concepto, BigDecimal monto, LocalDate fechaTransaccion, TipoFinanciero tipo, EstadoFinanciero estado, String tipoComprobante, String numeroComprobante, Long categoriaFinancieraId, Long ventaId) {
         this.codigo = codigo;
         this.concepto = concepto;
         this.monto = monto;
@@ -53,5 +59,6 @@ public class TransaccionFinancieraRequest {
         this.tipoComprobante = tipoComprobante;
         this.numeroComprobante = numeroComprobante;
         this.categoriaFinancieraId = categoriaFinancieraId;
+        this.ventaId = ventaId;
     }
 }

@@ -16,6 +16,7 @@ import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.lote.entity.Lote;
 import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
 import org.springframework.transaction.TransactionStatus;
 
@@ -44,6 +45,7 @@ class StockConcurrenciaIntegrationTest {
     @Autowired private InventarioOperacionService inventarioService;
     @Autowired private ProductoRepository productoRepository;
     @Autowired private LoteRepository loteRepository;
+    @Autowired private MovimientoInventarioRepository movimientoRepository;
     @Autowired private AlmacenRepository almacenRepository;
     @Autowired private CategoriaRepository categoriaRepository;
     @Autowired private PlatformTransactionManager transactionManager;
@@ -190,6 +192,7 @@ class StockConcurrenciaIntegrationTest {
     @AfterEach
     void limpiarDatosDeTest() {
         if (producto != null) {
+            movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(producto.getId()));
             loteRepository.deleteAll(loteRepository.findByProductoId(producto.getId()));
             // deleteById recarga la versión actual en vez de borrar con la que quedó
             // capturada en memoria (evita StaleObjectStateException tras consumos concurrentes).

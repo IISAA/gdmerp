@@ -4,9 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import pe.edu.upeu.gdmerp.exception.InsufficientStockException;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
 import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService;
@@ -17,6 +19,8 @@ import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.EstadoOrdenProduccio
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.mapper.OrdenProduccionMapper;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
+import pe.edu.upeu.gdmerp.shared.event.OrdenProduccionAprobadaEvent;
+import pe.edu.upeu.gdmerp.shared.event.OrdenProduccionCompletadaEvent;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -25,7 +29,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +48,9 @@ class OrdenProduccionTransicionEstadoTest {
 
     @Mock
     private pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService productoService;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private OrdenProduccionServiceImpl ordenProduccionService;
@@ -82,7 +88,7 @@ class OrdenProduccionTransicionEstadoTest {
     }
 
     @Test
-    @DisplayName("Transición PLANIFICADO -> EN_PROCESO descuenta insumos de Kardex")
+    @DisplayName("Transición PLANIFICADO -> EN_PROCESO publica OrdenProduccionAprobadaEvent")
     void transicionPlanificadoAEnProcesoDescuentaInsumos() {
         when(ordenRepository.findById(100L)).thenReturn(Optional.of(orden));
         when(ordenRepository.save(any(OrdenProduccion.class))).thenAnswer(i -> i.getArgument(0));
@@ -92,26 +98,32 @@ class OrdenProduccionTransicionEstadoTest {
 
         assertNotNull(response);
         assertEquals(EstadoOrdenProduccion.EN_PROCESO, orden.getEstado());
-        verify(inventarioService).descontarInsumosProduccion(orden.getDetalles());
+        ArgumentCaptor<OrdenProduccionAprobadaEvent> captor = ArgumentCaptor.forClass(OrdenProduccionAprobadaEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        assertEquals(100L, captor.getValue().ordenId());
+        assertEquals(1, captor.getValue().insumosConsumidos().size());
+        assertEquals(200L, captor.getValue().insumosConsumidos().get(0).productoId());
+        assertEquals(0, BigDecimal.valueOf(25).compareTo(captor.getValue().insumosConsumidos().get(0).cantidadConsumida()));
         verify(ordenRepository).save(orden);
     }
 
     @Test
-    @DisplayName("Falla en Kardex durante PLANIFICADO -> EN_PROCESO propaga excepción para rollback")
+    @DisplayName("Falla en listener BEFORE_COMMIT durante PLANIFICADO -> EN_PROCESO propaga excepción para rollback")
     void transicionPlanificadoAEnProcesoFallaEnKardexLanzaExcepcion() {
         when(ordenRepository.findById(100L)).thenReturn(Optional.of(orden));
+        when(ordenRepository.save(any(OrdenProduccion.class))).thenAnswer(i -> i.getArgument(0));
         doThrow(new InsufficientStockException("Stock insuficiente para insumo"))
-                .when(inventarioService).descontarInsumosProduccion(any());
+                .when(eventPublisher).publishEvent(any(OrdenProduccionAprobadaEvent.class));
 
         assertThrows(InsufficientStockException.class, () ->
                 ordenProduccionService.procesarTransicionEstado(100L, EstadoOrdenProduccion.EN_PROCESO)
         );
 
-        verify(ordenRepository, never()).save(any());
+        verify(ordenRepository).save(orden);
     }
 
     @Test
-    @DisplayName("Transición EN_PROCESO -> COMPLETADO ingresa producto terminado a Kardex")
+    @DisplayName("Transición EN_PROCESO -> COMPLETADO publica OrdenProduccionCompletadaEvent y genera lote")
     void transicionEnProcesoACompletadoIngresaProductoTerminado() {
         orden.setEstado(EstadoOrdenProduccion.EN_PROCESO);
         when(ordenRepository.findById(100L)).thenReturn(Optional.of(orden));
@@ -122,7 +134,28 @@ class OrdenProduccionTransicionEstadoTest {
 
         assertNotNull(response);
         assertEquals(EstadoOrdenProduccion.COMPLETADO, orden.getEstado());
-        verify(inventarioService).registrarIngresoProduccion(eq(orden.getProducto()), eq(orden.getCantidad()), any(String.class));
+        ArgumentCaptor<OrdenProduccionCompletadaEvent> captor = ArgumentCaptor.forClass(OrdenProduccionCompletadaEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        assertEquals(100L, captor.getValue().ordenId());
+        assertEquals(1L, captor.getValue().productoTerminadoId());
+        assertEquals(0, orden.getCantidad().compareTo(captor.getValue().cantidadProducida()));
+        assertNotNull(orden.getLoteGenerado());
+        verify(ordenRepository).save(orden);
+    }
+
+    @Test
+    @DisplayName("Transición EN_PROCESO -> FINALIZADA publica OrdenProduccionCompletadaEvent y genera lote")
+    void transicionEnProcesoAFinalizadaPublicaEventoCompletada() {
+        orden.setEstado(EstadoOrdenProduccion.EN_PROCESO);
+        when(ordenRepository.findById(100L)).thenReturn(Optional.of(orden));
+        when(ordenRepository.save(any(OrdenProduccion.class))).thenAnswer(i -> i.getArgument(0));
+        when(mapper.toResponse(any(OrdenProduccion.class))).thenReturn(mock(OrdenProduccionResponse.class));
+
+        OrdenProduccionResponse response = ordenProduccionService.procesarTransicionEstado(100L, EstadoOrdenProduccion.FINALIZADA);
+
+        assertNotNull(response);
+        assertEquals(EstadoOrdenProduccion.FINALIZADA, orden.getEstado());
+        verify(eventPublisher).publishEvent(any(OrdenProduccionCompletadaEvent.class));
         assertNotNull(orden.getLoteGenerado());
         verify(ordenRepository).save(orden);
     }

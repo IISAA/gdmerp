@@ -11,6 +11,7 @@ import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.lote.entity.Lote;
 import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
@@ -40,6 +41,7 @@ class OrdenProduccionTransactionTest {
     @Autowired private OrdenProduccionRepository ordenRepository;
     @Autowired private ProductoRepository productoRepository;
     @Autowired private LoteRepository loteRepository;
+    @Autowired private MovimientoInventarioRepository movimientoRepository;
     @Autowired private AlmacenRepository almacenRepository;
     @Autowired private CategoriaRepository categoriaRepository;
     @Autowired private CentroTrabajoRepository centroRepository;
@@ -219,13 +221,15 @@ class OrdenProduccionTransactionTest {
             centro = null;
         }
         if (productoT != null) {
-            // Borrar primero los lotes por repositorio (evita cascadas/merge sobre el
+            // Borrar primero los movimientos y lotes por repositorio (evita cascadas/merge sobre el
             // producto detached) y luego el producto con su versión vigente.
+            movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(productoT.getId()));
             loteRepository.deleteAll(loteRepository.findByProductoId(productoT.getId()));
             productoRepository.deleteById(productoT.getId());
             productoT = null;
         }
         if (insumo != null) {
+            movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(insumo.getId()));
             loteRepository.deleteAll(loteRepository.findByProductoId(insumo.getId()));
             // El stock del insumo se consumió en el test: su @Version subió en la BD,
             // por lo que se borra recargando la fila actual (deleteById) y no la imagen

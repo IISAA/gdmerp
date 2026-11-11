@@ -19,4 +19,9 @@ public interface InventarioOperacionService {
 
     void descontarInsumosProduccion(List<? extends InsumoDetalle> detalles);
     void reversarInsumosProduccion(List<? extends InsumoDetalle> detalles);
+
+    void descontarStockVenta(Long productoId, Long loteId, Integer cantidad, String numeroTicket);
+    void reponerStockVenta(Long productoId, Integer cantidad, String numeroTicket);
+
+    Long registrarAjusteInventario(Long productoId, BigDecimal diferencia, String motivoAjuste);
 }

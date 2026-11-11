@@ -18,6 +18,10 @@ public interface OrdenProduccionMapper {
     @Mapping(target = "totalCostoInsumos", expression = "java(ordenProduccion.getTotalCostoInsumos())")
     OrdenProduccionResponse toResponse(OrdenProduccion ordenProduccion);
 
+    @Mapping(target = "detalles", ignore = true)
+    @Mapping(target = "totalCostoInsumos", expression = "java(java.math.BigDecimal.ZERO)")
+    OrdenProduccionResponse toListResponse(OrdenProduccion ordenProduccion);
+
     @Mapping(target = "nombreMateriaPrima", source = "nombreProducto")
     @Mapping(target = "subtotal", expression = "java(detalle.getSubtotal())")
     DetalleOrdenResponse toDetalleResponse(DetalleOrdenProduccion detalle);

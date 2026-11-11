@@ -7,17 +7,29 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import pe.edu.upeu.gdmerp.compras.compra.dto.*;
-import pe.edu.upeu.gdmerp.compras.proveedor.dto.*;
-import pe.edu.upeu.gdmerp.compras.insumo.dto.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import pe.edu.upeu.gdmerp.compras.compra.dto.AmortizarPagoRequest;
+import pe.edu.upeu.gdmerp.compras.compra.dto.CompraReporte;
+import pe.edu.upeu.gdmerp.compras.compra.dto.CompraRequest;
+import pe.edu.upeu.gdmerp.compras.compra.dto.CompraResponse;
+import pe.edu.upeu.gdmerp.compras.compra.dto.PagoCompraResponse;
 import pe.edu.upeu.gdmerp.compras.compra.entity.EstadoCompra;
 import pe.edu.upeu.gdmerp.compras.compra.service.CompraService;
+import pe.edu.upeu.gdmerp.compras.insumo.dto.InsumoDto;
+import pe.edu.upeu.gdmerp.compras.proveedor.dto.ProveedorRequest;
+import pe.edu.upeu.gdmerp.compras.proveedor.dto.ProveedorResponse;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Tag(name = "Compras - Insumos y Proveedores", description = "Adquisición de materias primas, insumos y cuentas por pagar (Elishan Huaylla)")
+@Tag(name = "Compras - Insumos y Proveedores", description = "Adquisición de materias primas, insumos y cuentas por pagar")
 @RestController
 @RequestMapping("/api/v1/compras")
 @RequiredArgsConstructor

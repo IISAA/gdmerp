@@ -4,14 +4,37 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.*;
-import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.*;
-import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.*;
-import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.*;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.*;
-import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.repository.*;
-import pe.edu.upeu.gdmerp.finanzas.sesioncaja.repository.*;
-import pe.edu.upeu.gdmerp.finanzas.transaccion.repository.*;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCosto;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.AsignacionCajaCentroCostoId;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CajaChica;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.CentroCosto;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.DetalleRendicionCajaChica;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.EstadoRendicion;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.RendicionCajaChica;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.AsignacionCajaCentroCostoRepository;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CajaChicaRepository;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CentroCostoRepository;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.repository.RendicionCajaChicaRepository;
+import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.AbonoCuentaPorCobrar;
+import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.CuentaPorCobrar;
+import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.EstadoCredito;
+import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.repository.CuentaPorCobrarRepository;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.DenominacionMoneda;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.DetalleArqueoEfectivo;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.DetalleArqueoEfectivoId;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.EstadoCaja;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.MetodoPago;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.MovimientoCaja;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.SesionCaja;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.TipoDenominacion;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.repository.DenominacionMonedaRepository;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.repository.SesionCajaRepository;
+import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.CategoriaFinanciera;
+import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.EstadoFinanciero;
+import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.TipoFinanciero;
+import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.TransaccionFinanciera;
+import pe.edu.upeu.gdmerp.finanzas.transaccion.repository.CategoriaFinancieraRepository;
+import pe.edu.upeu.gdmerp.finanzas.transaccion.repository.TransaccionFinancieraRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,10 +51,10 @@ public class FinanzasDataInitializer implements CommandLineRunner {
     private final CategoriaFinancieraRepository categoriaFinancieraRepository;
     private final TransaccionFinancieraRepository transaccionFinancieraRepository;
     private final SesionCajaRepository sesionCajaRepository;
-    private final pe.edu.upeu.gdmerp.finanzas.sesioncaja.repository.DenominacionMonedaRepository denominacionMonedaRepository;
-    private final pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CentroCostoRepository centroCostoRepository;
-    private final pe.edu.upeu.gdmerp.finanzas.cajachica.repository.AsignacionCajaCentroCostoRepository asignacionCajaCentroCostoRepository;
-    private final pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.repository.CuentaPorCobrarRepository cuentaPorCobrarRepository;
+    private final DenominacionMonedaRepository denominacionMonedaRepository;
+    private final CentroCostoRepository centroCostoRepository;
+    private final AsignacionCajaCentroCostoRepository asignacionCajaCentroCostoRepository;
+    private final CuentaPorCobrarRepository cuentaPorCobrarRepository;
 
     public FinanzasDataInitializer(
             CajaChicaRepository cajaChicaRepository,
@@ -39,10 +62,10 @@ public class FinanzasDataInitializer implements CommandLineRunner {
             CategoriaFinancieraRepository categoriaFinancieraRepository,
             TransaccionFinancieraRepository transaccionFinancieraRepository,
             SesionCajaRepository sesionCajaRepository,
-            pe.edu.upeu.gdmerp.finanzas.sesioncaja.repository.DenominacionMonedaRepository denominacionMonedaRepository,
-            pe.edu.upeu.gdmerp.finanzas.cajachica.repository.CentroCostoRepository centroCostoRepository,
-            pe.edu.upeu.gdmerp.finanzas.cajachica.repository.AsignacionCajaCentroCostoRepository asignacionCajaCentroCostoRepository,
-            pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.repository.CuentaPorCobrarRepository cuentaPorCobrarRepository) {
+            DenominacionMonedaRepository denominacionMonedaRepository,
+            CentroCostoRepository centroCostoRepository,
+            AsignacionCajaCentroCostoRepository asignacionCajaCentroCostoRepository,
+            CuentaPorCobrarRepository cuentaPorCobrarRepository) {
         this.cajaChicaRepository = cajaChicaRepository;
         this.rendicionRepository = rendicionRepository;
         this.categoriaFinancieraRepository = categoriaFinancieraRepository;

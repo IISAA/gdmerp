@@ -107,6 +107,30 @@ export const routes: Routes = [
     loadChildren: () => import('./features/finanzas/finanzas.routes').then((m) => m.FINANZAS_ROUTES),
   },
   {
+    path: 'compras',
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMIN', 'SUPERVISOR'] },
+    loadChildren: () => import('./features/compras/compras.routes').then((m) => m.COMPRAS_ROUTES),
+  },
+  {
+    path: 'catalogo',
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'VENDEDOR'] },
+    loadChildren: () => import('./features/catalogo/catalogo.routes').then((m) => m.CATALOGO_ROUTES),
+  },
+  {
+    path: 'terceros',
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMIN', 'VENDEDOR', 'SUPERVISOR', 'ALMACENERO'] },
+    loadChildren: () => import('./features/terceros/terceros.routes').then((m) => m.TERCEROS_ROUTES),
+  },
+  {
+    path: 'caja',
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMIN', 'ADMIN_FINANZAS', 'SUPERVISOR', 'CAJERO', 'VENDEDOR'] },
+    loadChildren: () => import('./features/caja/caja.routes').then((m) => m.CAJA_ROUTES),
+  },
+  {
     path: 'acceso-denegado',
     loadComponent: () => import('./features/acceso-denegado/acceso-denegado.component').then(m => m.AccesoDenegadoComponent)
   },
