@@ -14,20 +14,40 @@ import { environment } from '../environments/environment';
  */
 export function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
-    keycloak.init({
-      config: {
-        url: environment.keycloak.url,
-        realm: environment.keycloak.realm,
-        clientId: environment.keycloak.clientId
-      },
-      initOptions: {
-        onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: `${window.location.origin}/assets/silent-check-sso.html`,
-        checkLoginIframe: false
-      },
-      enableBearerInterceptor: true,
-      bearerExcludedUrls: ['/assets']
-    });
+    keycloak
+      .init({
+        config: {
+          url: environment.keycloak.url,
+          realm: environment.keycloak.realm,
+          clientId: environment.keycloak.clientId
+        },
+        initOptions: {
+          onLoad: 'check-sso',
+          silentCheckSsoRedirectUri: `${window.location.origin}/assets/silent-check-sso.html`,
+          checkLoginIframe: false
+        },
+        enableBearerInterceptor: true,
+        bearerExcludedUrls: ['/assets'],
+        bearerPrefix: 'Bearer',
+        shouldAddToken: (req) => {
+          try {
+            return req.url.includes('/api/') && keycloak.isLoggedIn();
+          } catch {
+            return false;
+          }
+        },
+        shouldUpdateToken: () => {
+          try {
+            return keycloak.isLoggedIn();
+          } catch {
+            return false;
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn('Keycloak no disponible, continuando inicialización de la app:', err);
+        return false;
+      });
 }
 
 export const appConfig: ApplicationConfig = {

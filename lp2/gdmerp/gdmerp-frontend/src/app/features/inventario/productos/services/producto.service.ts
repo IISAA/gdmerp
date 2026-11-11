@@ -2,21 +2,21 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { ProductoResponse, ProductoRequest } from '../models/producto.model';
+import { Producto, ProductoResponse, ProductoRequest } from '../models/producto.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductoService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/productos`;
+  private readonly apiUrl = `${environment?.apiUrl || 'http://localhost:8080/api/v1'}/productos`;
 
-  listar(tipoProducto?: string): Observable<ProductoResponse[]> {
+  listar(tipoProducto?: string): Observable<Producto[]> {
     let params = new HttpParams();
     if (tipoProducto) {
       params = params.set('tipoProducto', tipoProducto);
     }
-    return this.http.get<ProductoResponse[]>(this.apiUrl, { params });
+    return this.http.get<Producto[]>(this.apiUrl, { params });
   }
 
   buscarPorId(id: number): Observable<ProductoResponse> {

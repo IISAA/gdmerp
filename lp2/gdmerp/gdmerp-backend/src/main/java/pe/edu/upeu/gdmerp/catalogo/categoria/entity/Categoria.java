@@ -12,8 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "CATEGORIAS", schema = "BOM_CATALOGO")
+@Entity(name = "CatalogoCategoria")
+@Table(name = "CATEGORIAS", schema = "GDM_CATALOGO")
 @Getter
 @Setter
 @Builder

@@ -20,8 +20,13 @@
     "@angular/material": "^22.2.0",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
+    "@types/leaflet": "^1.9.22",
+    "@zxing/browser": "^0.2.1",
+    "@zxing/library": "^0.23.0",
+    "chart.js": "^4.6.1",
     "keycloak-angular": "^22.0.0",
     "keycloak-js": "^26.2.4",
+    "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

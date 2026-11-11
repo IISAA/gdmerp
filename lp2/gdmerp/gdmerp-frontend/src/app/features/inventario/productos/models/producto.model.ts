@@ -17,13 +17,17 @@ export interface ProductoResponse {
   id: number;
   sku: string;
   nombre: string;
-  unidadMedida: string;
+  unidadMedida?: string;
   costoPromedio?: number;
-  stockTotal: number;
-  stockMinimo: number;
-  almacen: AlmacenResponse;
-  categoria: CategoriaResponse;
-  tipoProducto: TipoProducto | string;
+  precio?: number;
+  stock?: number;
+  stockTotal?: number;
+  stockActual?: number;
+  stockMinimo?: number;
+  almacen?: AlmacenResponse;
+  categoria?: CategoriaResponse;
+  tipoProducto?: TipoProducto | string;
+  imagenUrl?: string;
 }
 
 export type Producto = ProductoResponse;

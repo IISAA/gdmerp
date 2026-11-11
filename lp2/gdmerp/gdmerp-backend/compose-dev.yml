@@ -20,7 +20,7 @@ services:
       retries: 10
       start_period: 60s
 
-  #keycloak-db
+  # Keycloak DB
   keycloak-db:
     image: postgres:17-alpine
     container_name: gdmerp-keycloak-db
@@ -40,6 +40,7 @@ services:
       retries: 10
       start_period: 15s
 
+  # Keycloak
   keycloak:
     image: quay.io/keycloak/keycloak:26.8.0
     container_name: gdmerp-keycloak
@@ -60,14 +61,15 @@ services:
     volumes:
       - keycloak_data:/opt/keycloak/data
 
+  # Redis
+  redis:
+    image: redis:7.4-alpine
+    container_name: gdmerp-redis
+    restart: unless-stopped
+    ports:
+      - "36379:6379"
+
 volumes:
   oracle_data:
   keycloak_data:
   keycloak_db_data:
-
-redis:
-  image: redis:7.4-alpine
-  container_name: gdmerp-redis
-  restart: unless-stopped
-  ports:
-    - "36379:6379"

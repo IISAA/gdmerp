@@ -29,6 +29,7 @@
           <th style="padding: 1rem; color: #475569; font-weight: 600;">PRODUCTO & TIPO</th>
           <th style="padding: 1rem; color: #475569; font-weight: 600;">CATEGORÍA</th>
           <th style="padding: 1rem; color: #475569; font-weight: 600;">ALMACÉN</th>
+          <th style="padding: 1rem; color: #475569; font-weight: 600; text-align: right;">PRECIO</th>
           <th style="padding: 1rem; color: #475569; font-weight: 600; text-align: right;">STOCK FÍSICO</th>
           <th style="padding: 1rem; color: #475569; font-weight: 600; text-align: right;">ACCIONES</th>
         </tr>
@@ -36,10 +37,10 @@
       <tbody>
         @if (isLoading()) {
         <tr>
-          <td colspan="6" style="text-align: center; padding: 2rem;">Cargando catálogo...</td>
+          <td colspan="7" style="text-align: center; padding: 2rem;">Cargando catálogo...</td>
         </tr>
         } @else {
-        @for (producto of productosFiltrados(); track producto.id) {
+        @for (producto of productosFiltrados(); track (producto.id ?? $index)) {
         <tr style="border-bottom: 1px solid #e2e8f0; transition: background-color 0.2s;">
 
           <td style="padding: 1rem; font-family: monospace; color: #475569;">{{ producto.sku }}</td>
@@ -59,6 +60,11 @@
               <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem; color: #94a3b8;">warehouse</mat-icon>
               {{ producto.almacen?.nombre || 'Sin almacén' }}
             </div>
+          </td>
+
+          <!-- PRECIO -->
+          <td style="padding: 1rem; text-align: right; font-weight: 600; color: #0f172a;">
+            S/ {{ (producto.precio ?? producto.costoPromedio ?? 0) | number:'1.2-2' }}
           </td>
 
           <!-- SEMÁFORO DE STOCK -->
@@ -97,7 +103,7 @@
         </tr>
         } @empty {
         <tr>
-          <td colspan="6" style="text-align: center; padding: 3rem; color: #64748b;">
+          <td colspan="7" style="text-align: center; padding: 3rem; color: #64748b;">
             @if (textoBusqueda()) {
               No se encontraron productos coincidentes con "{{ textoBusqueda() }}".
             } @else {

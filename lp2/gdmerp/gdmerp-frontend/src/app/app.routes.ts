@@ -95,6 +95,18 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'ventas',
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMIN', 'VENDEDOR', 'CAJERO'] },
+    loadChildren: () => import('./features/ventas/ventas.routes').then((m) => m.VENTAS_ROUTES),
+  },
+  {
+    path: 'finanzas',
+    canActivate: [AuthGuard],
+    data: { roles: ['ADMIN', 'CONTADOR', 'CAJERO', 'TESORERO'] },
+    loadChildren: () => import('./features/finanzas/finanzas.routes').then((m) => m.FINANZAS_ROUTES),
+  },
+  {
     path: 'acceso-denegado',
     loadComponent: () => import('./features/acceso-denegado/acceso-denegado.component').then(m => m.AccesoDenegadoComponent)
   },

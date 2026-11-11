@@ -55,7 +55,7 @@
                 </td>
               </tr>
             } @else {
-              @for (almacen of almacenesFiltrados(); track almacen.id) {
+              @for (almacen of almacenesFiltrados(); track (almacen.id ?? $index)) {
                 <tr class="fila-registro">
                   <td class="col-id">#{{ almacen.id }}</td>
                   <td class="col-nombre">

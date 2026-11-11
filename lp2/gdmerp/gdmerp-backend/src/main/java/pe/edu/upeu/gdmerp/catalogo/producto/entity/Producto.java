@@ -18,8 +18,8 @@ import pe.edu.upeu.gdmerp.catalogo.categoria.entity.Categoria;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "PRODUCTOS", schema = "BOM_CATALOGO")
+@Entity(name = "CatalogoProducto")
+@Table(name = "PRODUCTOS", schema = "GDM_CATALOGO")
 @Getter
 @Setter
 @Builder

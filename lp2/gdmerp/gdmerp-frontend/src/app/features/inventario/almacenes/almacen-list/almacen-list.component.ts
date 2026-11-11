@@ -10,7 +10,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AlmacenService } from '../services/almacen.service';
-import { Almacen, AlmacenRequest } from '../models/almacen.model';
+import { Almacen, AlmacenResponse, AlmacenRequest } from '../models/almacen.model';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-almacen-list',
@@ -56,11 +57,12 @@ export class AlmacenListComponent implements OnInit {
   );
 
   readonly almacenesFiltrados = computed<Almacen[]>(() => {
+    const lista = this.almacenes() || [];
     const termino = this.textoBusqueda().toLowerCase().trim();
     if (!termino) {
-      return this.almacenes();
+      return lista;
     }
-    return this.almacenes().filter((alm) =>
+    return lista.filter((alm) =>
       (alm.nombre && alm.nombre.toLowerCase().includes(termino)) ||
       (alm.ubicacion && alm.ubicacion.toLowerCase().includes(termino))
     );
@@ -83,12 +85,27 @@ export class AlmacenListComponent implements OnInit {
   cargarAlmacenes(): void {
     this.isLoading.set(true);
     this.almacenService.listar().subscribe({
-      next: (data) => {
-        this.almacenes.set(data);
+      next: (response: unknown) => {
+        let lista: AlmacenResponse[] = [];
+        if (Array.isArray(response)) {
+          lista = response as AlmacenResponse[];
+        } else if (response && typeof response === 'object') {
+          const resObj = response as Record<string, unknown>;
+          if (Array.isArray(resObj['content'])) {
+            lista = resObj['content'] as AlmacenResponse[];
+          } else if (Array.isArray(resObj['data'])) {
+            lista = resObj['data'] as AlmacenResponse[];
+          } else if (Array.isArray(resObj['almacenes'])) {
+            lista = resObj['almacenes'] as AlmacenResponse[];
+          }
+        }
+        console.log(`[AlmacenListComponent] Almacenes cargados: ${lista.length}`);
+        this.almacenes.set(lista);
         this.isLoading.set(false);
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         console.error('Error al listar almacenes:', err);
+        this.almacenes.set([]);
         this.isLoading.set(false);
         this.snackBar.open('❌ No se pudieron cargar los almacenes.', 'Cerrar', {
           duration: 4000,

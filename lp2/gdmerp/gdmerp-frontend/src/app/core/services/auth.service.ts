@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
 
 @Injectable({
@@ -11,6 +11,17 @@ export class AuthService {
   readonly username = signal<string>('');
   readonly userRoles = signal<string[]>([]);
   readonly isAuthenticated = signal<boolean>(false);
+
+  // Alias reactivos para compatibilidad con módulos de negocio (ventas, finanzas)
+  readonly roles = this.userRoles;
+  readonly usuario = computed(() => {
+    const un = this.username();
+    return {
+      nombre: un || 'Usuario',
+      username: un || '',
+      email: ''
+    };
+  });
 
   constructor() {
     this.initSignalsSeguro();
@@ -93,6 +104,20 @@ export class AuthService {
       return false;
     }
     return roles.some((role) => this.hasRole(role));
+  }
+
+  /**
+   * Retorna el identificador numérico de usuario (fallback para compatibilidad POS).
+   */
+  usuarioId(): number {
+    return 1;
+  }
+
+  /**
+   * Verifica roles permitidos (alias de hasAnyRole).
+   */
+  tieneRol(...rolesPermitidos: string[]): boolean {
+    return this.hasAnyRole(rolesPermitidos);
   }
 
   /**

@@ -7,6 +7,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
 import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
 import pe.edu.upeu.gdmerp.ventas.auditoria.service.AuditoriaService;
@@ -59,6 +64,23 @@ public class VentaDataInitializer implements CommandLineRunner {
 
         log.info("Inicializando datos de prueba de Ventas POS y Omnicanalidad para Agro Peruvian Foods...");
 
+        Authentication prevAuth = SecurityContextHolder.getContext().getAuthentication();
+        if (prevAuth == null) {
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken("system-initializer", null,
+                            List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_ALMACENERO")))
+            );
+        }
+        try {
+            ejecutarCargaSemilla();
+        } finally {
+            if (prevAuth == null) {
+                SecurityContextHolder.clearContext();
+            }
+        }
+    }
+
+    private void ejecutarCargaSemilla() {
         List<ProductoResponse> listaProductos = productoService.listar();
         if (listaProductos.isEmpty()) {
             log.warn("No se encontraron productos en catálogo para generar ventas semilla.");

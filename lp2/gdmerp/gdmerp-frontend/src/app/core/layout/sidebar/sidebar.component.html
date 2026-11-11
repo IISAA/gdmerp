@@ -48,6 +48,30 @@
       <span class="active-indicator"></span>
     </a>
 
+    <!-- 4. Ventas y POS -->
+    <a
+      *hasRole="['ADMIN', 'VENDEDOR', 'CAJERO']"
+      routerLink="/ventas"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">point_of_sale</mat-icon>
+      <span class="nav-text">Ventas y POS</span>
+      <span class="active-indicator"></span>
+    </a>
+
+    <!-- 5. Finanzas y Caja -->
+    <a
+      *hasRole="['ADMIN', 'CONTADOR', 'CAJERO', 'TESORERO']"
+      routerLink="/finanzas"
+      routerLinkActive="nav-item-active"
+      class="nav-item"
+    >
+      <mat-icon class="nav-icon">account_balance</mat-icon>
+      <span class="nav-text">Finanzas y Caja</span>
+      <span class="active-indicator"></span>
+    </a>
+
   </nav>
 
   <!-- Pie del Sidebar: Perfil de Usuario de Keycloak -->

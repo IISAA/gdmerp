@@ -25,11 +25,11 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     Optional<Producto> findById(Long id);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Producto p WHERE p.id = :id")
+    @Query("SELECT p FROM CatalogoProducto p WHERE p.id = :id")
     Optional<Producto> findByIdForUpdate(@Param("id") Long id);
 
     @Modifying
-    @Query("UPDATE Producto p SET p.stock = p.stock - :cantidad WHERE p.id = :id AND p.stock >= :cantidad")
+    @Query("UPDATE CatalogoProducto p SET p.stock = p.stock - :cantidad WHERE p.id = :id AND p.stock >= :cantidad")
     int descontarStockAtomico(@Param("id") Long id, @Param("cantidad") Integer cantidad);
 
     @EntityGraph(attributePaths = "categoria")

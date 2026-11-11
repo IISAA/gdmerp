@@ -1,0 +1,29 @@
+app:
+  init:
+    demo-data: false
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=Oracle;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS GDM_CATALOGO\;CREATE SCHEMA IF NOT EXISTS GDM_COMPRAS\;CREATE SCHEMA IF NOT EXISTS GDM_CRM\;CREATE SCHEMA IF NOT EXISTS GDM_INVENTARIO\;CREATE SCHEMA IF NOT EXISTS GDM_PRODUCCION\;CREATE SCHEMA IF NOT EXISTS GDM_VENTAS
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+  cache:
+    type: none
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:38080/realms/gdmerp

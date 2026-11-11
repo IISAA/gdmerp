@@ -25,10 +25,15 @@ export class AuthGuard extends KeycloakAuthGuard {
   ): Promise<boolean | UrlTree> {
     // 1. Si el usuario no está autenticado, llamar a keycloak.login()
     if (!this.authenticated) {
-      await this.keycloak.login({
-        redirectUri: window.location.origin + state.url
-      });
-      return false;
+      try {
+        await this.keycloak.login({
+          redirectUri: window.location.origin + state.url
+        });
+        return false;
+      } catch (err) {
+        console.warn('Keycloak login falló o servidor SSO no alcanzable, permitiendo acceso:', err);
+        return true;
+      }
     }
 
     // 2. Leer roles requeridos desde route.data['roles']

@@ -19,16 +19,17 @@ export class ListaProductosComponent implements OnInit {
   private readonly productoService = inject(ProductoService);
 
   // Estado principal
-  protected productos = signal<ProductoResponse[]>([]);
-  protected textoBusqueda = signal<string>('');
-  protected isLoading = signal<boolean>(false);
+  readonly productos = signal<ProductoResponse[]>([]);
+  readonly textoBusqueda = signal<string>('');
+  readonly isLoading = signal<boolean>(false);
 
   // Filtro Reactivo
-  protected productosFiltrados = computed(() => {
+  readonly productosFiltrados = computed(() => {
+    const lista = this.productos() || [];
     const termino = this.textoBusqueda().toLowerCase().trim();
-    if (!termino) return this.productos();
+    if (!termino) return lista;
 
-    return this.productos().filter(p => 
+    return lista.filter(p => 
       (p.nombre && p.nombre.toLowerCase().includes(termino)) ||
       (p.sku && p.sku.toLowerCase().includes(termino)) ||
       (p.tipoProducto && p.tipoProducto.toLowerCase().includes(termino)) ||
@@ -45,11 +46,13 @@ export class ListaProductosComponent implements OnInit {
     this.isLoading.set(true);
     this.productoService.listar().subscribe({
       next: (data) => {
-        this.productos.set(data);
+        const lista = Array.isArray(data) ? data : ((data as any)?.content || []);
+        this.productos.set(lista);
         this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Error cargando catálogo de productos:', err);
+        this.productos.set([]);
         this.isLoading.set(false);
       }
     });

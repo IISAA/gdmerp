@@ -26,7 +26,7 @@ public class AlmacenController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public ResponseEntity<List<AlmacenResponse>> listar() {
-        log.info("Listando Almacenes ... soy Isai");
+        log.info("Listando Almacenes (Response DTO record limpio)...");
         return ResponseEntity.ok(almacenService.listar());
     }
 
