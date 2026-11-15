@@ -35,6 +35,10 @@ public class MovimientoCajaRequest {
 
     private String referenciaExterna;
 
+    private Long ventaId;
+
+    private Long compraId;
+
     @NotNull(message = "La categoría financiera es obligatoria")
     private Long categoriaFinancieraId;
 }

@@ -49,12 +49,16 @@ export class RendicionCajaChicaService {
     responsable: string;
     limiteMaximo: number;
     saldoInicial: number;
+    centroCostoId?: number;
   }): Observable<CajaChica> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('codigo', datos.codigo)
       .set('responsable', datos.responsable)
       .set('limiteMaximo', datos.limiteMaximo.toString())
       .set('saldoInicial', datos.saldoInicial.toString());
+    if (datos.centroCostoId) {
+      params = params.set('centroCostoId', datos.centroCostoId.toString());
+    }
     return this.http.post<CajaChica>(`${this.baseUrl}/cajas-chicas`, null, { params });
   }
 

@@ -7,10 +7,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.upeu.gdmerp.catalogo.producto.dto.TipoProducto;
+import pe.edu.upeu.gdmerp.catalogo.producto.service.ProductoService;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
-import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService;
-import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
+import pe.edu.upeu.gdmerp.inventario.stock.dto.StockInventarioResponse;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioOperacionService;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioService;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
 import pe.edu.upeu.gdmerp.produccion.listamateriales.repository.ListaMaterialesRepository;
@@ -50,7 +52,10 @@ class OrdenProduccionActualizarServiceTest {
     private InventarioOperacionService inventarioService;
 
     @Mock
-    private ProductoService productoService;
+    private ProductoService catalogoProductoService;
+
+    @Mock
+    private InventarioService stockService;
 
     @Mock
     private ListaMaterialesRepository listaMaterialesRepository;
@@ -89,8 +94,9 @@ class OrdenProduccionActualizarServiceTest {
     void actualizarExitosoEnEstadoPlanificado() {
         when(ordenRepository.findById(10L)).thenReturn(Optional.of(ordenExistente));
         when(centroTrabajoRepository.findById(2L)).thenReturn(Optional.of(centroTrabajo2));
-        when(productoService.buscarPorId(200L)).thenReturn(new ProductoResponse(
-                200L, "SKU-HARINA", "Harina de Trigo", "kg", new BigDecimal("3.50"), 100, 10, null, null
+        when(stockService.buscarPorProductoId(200L)).thenReturn(new StockInventarioResponse(
+                1L, 200L, "SKU-HARINA", "Harina de Trigo", "kg", TipoProducto.MATERIA_PRIMA,
+                BigDecimal.ZERO, null, null, new BigDecimal("100"), new BigDecimal("10"), null, new BigDecimal("3.50")
         ));
         when(ordenRepository.save(any(OrdenProduccion.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(mapper.toResponse(any(OrdenProduccion.class))).thenReturn(mock(OrdenProduccionResponse.class));
@@ -115,7 +121,7 @@ class OrdenProduccionActualizarServiceTest {
         assertEquals("Harina de Trigo", detalle.getNombreProducto());
         assertEquals(0, BigDecimal.valueOf(25).compareTo(detalle.getCantidadRequerida()));
         assertEquals(new BigDecimal("3.50"), detalle.getCostoUnitario());
-        verify(productoService).ajustarStock(eq(200L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(-25)) == 0));
+        verify(stockService).ajustarStock(eq(200L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(-25)) == 0));
         verify(ordenRepository).save(ordenExistente);
     }
 
@@ -132,8 +138,9 @@ class OrdenProduccionActualizarServiceTest {
 
         when(ordenRepository.findById(10L)).thenReturn(Optional.of(ordenExistente));
         when(centroTrabajoRepository.findById(1L)).thenReturn(Optional.of(centroTrabajo1));
-        when(productoService.buscarPorId(600L)).thenReturn(new ProductoResponse(
-                600L, "SKU-MANTEQUILLA", "Mantequilla", "kg", new BigDecimal("5.00"), 50, 5, null, null
+        when(stockService.buscarPorProductoId(600L)).thenReturn(new StockInventarioResponse(
+                2L, 600L, "SKU-MANTEQUILLA", "Mantequilla", "kg", TipoProducto.MATERIA_PRIMA,
+                BigDecimal.ZERO, null, null, new BigDecimal("50"), new BigDecimal("5"), null, new BigDecimal("5.00")
         ));
         when(ordenRepository.save(any(OrdenProduccion.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(mapper.toResponse(any(OrdenProduccion.class))).thenReturn(mock(OrdenProduccionResponse.class));
@@ -150,9 +157,9 @@ class OrdenProduccionActualizarServiceTest {
         ordenProduccionService.actualizar(10L, request);
 
         // 1. REVERTIR: se devuelve (+) el stock del detalle antiguo
-        verify(productoService).ajustarStock(eq(500L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(10)) == 0));
+        verify(stockService).ajustarStock(eq(500L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(10)) == 0));
         // 2. REAPLICAR: se descuenta (-) el stock del nuevo insumo
-        verify(productoService).ajustarStock(eq(600L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(-18)) == 0));
+        verify(stockService).ajustarStock(eq(600L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(-18)) == 0));
         verify(ordenRepository).save(ordenExistente);
         assertEquals(1, ordenExistente.getDetalles().size());
         assertEquals(600L, ordenExistente.getDetalles().get(0).getMateriaPrimaId());
@@ -379,8 +386,8 @@ class OrdenProduccionActualizarServiceTest {
 
         ordenProduccionService.eliminar(10L);
 
-        verify(productoService).ajustarStock(eq(201L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(8)) == 0));
-        verify(productoService).ajustarStock(eq(202L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(15)) == 0));
+        verify(stockService).ajustarStock(eq(201L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(8)) == 0));
+        verify(stockService).ajustarStock(eq(202L), argThat((BigDecimal b) -> b.compareTo(BigDecimal.valueOf(15)) == 0));
         verify(ordenRepository).delete(ordenExistente);
     }
 
@@ -393,7 +400,7 @@ class OrdenProduccionActualizarServiceTest {
                 () -> ordenProduccionService.eliminar(10L));
         assertTrue(ex.getMessage().contains("Solo se pueden eliminar físicamente órdenes en estado PLANIFICADO"));
         verify(ordenRepository, never()).delete(any());
-        verify(productoService, never()).ajustarStock(any(), any(BigDecimal.class));
+        verify(stockService, never()).ajustarStock(any(), any(BigDecimal.class));
     }
 
     @Test

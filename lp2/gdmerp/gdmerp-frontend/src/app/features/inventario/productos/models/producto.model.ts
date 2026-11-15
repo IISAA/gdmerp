@@ -17,7 +17,9 @@ export interface ProductoResponse {
   id: number;
   sku: string;
   nombre: string;
+  descripcion?: string;
   unidadMedida?: string;
+  costoBase?: number;
   costoPromedio?: number;
   precio?: number;
   stock?: number;
@@ -35,10 +37,13 @@ export type Producto = ProductoResponse;
 export interface ProductoRequest {
   sku: string;
   nombre: string;
+  descripcion?: string;
   tipoProducto: TipoProducto | string;
   categoriaId: number;
-  almacenId: number;
+  almacenId?: number | null;
   unidadMedida: string;
+  precio?: number;
+  costoBase?: number;
+  costoPromedio?: number;
   stockMinimo: number;
-  costoPromedio: number;
 }

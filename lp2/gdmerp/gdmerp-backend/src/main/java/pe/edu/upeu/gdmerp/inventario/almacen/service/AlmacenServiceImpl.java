@@ -26,12 +26,12 @@ public class AlmacenServiceImpl implements AlmacenService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     @Cacheable(value = "almacenes", key = "'all'", unless = "#result == null || #result.isEmpty()")
     public List<AlmacenResponse> listar() {
-        return almacenRepository.findAll().stream()
+        return new java.util.ArrayList<>(almacenRepository.findAll().stream()
                 .map(almacenMapper::toResponse)
-                .toList();
+                .toList());
     }
 
     @Override

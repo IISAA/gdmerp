@@ -2,7 +2,7 @@
   <!-- NAVEGACIÓN ESTANDARIZADA & BREADCRUMB (Pilar 1) -->
   <div class="view-back-nav">
     <a routerLink="/compras/proveedores" class="btn-back-nav">
-      <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_back</span>
+      <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">arrow_back</mat-icon>
       Volver al Directorio
     </a>
     <div class="breadcrumb-trail">
@@ -21,13 +21,15 @@
       <p class="subtitle">Alta en el maestro de terceros y proveedores con validación oficial SUNAT (APIsPERU)</p>
     </div>
     <div class="header-actions">
-      <a routerLink="/compras/proveedores" class="btn btn-neutral-secondary">← Volver al Directorio</a>
+      <a routerLink="/compras/proveedores" class="btn btn-neutral-secondary">
+        <mat-icon class="icon-inline">arrow_back</mat-icon> Volver al Directorio
+      </a>
     </div>
   </div>
 
   @if (error()) {
     <div class="alert alert-danger" style="display: flex; align-items: center; gap: 0.5rem;">
-      <span class="material-symbols-outlined">warning</span>
+      <mat-icon>warning</mat-icon>
       <span>{{ error() }}</span>
     </div>
   }
@@ -56,10 +58,10 @@
             style="white-space: nowrap; display: flex; align-items: center; gap: 0.35rem;"
           >
             @if (buscandoRuc()) {
-              <span class="material-symbols-outlined icon-inline spin">sync</span>
+              <mat-icon class="icon-inline spin">sync</mat-icon>
               Consultando...
             } @else {
-              <span class="material-symbols-outlined icon-inline">search</span>
+              <mat-icon class="icon-inline">search</mat-icon>
               Buscar SUNAT
             }
           </button>
@@ -131,7 +133,7 @@
 
       <div class="form-actions mt-4">
         <button type="submit" class="btn btn-primary" [disabled]="loading()">
-          <span class="material-symbols-outlined icon-inline">add_circle</span>
+          <mat-icon class="icon-inline">add_circle</mat-icon>
           {{ loading() ? 'Registrando...' : 'Guardar Proveedor' }}
         </button>
         <a routerLink="/compras/proveedores" class="btn btn-secondary">Cancelar</a>

@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "CUENTAS_POR_COBRAR")
+@Table(name = "CUENTAS_POR_COBRAR", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,12 +33,19 @@ import java.util.List;
 public class CuentaPorCobrar {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_cuentas_por_cobrar")
+    @SequenceGenerator(name = "seq_cuentas_por_cobrar", sequenceName = "SEQ_CUENTAS_POR_COBRAR", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 
     @Column(name = "CODIGO", nullable = false, unique = true, length = 50)
     private String codigo;
+
+    @Column(name = "CLIENTE_ID")
+    private Long clienteId;
+
+    @Column(name = "VENTA_ID")
+    private Long ventaId;
 
     @Column(name = "CLIENTE_NOMBRE", nullable = false, length = 150)
     private String clienteNombre;

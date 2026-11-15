@@ -7,11 +7,11 @@
       <p class="subtitle">Historial cronológico de transacciones comerciales y comprobantes</p>
     </div>
     <div class="header-actions">
-      <a routerLink="/ventas/nueva" class="btn btn-primary">
-        <span class="material-symbols-outlined icon-inline">point_of_sale</span> Emitir Nueva Venta POS
+      <a routerLink="/ventas/nueva" class="btn btn-glacier-primary">
+        <mat-icon class="icon-inline">point_of_sale</mat-icon> Emitir Nueva Venta POS
       </a>
-      <button class="btn btn-secondary" (click)="cargarDatos()">
-        <span class="material-symbols-outlined icon-inline">refresh</span> Actualizar
+      <button class="btn btn-neutral-secondary" (click)="cargarDatos()">
+        <mat-icon class="icon-inline">refresh</mat-icon> Actualizar
       </button>
     </div>
   </div>
@@ -19,13 +19,13 @@
   <!-- Messages -->
   @if (error()) {
     <div class="alert alert-danger" style="display: flex; align-items: center; gap: 0.5rem;">
-      <span class="material-symbols-outlined">warning</span>
+      <mat-icon>warning</mat-icon>
       <span>{{ error() }}</span>
     </div>
   }
   @if (successMsg()) {
     <div class="alert alert-success" style="display: flex; align-items: center; gap: 0.5rem;">
-      <span class="material-symbols-outlined">check_circle</span>
+      <mat-icon>check_circle</mat-icon>
       <span>{{ successMsg() }}</span>
     </div>
   }
@@ -34,21 +34,21 @@
   @if (resumen(); as r) {
     <div class="metrics-grid">
       <div class="metric-card">
-        <span class="material-symbols-outlined metric-icon">receipt_long</span>
+        <mat-icon class="metric-icon">receipt_long</mat-icon>
         <div>
           <span class="metric-label">Comprobantes Emitidos</span>
           <h3 class="metric-value">{{ r.totalVentas }}</h3>
         </div>
       </div>
       <div class="metric-card">
-        <span class="material-symbols-outlined metric-icon text-success">payments</span>
+        <mat-icon class="metric-icon text-success">payments</mat-icon>
         <div>
           <span class="metric-label">Total Recaudado</span>
           <h3 class="metric-value text-success">{{ r.totalRecaudado | currency:'PEN':'S/ ' }}</h3>
         </div>
       </div>
       <div class="metric-card">
-        <span class="material-symbols-outlined metric-icon text-info">trending_up</span>
+        <mat-icon class="metric-icon text-info">trending_up</mat-icon>
         <div>
           <span class="metric-label">Ticket Promedio</span>
           <h3 class="metric-value text-info">{{ r.ticketPromedio | currency:'PEN':'S/ ' }}</h3>
@@ -96,11 +96,11 @@
               <td class="text-center">
                 <div class="btn-group">
                   <button class="btn btn-secondary btn-sm" (click)="verTicket(v)">
-                    <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">visibility</span> Ver Ticket
+                    <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">visibility</mat-icon> Ver Ticket
                   </button>
                   @if (v.estado === 'REGISTRADA') {
-                    <button class="btn btn-danger btn-sm" (click)="anularVenta(v.id)">
-                      <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">block</span> Anular
+                    <button class="btn-action-discreet-danger" (click)="anularVenta(v.id)">
+                      <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">block</mat-icon> Anular
                     </button>
                   }
                 </div>
@@ -171,7 +171,7 @@
       <div class="modal-footer no-print">
         <button type="button" class="btn btn-secondary" (click)="modalTicket.set(false)">Cerrar</button>
         <button type="button" class="btn btn-info btn-print" (click)="imprimirTicket()">
-          <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">print</span>
+          <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">print</mat-icon>
           Imprimir Ticket (ESC/POS)
         </button>
       </div>

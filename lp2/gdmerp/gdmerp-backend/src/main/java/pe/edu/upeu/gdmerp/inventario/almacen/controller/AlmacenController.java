@@ -24,7 +24,7 @@ public class AlmacenController {
 
     @Operation(summary = "Lista todos los almacenes")
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     public ResponseEntity<List<AlmacenResponse>> listar() {
         log.info("Listando Almacenes (Response DTO record limpio)...");
         return ResponseEntity.ok(almacenService.listar());
@@ -32,7 +32,7 @@ public class AlmacenController {
 
     @Operation(summary = "Busca un almacén por ID")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     public ResponseEntity<AlmacenResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(almacenService.buscarPorId(id));
     }

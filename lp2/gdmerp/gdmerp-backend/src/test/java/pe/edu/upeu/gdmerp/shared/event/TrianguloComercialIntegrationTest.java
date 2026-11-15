@@ -4,8 +4,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import pe.edu.upeu.gdmerp.catalogo.producto.dto.TipoProducto;
+import pe.edu.upeu.gdmerp.catalogo.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.catalogo.producto.repository.ProductoRepository;
 import pe.edu.upeu.gdmerp.exception.BusinessConflictException;
 import pe.edu.upeu.gdmerp.exception.InsufficientStockException;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.CuentaPorCobrar;
@@ -23,10 +27,10 @@ import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.lote.entity.Lote;
 import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.MovimientoInventario;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.entity.MovimientoInventario;
+import pe.edu.upeu.gdmerp.inventario.stock.entity.StockInventario;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.MovimientoInventarioRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.StockInventarioRepository;
 import pe.edu.upeu.gdmerp.ventas.venta.dto.DetalleVentaRequest;
 import pe.edu.upeu.gdmerp.ventas.venta.dto.VentaRequest;
 import pe.edu.upeu.gdmerp.ventas.venta.dto.VentaResponse;
@@ -54,7 +58,8 @@ class TrianguloComercialIntegrationTest {
 
     @Autowired private VentaService ventaService;
     @Autowired private VentaRepository ventaRepository;
-    @Autowired private ProductoRepository productoRepository;
+    @Autowired @Qualifier("catalogoProductoRepository") private ProductoRepository productoRepository;
+    @Autowired private StockInventarioRepository stockRepository;
     @Autowired private LoteRepository loteRepository;
     @Autowired private MovimientoInventarioRepository movimientoRepository;
     @Autowired private AlmacenRepository almacenRepository;
@@ -66,6 +71,7 @@ class TrianguloComercialIntegrationTest {
     private String sufijo;
     private final List<Long> ventasCreadas = new ArrayList<>();
     private final List<String> ticketsCreados = new ArrayList<>();
+    private final List<Long> stocksCreados = new ArrayList<>();
     private final List<Long> productosCreados = new ArrayList<>();
     private final List<Long> almacenesCreados = new ArrayList<>();
     private final List<Long> categoriasCreadas = new ArrayList<>();
@@ -103,6 +109,15 @@ class TrianguloComercialIntegrationTest {
         for (Long prodId : productosCreados) {
             movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(prodId));
             loteRepository.deleteAll(loteRepository.findByProductoId(prodId));
+        }
+        for (Long stockId : stocksCreados) {
+            if (stockRepository.existsById(stockId)) {
+                stockRepository.deleteById(stockId);
+            }
+        }
+        stocksCreados.clear();
+
+        for (Long prodId : productosCreados) {
             if (productoRepository.existsById(prodId)) {
                 productoRepository.deleteById(prodId);
             }
@@ -144,8 +159,8 @@ class TrianguloComercialIntegrationTest {
         assertEquals(0, new BigDecimal("100.00").compareTo(creada.getTotal()));
 
         // Inventario: stock, lote y Kardex actualizados en BEFORE_COMMIT
-        Producto trasVenta = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("46.0000").compareTo(trasVenta.getStockTotal()));
+        StockInventario trasVenta = stockRepository.findFirstByProductoIdOrderByIdAsc(producto.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("46.0000").compareTo(trasVenta.getStockActual()));
         Lote loteTrasVenta = loteRepository.findByProductoId(producto.getId()).get(0);
         assertEquals(46, loteTrasVenta.getCantidadActual());
 
@@ -168,8 +183,8 @@ class TrianguloComercialIntegrationTest {
         VentaResponse anulada = ventaService.anular(creada.getId(), "supervisor-triangulo");
         assertEquals(EstadoVenta.ANULADA, anulada.getEstado());
 
-        Producto trasAnulacion = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("50.0000").compareTo(trasAnulacion.getStockTotal()));
+        StockInventario trasAnulacion = stockRepository.findFirstByProductoIdOrderByIdAsc(producto.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("50.0000").compareTo(trasAnulacion.getStockActual()));
         Lote loteTrasAnulacion = loteRepository.findByProductoId(producto.getId()).get(0);
         assertEquals(50, loteTrasAnulacion.getCantidadActual());
 
@@ -207,8 +222,8 @@ class TrianguloComercialIntegrationTest {
         assertEquals(totalCuentasAntes, cuentaRepository.count(),
                 "Finanzas tampoco debe persistir CuentaPorCobrar cuando Inventario hace rollback");
 
-        Producto intacto = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("5.0000").compareTo(intacto.getStockTotal()));
+        StockInventario intacto = stockRepository.findFirstByProductoIdOrderByIdAsc(producto.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("5.0000").compareTo(intacto.getStockActual()));
         assertTrue(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(producto.getId()).isEmpty());
     }
 
@@ -239,15 +254,15 @@ class TrianguloComercialIntegrationTest {
 
         assertTrue(ventaRepository.findByOperacionId(opId).isEmpty(),
                 "El fallo en Finanzas (BEFORE_COMMIT) debe revertir la Venta");
-        Producto stockIntacto = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("15.0000").compareTo(stockIntacto.getStockTotal()),
+        StockInventario stockIntacto = stockRepository.findFirstByProductoIdOrderByIdAsc(producto.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("15.0000").compareTo(stockIntacto.getStockActual()),
                 "El fallo en Finanzas debe revertir también el descuento de stock/lote de Inventario");
         Lote loteIntacto = loteRepository.findByProductoId(producto.getId()).get(0);
         assertEquals(15, loteIntacto.getCantidadActual());
         assertTrue(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(producto.getId()).isEmpty());
     }
 
-    private Producto crearProductoConLote(String stock, int cantidadLote) {
+    private Producto crearProductoConLote(String stockInicial, int cantidadLote) {
         Almacen alm = new Almacen();
         alm.setNombre("ALM-TRI-" + sufijo + "-" + almacenesCreados.size());
         alm.setUbicacion("Planta Venta");
@@ -260,20 +275,32 @@ class TrianguloComercialIntegrationTest {
         cat = categoriaRepository.save(cat);
         categoriasCreadas.add(cat.getId());
 
-        Producto prod = new Producto();
-        prod.setSku("SKU-TRI-" + sufijo + "-" + productosCreados.size());
-        prod.setNombre("Producto Comercial " + sufijo);
-        prod.setUnidadMedida("unidad");
-        prod.setCostoPromedio(new BigDecimal("25.0000"));
-        prod.setStockTotal(new BigDecimal(stock));
-        prod.setStockMinimo(BigDecimal.ONE);
-        prod.setAlmacen(alm);
-        prod.setCategoria(cat);
+        Producto prod = Producto.builder()
+                .sku("SKU-TRI-" + sufijo + "-" + productosCreados.size())
+                .nombre("Producto Comercial " + sufijo)
+                .unidadMedida("unidad")
+                .precio(new BigDecimal("25.00"))
+                .costoBase(new BigDecimal("25.0000"))
+                .tipoProducto(TipoProducto.TERMINADO)
+                .stockMinimo(BigDecimal.ONE)
+                .stock(0)
+                .activo(Boolean.TRUE)
+                .build();
         prod = productoRepository.save(prod);
         productosCreados.add(prod.getId());
 
+        StockInventario stock = new StockInventario();
+        stock.setProductoId(prod.getId());
+        stock.setAlmacen(alm);
+        stock.setCategoriaId(cat.getId());
+        stock.setCostoPromedio(new BigDecimal("25.0000"));
+        stock.setStockActual(new BigDecimal(stockInicial));
+        stock.setStockMinimo(BigDecimal.ONE);
+        stock = stockRepository.save(stock);
+        stocksCreados.add(stock.getId());
+
         Lote lote = new Lote();
-        lote.setProducto(prod);
+        lote.setProductoId(prod.getId());
         lote.setNumeroLote("LT-TRI-" + sufijo);
         lote.setCantidadActual(cantidadLote);
         lote.setFechaProduccion(LocalDate.now().minusDays(2));

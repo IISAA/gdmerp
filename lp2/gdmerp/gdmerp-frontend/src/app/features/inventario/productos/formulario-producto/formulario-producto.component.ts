@@ -121,8 +121,9 @@ export class FormularioProductoComponent implements OnInit {
     nombre: ['', [Validators.required, Validators.maxLength(150)]],
     tipoProducto: ['MATERIA_PRIMA' as TipoProducto, Validators.required],
     categoriaId: [null as number | null, Validators.required],
-    almacenId: [null as number | null, Validators.required],
+    almacenId: [null as number | null],
     unidadMedida: ['UND', Validators.required],
+    precio: [0, [Validators.min(0)]],
     stockMinimo: [0, [Validators.required, Validators.min(0)]],
     costoPromedio: [0, [Validators.required, Validators.min(0)]]
   });
@@ -179,10 +180,11 @@ export class FormularioProductoComponent implements OnInit {
           nombre: producto.nombre,
           tipoProducto: producto.tipoProducto as TipoProducto,
           categoriaId: producto.categoria ? producto.categoria.id : null,
-          almacenId: producto.almacen ? producto.almacen.id : null,
+          almacenId: producto.almacen ? producto.almacen.id : (this.almacenes().length > 0 ? this.almacenes()[0].id : null),
           unidadMedida: this.normalizarUnidadMedida(producto.unidadMedida),
-          stockMinimo: producto.stockMinimo,
-          costoPromedio: producto.costoPromedio
+          precio: producto.precio ?? 0,
+          stockMinimo: producto.stockMinimo ?? 0,
+          costoPromedio: producto.costoBase ?? producto.costoPromedio ?? 0
         });
         this.form.enable();
         this.skuEditadoManualmente.set(true);
@@ -360,13 +362,18 @@ export class FormularioProductoComponent implements OnInit {
 
     this.isSubmitting.set(true);
     const formData = this.form.getRawValue();
-    if (formData.sku) {
-      formData.sku = formData.sku.trim().toUpperCase();
-    }
+    const payload = {
+      ...formData,
+      sku: formData.sku ? formData.sku.trim().toUpperCase() : '',
+      precio: formData.precio !== null && formData.precio !== undefined ? Number(formData.precio) : 0,
+      costoBase: formData.costoPromedio !== null && formData.costoPromedio !== undefined ? Number(formData.costoPromedio) : 0,
+      costoPromedio: formData.costoPromedio !== null && formData.costoPromedio !== undefined ? Number(formData.costoPromedio) : 0,
+      stockMinimo: formData.stockMinimo !== null && formData.stockMinimo !== undefined ? Number(formData.stockMinimo) : 0
+    };
 
     const request$ = this.isEditMode()
-      ? this.productoService.actualizar(this.productoId()!, formData as any)
-      : this.productoService.crear(formData as any);
+      ? this.productoService.actualizar(this.productoId()!, payload as any)
+      : this.productoService.crear(payload as any);
 
     request$.subscribe({
       next: () => {

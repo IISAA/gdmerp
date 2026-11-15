@@ -42,14 +42,20 @@ public class TransaccionFinancieraRequest {
 
     private Long ventaId;
 
+    private Long compraId;
+
     public TransaccionFinancieraRequest() {
     }
 
     public TransaccionFinancieraRequest(String codigo, String concepto, BigDecimal monto, LocalDate fechaTransaccion, TipoFinanciero tipo, EstadoFinanciero estado, String tipoComprobante, String numeroComprobante, Long categoriaFinancieraId) {
-        this(codigo, concepto, monto, fechaTransaccion, tipo, estado, tipoComprobante, numeroComprobante, categoriaFinancieraId, null);
+        this(codigo, concepto, monto, fechaTransaccion, tipo, estado, tipoComprobante, numeroComprobante, categoriaFinancieraId, null, null);
     }
 
     public TransaccionFinancieraRequest(String codigo, String concepto, BigDecimal monto, LocalDate fechaTransaccion, TipoFinanciero tipo, EstadoFinanciero estado, String tipoComprobante, String numeroComprobante, Long categoriaFinancieraId, Long ventaId) {
+        this(codigo, concepto, monto, fechaTransaccion, tipo, estado, tipoComprobante, numeroComprobante, categoriaFinancieraId, ventaId, null);
+    }
+
+    public TransaccionFinancieraRequest(String codigo, String concepto, BigDecimal monto, LocalDate fechaTransaccion, TipoFinanciero tipo, EstadoFinanciero estado, String tipoComprobante, String numeroComprobante, Long categoriaFinancieraId, Long ventaId, Long compraId) {
         this.codigo = codigo;
         this.concepto = concepto;
         this.monto = monto;
@@ -60,5 +66,6 @@ public class TransaccionFinancieraRequest {
         this.numeroComprobante = numeroComprobante;
         this.categoriaFinancieraId = categoriaFinancieraId;
         this.ventaId = ventaId;
+        this.compraId = compraId;
     }
 }

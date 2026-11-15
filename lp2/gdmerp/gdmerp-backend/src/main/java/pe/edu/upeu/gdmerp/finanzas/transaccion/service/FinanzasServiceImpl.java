@@ -46,14 +46,10 @@ public class FinanzasServiceImpl implements FinanzasService {
     @Override
     @Transactional(readOnly = true)
     public List<CategoriaFinancieraResponse> listarCategorias(TipoFinanciero tipo) {
-        if (tipo != null) {
-            return categoriaRepository.findByTipoDefault(tipo).stream()
-                    .map(finanzasMapper::toCategoriaResponse)
-                    .toList();
-        }
-        return categoriaRepository.findAll().stream()
-                .map(finanzasMapper::toCategoriaResponse)
-                .toList();
+        List<CategoriaFinanciera> categorias = (tipo != null)
+                ? categoriaRepository.findByTipoDefault(tipo)
+                : categoriaRepository.findAll();
+        return finanzasMapper.toCategoriaResponseList(categorias);
     }
 
     @Override
@@ -101,39 +97,28 @@ public class FinanzasServiceImpl implements FinanzasService {
     @Override
     @Transactional(readOnly = true)
     public List<TransaccionFinancieraResponse> listarTransacciones(TipoFinanciero tipo, EstadoFinanciero estado, Long categoriaFinancieraId) {
+        List<TransaccionFinanciera> transacciones;
         if (categoriaFinancieraId != null) {
             buscarCategoriaOFallar(categoriaFinancieraId);
-            return transaccionRepository.findByCategoriaFinancieraId(categoriaFinancieraId).stream()
-                    .map(finanzasMapper::toTransaccionResponse)
-                    .toList();
+            transacciones = transaccionRepository.findByCategoriaFinancieraId(categoriaFinancieraId);
+        } else if (tipo != null && estado != null) {
+            transacciones = transaccionRepository.findByTipoAndEstado(tipo, estado);
+        } else if (tipo != null) {
+            transacciones = transaccionRepository.findByTipo(tipo);
+        } else if (estado != null) {
+            transacciones = transaccionRepository.findByEstado(estado);
+        } else {
+            transacciones = transaccionRepository.findAll();
         }
-        if (tipo != null && estado != null) {
-            return transaccionRepository.findByTipoAndEstado(tipo, estado).stream()
-                    .map(finanzasMapper::toTransaccionResponse)
-                    .toList();
-        }
-        if (tipo != null) {
-            return transaccionRepository.findByTipo(tipo).stream()
-                    .map(finanzasMapper::toTransaccionResponse)
-                    .toList();
-        }
-        if (estado != null) {
-            return transaccionRepository.findByEstado(estado).stream()
-                    .map(finanzasMapper::toTransaccionResponse)
-                    .toList();
-        }
-        return transaccionRepository.findAll().stream()
-                .map(finanzasMapper::toTransaccionResponse)
-                .toList();
+        return finanzasMapper.toTransaccionResponseList(transacciones);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<TransaccionFinancieraResponse> listarTransaccionesPorCategoria(Long categoriaId) {
         buscarCategoriaOFallar(categoriaId);
-        return transaccionRepository.findByCategoriaFinancieraId(categoriaId).stream()
-                .map(finanzasMapper::toTransaccionResponse)
-                .toList();
+        return finanzasMapper.toTransaccionResponseList(
+                transaccionRepository.findByCategoriaFinancieraId(categoriaId));
     }
 
     @Override
@@ -161,6 +146,7 @@ public class FinanzasServiceImpl implements FinanzasService {
         entity.setTipoComprobante(request.getTipoComprobante());
         entity.setNumeroComprobante(request.getNumeroComprobante());
         entity.setVentaId(request.getVentaId());
+        entity.setCompraId(request.getCompraId());
         entity.setCategoriaFinanciera(categoria);
 
         TransaccionFinanciera guardada = transaccionRepository.save(entity);
@@ -195,6 +181,9 @@ public class FinanzasServiceImpl implements FinanzasService {
         if (request.getVentaId() != null) {
             entity.setVentaId(request.getVentaId());
         }
+        if (request.getCompraId() != null) {
+            entity.setCompraId(request.getCompraId());
+        }
         entity.setCategoriaFinanciera(categoria);
 
         TransaccionFinanciera guardada = transaccionRepository.save(entity);
@@ -228,36 +217,26 @@ public class FinanzasServiceImpl implements FinanzasService {
     public FlujoCajaResumenResponse obtenerResumenFlujoCaja() {
         List<TransaccionFinanciera> todas = transaccionRepository.findAll();
 
-        BigDecimal totalIngresos = todas.stream()
-                .filter(t -> t.getTipo() == TipoFinanciero.INGRESO && t.getEstado() == EstadoFinanciero.PAGADO)
-                .map(TransaccionFinanciera::getMonto)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal totalEgresos = todas.stream()
-                .filter(t -> t.getTipo() == TipoFinanciero.EGRESO && t.getEstado() == EstadoFinanciero.PAGADO)
-                .map(TransaccionFinanciera::getMonto)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal cuentasPorCobrar = todas.stream()
-                .filter(t -> t.getTipo() == TipoFinanciero.INGRESO && t.getEstado() == EstadoFinanciero.PENDIENTE)
-                .map(TransaccionFinanciera::getMonto)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal cuentasPorPagar = todas.stream()
-                .filter(t -> t.getTipo() == TipoFinanciero.EGRESO && t.getEstado() == EstadoFinanciero.PENDIENTE)
-                .map(TransaccionFinanciera::getMonto)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal balanceNeto = totalIngresos.subtract(totalEgresos);
+        BigDecimal totalIngresos = sumarMontos(todas, TipoFinanciero.INGRESO, EstadoFinanciero.PAGADO);
+        BigDecimal totalEgresos = sumarMontos(todas, TipoFinanciero.EGRESO, EstadoFinanciero.PAGADO);
+        BigDecimal cuentasPorCobrar = sumarMontos(todas, TipoFinanciero.INGRESO, EstadoFinanciero.PENDIENTE);
+        BigDecimal cuentasPorPagar = sumarMontos(todas, TipoFinanciero.EGRESO, EstadoFinanciero.PENDIENTE);
 
         return FlujoCajaResumenResponse.builder()
                 .totalIngresos(totalIngresos)
                 .totalEgresos(totalEgresos)
-                .balanceNeto(balanceNeto)
+                .balanceNeto(totalIngresos.subtract(totalEgresos))
                 .cuentasPorCobrarPendientes(cuentasPorCobrar)
                 .cuentasPorPagarPendientes(cuentasPorPagar)
                 .totalTransacciones(todas.size())
                 .build();
+    }
+
+    private BigDecimal sumarMontos(List<TransaccionFinanciera> transacciones, TipoFinanciero tipo, EstadoFinanciero estado) {
+        return transacciones.stream()
+                .filter(t -> t.getTipo() == tipo && t.getEstado() == estado && t.getMonto() != null)
+                .map(TransaccionFinanciera::getMonto)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private void publicarEventoPagoVentaSiCorresponde(TransaccionFinanciera transaccion) {

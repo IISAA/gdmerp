@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface CategoriaFinancieraRepository extends JpaRepository<CategoriaFinanciera, Long> {
     Optional<CategoriaFinanciera> findByNombre(String nombre);
+    Optional<CategoriaFinanciera> findByNombreIgnoreCase(String nombre);
     boolean existsByNombre(String nombre);
     boolean existsByNombreAndIdNot(String nombre, Long id);
     List<CategoriaFinanciera> findByTipoDefault(TipoFinanciero tipoDefault);

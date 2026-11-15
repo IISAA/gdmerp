@@ -24,6 +24,8 @@ public class MovimientoCajaResponse {
     private BigDecimal monto;
     private String descripcion;
     private String referenciaExterna;
+    private Long ventaId;
+    private Long compraId;
     private Long categoriaFinancieraId;
     private String categoriaFinancieraNombre;
     private Long sesionCajaId;

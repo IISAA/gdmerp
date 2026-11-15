@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "CENTROS_COSTO")
+@Table(name = "CENTROS_COSTO", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder
@@ -22,7 +23,8 @@ import lombok.Setter;
 public class CentroCosto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_centros_costo")
+    @SequenceGenerator(name = "seq_centros_costo", sequenceName = "SEQ_CENTROS_COSTO", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 

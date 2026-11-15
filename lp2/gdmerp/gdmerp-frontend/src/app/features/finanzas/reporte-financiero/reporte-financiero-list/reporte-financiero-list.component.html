@@ -1,9 +1,9 @@
-<div class="reportes-container">
-  <!-- PAGE HEADER -->
+<div class="feature-container">
+  <!-- PAGE HEADER ESTILO PRODUCCIÓN -->
   <header class="page-header">
     <div class="header-titles">
       <div class="header-badge-row">
-        <span class="badge-glacier">Analítica & Finanzas TailAdmin</span>
+        <span class="badge badge-amber">Finanzas & TailAdmin</span>
         <span class="badge-status-live">
           <span class="pulse-dot"></span> Tiempo Real
         </span>
@@ -17,10 +17,10 @@
     <div class="header-actions">
       @if (dashboard()?.sesionActivaId) {
         <button class="btn btn-secondary-glacier" (click)="descargarReporteActiva('EXCEL')" [disabled]="exportando()" title="Descargar corte de caja en Excel">
-          <span class="material-symbols-outlined icon-inline">table_view</span> Exportar Excel
+          <mat-icon class="icon-inline">table_view</mat-icon> Exportar Excel
         </button>
         <button class="btn btn-primary-glacier" (click)="descargarReporteActiva('PDF')" [disabled]="exportando()" title="Descargar corte de caja en PDF">
-          <span class="material-symbols-outlined icon-inline">picture_as_pdf</span> Exportar PDF
+          <mat-icon class="icon-inline">picture_as_pdf</mat-icon> Exportar PDF
         </button>
       }
     </div>
@@ -60,7 +60,7 @@
         <!-- Badge de Balance / ingresos -->
         <div class="balance-margin-row">
           <div class="margin-pill">
-            <span class="material-symbols-outlined icon-16 text-emerald-500">trending_up</span>
+            <mat-icon class="icon-16 text-emerald-500">trending_up</mat-icon>
             <span class="margin-pct">+{{ margenOperativo() }}% Balance / ingresos</span>
           </div>
           <span class="text-xs text-muted">disponible vs egresos</span>
@@ -89,18 +89,18 @@
           </div>
         </div>
 
-        <!-- Acciones directas integradas en la tarjeta (TailAdmin Transfer/Receive) -->
+        <!-- Acciones directas integradas en la tarjeta -->
         <div class="balance-actions-row">
           @if (d.sesionActivaId) {
             <button class="btn btn-balance-primary" (click)="descargarReporteActiva('PDF')" [disabled]="exportando()">
-              <span class="material-symbols-outlined icon-inline">picture_as_pdf</span> Corte Activo (PDF)
+              <mat-icon class="icon-inline">picture_as_pdf</mat-icon> Corte Activo (PDF)
             </button>
             <button class="btn btn-balance-secondary" (click)="descargarReporteActiva('EXCEL')" [disabled]="exportando()">
-              <span class="material-symbols-outlined icon-inline">table_view</span> Corte Activo (Excel)
+              <mat-icon class="icon-inline">table_view</mat-icon> Corte Activo (Excel)
             </button>
           } @else {
             <a routerLink="/finanzas/sesiones" class="btn btn-balance-primary w-full text-center">
-              <span class="material-symbols-outlined icon-inline">lock_open</span> Aperturar Turno de Caja
+              <mat-icon class="icon-inline">lock_open</mat-icon> Aperturar Turno de Caja
             </a>
           }
         </div>
@@ -112,7 +112,7 @@
         <div class="kpi-box">
           <div class="kpi-box-top">
             <div class="kpi-icon-circle icon-bg-success">
-              <span class="material-symbols-outlined text-success">trending_up</span>
+              <mat-icon class="text-success">trending_up</mat-icon>
             </div>
             <span class="kpi-badge kpi-badge-success">Facturación</span>
           </div>
@@ -129,7 +129,7 @@
         <div class="kpi-box">
           <div class="kpi-box-top">
             <div class="kpi-icon-circle icon-bg-danger">
-              <span class="material-symbols-outlined text-danger">trending_down</span>
+              <mat-icon class="text-danger">trending_down</mat-icon>
             </div>
             <span class="kpi-badge kpi-badge-danger">Gastos Operativos</span>
           </div>
@@ -146,7 +146,7 @@
         <div class="kpi-box">
           <div class="kpi-box-top">
             <div class="kpi-icon-circle icon-bg-primary">
-              <span class="material-symbols-outlined text-primary-glacier">payments</span>
+              <mat-icon class="text-primary-glacier">payments</mat-icon>
             </div>
             <span class="kpi-badge kpi-badge-primary">Gaveta Física</span>
           </div>
@@ -165,7 +165,7 @@
         <div class="kpi-box">
           <div class="kpi-box-top">
             <div class="kpi-icon-circle icon-bg-warning">
-              <span class="material-symbols-outlined text-warning">warning</span>
+              <mat-icon class="text-warning">warning</mat-icon>
             </div>
             <span class="kpi-badge kpi-badge-warning">FEFO Alerta</span>
           </div>
@@ -205,14 +205,14 @@
               class="chart-tab-btn"
               [class.active]="vistaActiva() === 'OMNICANAL_BARRAS'"
               (click)="cambiarVista('OMNICANAL_BARRAS')">
-              <span class="material-symbols-outlined icon-inline">bar_chart</span> Barras (Omnicanal)
+              <mat-icon class="icon-inline">bar_chart</mat-icon> Barras (Omnicanal)
             </button>
             <button
               type="button"
               class="chart-tab-btn"
               [class.active]="vistaActiva() === 'FINANZAS_PASTEL'"
               (click)="cambiarVista('FINANZAS_PASTEL')">
-              <span class="material-symbols-outlined icon-inline">pie_chart</span> Pastel (Finanzas)
+              <mat-icon class="icon-inline">pie_chart</mat-icon> Pastel (Finanzas)
             </button>
           </div>
         </div>
@@ -318,7 +318,7 @@
                 @if (metricaPastel() === 'ESTRUCTURA') {
                   <div class="stat-row-item highlight-row p-2.5 rounded">
                     <div>
-                      <strong class="text-success text-xs"><span class="material-symbols-outlined icon-inline">trending_up</span> Ganancia Neta:</strong>
+                      <strong class="text-success text-xs"><mat-icon class="icon-inline">trending_up</mat-icon> Ganancia Neta:</strong>
                       <div class="text-xs text-muted">Flujo neto disponible tras cubrir compras y gastos</div>
                     </div>
                     <strong class="text-base text-success tabular-nums">{{ d.balanceNeto | currency:'PEN':'S/ ':'1.2-2' }}</strong>
@@ -326,7 +326,7 @@
 
                   <div class="stat-row-item p-2">
                     <div>
-                      <strong class="text-xs"><span class="material-symbols-outlined icon-inline">inventory_2</span> Costos Directos (COGS):</strong>
+                      <strong class="text-xs"><mat-icon class="icon-inline">inventory_2</mat-icon> Costos Directos (COGS):</strong>
                       <div class="text-xs text-muted">Insumos y prensado (45%)</div>
                     </div>
                     <strong class="font-mono text-xs tabular-nums">{{ (d.totalIngresos * 0.45) | currency:'PEN':'S/ ':'1.2-2' }}</strong>
@@ -334,7 +334,7 @@
 
                   <div class="stat-row-item p-2">
                     <div>
-                      <strong class="text-xs"><span class="material-symbols-outlined icon-inline">money_off</span> Egresos Operativos:</strong>
+                      <strong class="text-xs"><mat-icon class="icon-inline">money_off</mat-icon> Egresos Operativos:</strong>
                       <div class="text-xs text-muted">Servicios y logística</div>
                     </div>
                     <strong class="font-mono text-xs text-danger tabular-nums">{{ d.totalEgresos | currency:'PEN':'S/ ':'1.2-2' }}</strong>
@@ -342,7 +342,7 @@
 
                   <div class="stat-row-item p-2">
                     <div>
-                      <strong class="text-xs"><span class="material-symbols-outlined icon-inline">account_balance_wallet</span> Rendiciones:</strong>
+                      <strong class="text-xs"><mat-icon class="icon-inline">account_balance_wallet</mat-icon> Rendiciones:</strong>
                       <div class="text-xs text-muted">Gastos de administración/furgón</div>
                     </div>
                     <strong class="font-mono text-xs text-purple tabular-nums">{{ (d.reporteRendiciones?.totalMonto ?? 0) | currency:'PEN':'S/ ':'1.2-2' }}</strong>
@@ -350,7 +350,7 @@
                 } @else if (metricaPastel() === 'CATEGORIAS') {
                   <div class="stat-row-item p-2.5 rounded bg-slate-50">
                     <div>
-                      <strong class="text-primary text-xs"><span class="material-symbols-outlined icon-inline">eco</span> Derivados de Cacao:</strong>
+                      <strong class="text-primary text-xs"><mat-icon class="icon-inline">eco</mat-icon> Derivados de Cacao:</strong>
                       <div class="text-xs text-muted">Pasta pura 500g, nibs horneados</div>
                     </div>
                     <strong class="text-sm text-primary">~52% del ingreso</strong>
@@ -358,7 +358,7 @@
 
                   <div class="stat-row-item p-2.5 rounded bg-slate-50">
                     <div>
-                      <strong class="text-amber text-xs"><span class="material-symbols-outlined icon-inline">water_drop</span> Aceites de Coco:</strong>
+                      <strong class="text-amber text-xs"><mat-icon class="icon-inline">water_drop</mat-icon> Aceites de Coco:</strong>
                       <div class="text-xs text-muted">Aceite virgen 500ml, 250ml</div>
                     </div>
                     <strong class="text-sm text-amber">~38% del ingreso</strong>
@@ -366,7 +366,7 @@
 
                   <div class="stat-row-item p-2.5 rounded bg-slate-50">
                     <div>
-                      <strong class="text-teal text-xs"><span class="material-symbols-outlined icon-inline">inventory</span> Empaques e Insumos:</strong>
+                      <strong class="text-teal text-xs"><mat-icon class="icon-inline">inventory</mat-icon> Empaques e Insumos:</strong>
                       <div class="text-xs text-muted">Frascos y tapas herméticas</div>
                     </div>
                     <strong class="text-sm text-teal">~10% del ingreso</strong>
@@ -392,7 +392,7 @@
           <div class="spending-section">
             <div class="spending-header">
               <div class="spending-title-row">
-                <span class="material-symbols-outlined icon-18 text-slate-400">stacked_bar_chart</span>
+                <mat-icon class="icon-18 text-slate-400">stacked_bar_chart</mat-icon>
                 <span class="spending-title">Distribución de Ingresos por Canal Omnicanal</span>
               </div>
               <div class="spending-total-badge">
@@ -445,7 +445,7 @@
         @if (semaforo(); as sf) {
           <div class="quick-fefo-card">
             <div class="quick-fefo-header">
-              <span class="quick-fefo-title"><span class="material-symbols-outlined icon-inline text-amber-500">traffic</span> Semáforo FEFO Lotes</span>
+              <span class="quick-fefo-title"><mat-icon class="icon-inline text-amber-500">traffic</mat-icon> Semáforo FEFO Lotes</span>
               <span class="text-xs font-semibold tabular-nums text-slate-600">{{ sf.totalLotes }} Lotes</span>
             </div>
 
@@ -474,7 +474,7 @@
         <!-- RESUMEN DE RENDICIONES DE CAJA CHICA -->
         <div class="quick-rendiciones-card">
           <div class="quick-fefo-header">
-            <span class="quick-fefo-title"><span class="material-symbols-outlined icon-inline text-sky-500">receipt_long</span> Fondos Fijos (Caja Chica)</span>
+            <span class="quick-fefo-title"><mat-icon class="icon-inline text-sky-500">receipt_long</mat-icon> Fondos Fijos (Caja Chica)</span>
             <span class="badge-glacier-sm">{{ d.reporteRendiciones.cantidadRendiciones }} Docs</span>
           </div>
 
@@ -520,21 +520,21 @@
             class="table-tab-btn"
             [class.active]="tabInferior() === 'TODOS'"
             (click)="tabInferior.set('TODOS')">
-            <span class="material-symbols-outlined icon-inline">dataset</span> Todos los Reportes
+            <mat-icon class="icon-inline">dataset</mat-icon> Todos los Reportes
           </button>
           <button
             type="button"
             class="table-tab-btn"
             [class.active]="tabInferior() === 'RANKING'"
             (click)="tabInferior.set('RANKING')">
-            <span class="material-symbols-outlined icon-inline">military_tech</span> Ranking Top Productos (ABC)
+            <mat-icon class="icon-inline">military_tech</mat-icon> Ranking Top Productos (ABC)
           </button>
           <button
             type="button"
             class="table-tab-btn"
             [class.active]="tabInferior() === 'LOTES'"
             (click)="tabInferior.set('LOTES')">
-            <span class="material-symbols-outlined icon-inline">inventory</span> Semáforo FEFO de Lotes
+            <mat-icon class="icon-inline">inventory</mat-icon> Semáforo FEFO de Lotes
           </button>
         </div>
       </div>
@@ -549,13 +549,13 @@
                   <span class="badge-glacier">Ventas registradas</span>
                   <span class="text-xs text-muted font-medium">{{ rankingFiltrado().length }} productos</span>
                 </div>
-                <h3 class="section-title"><span class="material-symbols-outlined icon-inline text-sky-500">military_tech</span> Ranking de productos por ingresos</h3>
+                <h3 class="section-title"><mat-icon class="icon-inline text-sky-500">military_tech</mat-icon> Ranking de productos por ingresos</h3>
                 <p class="section-subtitle">Ingresos y unidades de ventas registradas. No incluye pedidos independientes sin detalle de productos.</p>
               </div>
 
               <!-- Buscador de productos -->
               <div class="table-search-box">
-                <span class="material-symbols-outlined search-icon">search</span>
+                <mat-icon class="search-icon">search</mat-icon>
                 <input
                   type="text"
                   placeholder="Buscar producto..."
@@ -609,10 +609,10 @@
             <div class="section-header">
               <div>
                 <div class="header-badge-row">
-                  <span class="badge-glacier">Control FEFO & Sanitario</span>
+                  <span class="badge badge-amber">Control FEFO & Sanitario</span>
                   <span class="text-xs text-muted font-medium">Inventario: {{ sf.valorizacionTotalInventario | currency:'PEN':'S/ ':'1.2-2' }}</span>
                 </div>
-                <h3 class="section-title"><span class="material-symbols-outlined icon-inline text-emerald-500">traffic</span> Semáforo de Caducidad de Lotes (FEFO)</h3>
+                <h3 class="section-title"><mat-icon class="icon-inline text-emerald-500">traffic</mat-icon> Semáforo de Caducidad de Lotes (FEFO)</h3>
                 <p class="section-subtitle">Monitoreo de vida útil de derivados de cacao y aceites prensados en frío en planta y almacenes.</p>
               </div>
 
@@ -650,7 +650,7 @@
                 </div>
 
                 <div class="table-search-box">
-                  <span class="material-symbols-outlined search-icon">search</span>
+                  <mat-icon class="search-icon">search</mat-icon>
                   <input
                     type="text"
                     placeholder="Buscar lote o producto..."
@@ -692,13 +692,13 @@
                       </td>
                       <td class="text-center">
                         @if (l.estadoSemaforo === 'CRITICO') {
-                          <span class="badge-semaforo semaforo-critico"><span class="material-symbols-outlined icon-inline text-danger" style="font-size:0.9rem">error</span> CRÍTICO (&le; 30d)</span>
+                          <span class="badge-semaforo semaforo-critico"><mat-icon class="icon-inline text-danger" style="font-size:0.9rem; width:0.9rem; height:0.9rem;">error</mat-icon> CRÍTICO (&le; 30d)</span>
                         } @else if (l.estadoSemaforo === 'PREVENTIVO') {
-                          <span class="badge-semaforo semaforo-preventivo"><span class="material-symbols-outlined icon-inline text-amber" style="font-size:0.9rem">schedule</span> PREVENTIVO (&le; 60d)</span>
+                          <span class="badge-semaforo semaforo-preventivo"><mat-icon class="icon-inline text-amber" style="font-size:0.9rem; width:0.9rem; height:0.9rem;">schedule</mat-icon> PREVENTIVO (&le; 60d)</span>
                         } @else if (l.estadoSemaforo === 'OPTIMO') {
-                          <span class="badge-semaforo semaforo-optimo"><span class="material-symbols-outlined icon-inline text-success" style="font-size:0.9rem">check_circle</span> ÓPTIMO</span>
+                          <span class="badge-semaforo semaforo-optimo"><mat-icon class="icon-inline text-success" style="font-size:0.9rem; width:0.9rem; height:0.9rem;">check_circle</mat-icon> ÓPTIMO</span>
                         } @else {
-                          <span class="badge-semaforo semaforo-vencido"><span class="material-symbols-outlined icon-inline text-danger" style="font-size:0.9rem">cancel</span> VENCIDO</span>
+                          <span class="badge-semaforo semaforo-vencido"><mat-icon class="icon-inline text-danger" style="font-size:0.9rem; width:0.9rem; height:0.9rem;">cancel</mat-icon> VENCIDO</span>
                         }
                       </td>
                       <td class="text-right font-bold tabular-nums">{{ l.stockActual | number:'1.2-2' }} unid.</td>

@@ -27,15 +27,15 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     @Cacheable(value = "categorias", key = "'all'", unless = "#result == null || #result.isEmpty()")
     public List<CategoriaResponse> listar() {
-        return categoriaRepository.findAll().stream().map(categoriaMapper::toResponse).toList();
+        return new java.util.ArrayList<>(categoriaRepository.findAll().stream().map(categoriaMapper::toResponse).toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     @Cacheable(value = "categorias", key = "#id", unless = "#result == null")
     public CategoriaResponse buscarPorId(Long id) {
         return categoriaMapper.toResponse(getCategoriaEntity(id));

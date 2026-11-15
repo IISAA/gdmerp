@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,13 +20,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "TRANSACCIONES_FINANCIERAS")
+@Table(name = "TRANSACCIONES_FINANCIERAS", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @NoArgsConstructor
 public class TransaccionFinanciera {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_transacciones_financieras")
+    @SequenceGenerator(name = "seq_transacciones_financieras", sequenceName = "SEQ_TRANSACCIONES_FINANCIERAS", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 
@@ -57,6 +59,9 @@ public class TransaccionFinanciera {
 
     @Column(name = "VENTA_ID")
     private Long ventaId;
+
+    @Column(name = "COMPRA_ID")
+    private Long compraId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CATEGORIA_FINANCIERA", nullable = false)

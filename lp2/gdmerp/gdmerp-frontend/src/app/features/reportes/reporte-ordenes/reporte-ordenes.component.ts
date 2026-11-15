@@ -4,6 +4,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { OrdenReporteService, OrdenesPorEstadoDto } from '../services/orden-reporte.service';
 
 @Component({
@@ -14,7 +15,8 @@ import { OrdenReporteService, OrdenesPorEstadoDto } from '../services/orden-repo
     MatTableModule,
     MatCardModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSnackBarModule,
   ],
   templateUrl: './reporte-ordenes.component.html',
   styleUrls: ['./reporte-ordenes.component.css']
@@ -22,6 +24,7 @@ import { OrdenReporteService, OrdenesPorEstadoDto } from '../services/orden-repo
 export class ReporteOrdenesComponent implements OnInit {
   private readonly ordenReporteService = inject(OrdenReporteService);
   private readonly location = inject(Location);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly datosEstados = signal<OrdenesPorEstadoDto[]>([]);
   readonly isLoading = signal<boolean>(false);
@@ -52,7 +55,12 @@ export class ReporteOrdenesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar reporte de órdenes por estado', err);
-        this.error.set('No se pudo cargar el resumen de órdenes por estado. Verifique la conexión con el servidor.');
+        const msg = 'No se pudo cargar el resumen de órdenes por estado. Verifique la conexión con el servidor.';
+        this.error.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.isLoading.set(false);
       }
     });

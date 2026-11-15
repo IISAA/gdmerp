@@ -1,8 +1,5 @@
 package pe.edu.upeu.gdmerp.finanzas.sesioncaja.controller;
 
-import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.DenominacionMonedaResponse;
-import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.DetalleArqueoEfectivo;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.AperturaSesionRequest;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.CierreCajaReporteDto;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.CierreSesionRequest;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.DenominacionMonedaResponse;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.MovimientoCajaRequest;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.MovimientoCajaResponse;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.SesionCajaDetalleResponse;
@@ -93,7 +91,7 @@ public class SesionCajaController {
 
     @GetMapping("/denominaciones")
     @Operation(summary = "Listar catálogo de billetes y monedas activas para el arqueo físico de caja")
-    public ResponseEntity<List<pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.DenominacionMonedaResponse>> listarDenominaciones() {
+    public ResponseEntity<List<DenominacionMonedaResponse>> listarDenominaciones() {
         return ResponseEntity.ok(sesionCajaService.listarDenominaciones());
     }
 }

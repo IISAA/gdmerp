@@ -3,32 +3,18 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CompraService } from '../services/compra.service';
 import { CompraRequest, Insumo, InsumoCatalogo } from '../models/compra.model';
 import { ProveedorService } from '../../proveedor/services/proveedor.service';
 import { Proveedor } from '../../proveedor/models/proveedor.model';
 
-const INSUMOS_DEFAULT: InsumoCatalogo[] = [
-  { id: 101, nombre: 'Cacao Nativo Chuncho en Grano Seleccionado', unidad: 'KG', precioSugerido: 20.0 },
-  { id: 102, nombre: 'Cocos Frescos Orgánicos del Chira para Prensado', unidad: 'UNID', precioSugerido: 2.2 },
-  { id: 103, nombre: 'Copra Blanca Deshidratada Grado Alimentario', unidad: 'KG', precioSugerido: 9.5 },
-  { id: 104, nombre: 'Frasco de Vidrio Grado Alimentario 30ml + Tapa', unidad: 'UNID', precioSugerido: 1.1 },
-  { id: 105, nombre: 'Frasco de Vidrio Grado Alimentario 120ml + Tapa', unidad: 'UNID', precioSugerido: 1.6 },
-  { id: 106, nombre: 'Frasco de Vidrio Grado Alimentario 250ml + Tapa Twist-Off', unidad: 'UNID', precioSugerido: 2.1 },
-  { id: 107, nombre: 'Frasco de Vidrio Grado Alimentario 460ml + Tapa Twist-Off', unidad: 'UNID', precioSugerido: 2.65 },
-  { id: 108, nombre: 'Frasco de Vidrio Grado Alimentario 1L Boca Ancha', unidad: 'UNID', precioSugerido: 3.8 },
-  { id: 109, nombre: 'Balde HDPE Grado Alimentario 4L con Asa y Tapa Precinto', unidad: 'UNID', precioSugerido: 8.5 },
-  { id: 110, nombre: 'Balde Industrial HDPE 20L Grado Alimentario', unidad: 'UNID', precioSugerido: 24.0 },
-  { id: 111, nombre: 'Bolsa Doypack Kraft Bilaminada con Zipper 250g/500g', unidad: 'MILLAR', precioSugerido: 420.0 },
-  { id: 112, nombre: 'Rollo Etiquetas Impermeables BOPP + Precintos Termocontraíbles', unidad: 'ROLLO', precioSugerido: 95.0 },
-  { id: 113, nombre: 'Caja de Cartón Corrugado Bandeja 24/36 Unidades Exportación', unidad: 'UNID', precioSugerido: 3.4 },
-];
-
 @Component({
   selector: 'app-compra-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, CurrencyPipe],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, CurrencyPipe, MatSnackBarModule, MatIconModule],
   templateUrl: './compra-form.component.html',
   styleUrl: './compra-form.component.css',
 })
@@ -37,24 +23,22 @@ export class CompraForm implements OnInit {
   private readonly compraService = inject(CompraService);
   private readonly proveedorService = inject(ProveedorService);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly proveedores = signal<Proveedor[]>([]);
-  protected readonly catalogoInsumos = signal<InsumoCatalogo[]>(INSUMOS_DEFAULT);
+  protected readonly catalogoInsumos = signal<InsumoCatalogo[]>([]);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly modalConfirmacion = signal(false);
 
   protected readonly form = this.fb.nonNullable.group({
     proveedorId: [0, [Validators.required, Validators.min(1)]],
-    serieComprobante: ['F001', [Validators.required, Validators.maxLength(10)]],
-    numeroComprobante: [
-      `${Math.floor(100000 + Math.random() * 900000)}`,
-      [Validators.required, Validators.maxLength(30)],
-    ],
+    serieComprobante: ['', [Validators.required, Validators.maxLength(10)]],
+    numeroComprobante: ['', [Validators.required, Validators.maxLength(30)]],
     fechaEmision: [new Date().toISOString().slice(0, 10), [Validators.required]],
     condicionPago: ['CONTADO', [Validators.required]],
     costoFlete: [0, [Validators.min(0)]],
-    detalles: this.fb.array([this.crearLineaInicial()], [Validators.minLength(1)]),
+    detalles: this.fb.array([this.crearLineaVacia()], [Validators.minLength(1)]),
   });
 
   protected get detallesArray() {
@@ -99,11 +83,16 @@ export class CompraForm implements OnInit {
         }
       },
       error: () => {
-        this.error.set('No se pudo cargar el directorio de proveedores.');
+        this.snackBar.open('❌ No se pudo cargar el directorio de proveedores.', 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
       },
     });
 
-    // 2. Cargar catálogo de insumos dinámicos desde backend
+    // 2. Cargar catálogo de insumos dinámicos reales desde backend
     this.compraService.listarInsumos().subscribe({
       next: (insumosApi: Insumo[]) => {
         if (insumosApi && insumosApi.length > 0) {
@@ -114,33 +103,50 @@ export class CompraForm implements OnInit {
             precioSugerido: Number(i.precioSugerido) || 10.0,
           }));
           this.catalogoInsumos.set(mapeados);
+
+          // Inicializar la primera línea con el primer insumo real
+          if (this.detallesArray.length > 0) {
+            const primer = mapeados[0];
+            this.detallesArray.at(0).patchValue({
+              insumoId: primer.id,
+              nombreInsumo: primer.nombre,
+              precioUnitario: primer.precioSugerido,
+            });
+          }
         }
       },
       error: () => {
-        // Mantiene INSUMOS_DEFAULT
+        this.snackBar.open('❌ No se pudo cargar el catálogo de insumos.', 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
       },
     });
   }
 
-  private crearLineaInicial() {
-    const insumoInicial = this.catalogoInsumos()[0] || INSUMOS_DEFAULT[0];
+  private crearLineaVacia() {
     const hoy = new Date();
     const vencimientoDefault = new Date(hoy.setFullYear(hoy.getFullYear() + 1)).toISOString().slice(0, 10);
 
     return this.fb.nonNullable.group({
-      insumoId: [insumoInicial.id, [Validators.required, Validators.min(1)]],
-      nombreInsumo: [insumoInicial.nombre, [Validators.required, Validators.maxLength(150)]],
+      insumoId: [0, [Validators.required, Validators.min(1)]],
+      nombreInsumo: ['', [Validators.required, Validators.maxLength(150)]],
       loteProveedor: [''],
       fechaVencimiento: [vencimientoDefault],
       factorConversion: [1, [Validators.required, Validators.min(0.01)]],
-      cantidad: [100, [Validators.required, Validators.min(0.01)]],
-      precioUnitario: [insumoInicial.precioSugerido, [Validators.required, Validators.min(0.01)]],
+      cantidad: [1, [Validators.required, Validators.min(0.01)]],
+      precioUnitario: [0, [Validators.required, Validators.min(0)]],
     });
   }
 
   agregarLinea(): void {
     const catalogo = this.catalogoInsumos();
-    const sugerido = catalogo[Math.min(this.detallesArray.length, catalogo.length - 1)];
+    const sugerido = catalogo.length > 0
+      ? catalogo[Math.min(this.detallesArray.length, catalogo.length - 1)]
+      : { id: 0, nombre: '', unidad: 'UND', precioSugerido: 10 };
+
     const hoy = new Date();
     const vencimientoDefault = new Date(hoy.setFullYear(hoy.getFullYear() + 1)).toISOString().slice(0, 10);
 
@@ -160,6 +166,13 @@ export class CompraForm implements OnInit {
   eliminarLinea(index: number): void {
     if (this.detallesArray.length > 1) {
       this.detallesArray.removeAt(index);
+    } else {
+      this.snackBar.open('⚠️ La orden debe tener al menos un ítem de insumo.', 'Cerrar', {
+        duration: 3000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['warning-snackbar'],
+      });
     }
   }
 
@@ -179,7 +192,12 @@ export class CompraForm implements OnInit {
   abrirConfirmacion(): void {
     if (this.form.invalid || this.detallesArray.length === 0) {
       this.form.markAllAsTouched();
-      this.error.set('Por favor verifique los campos requeridos en el formulario.');
+      this.snackBar.open('⚠️ Por favor verifique los campos requeridos en el formulario de compra.', 'Cerrar', {
+        duration: 4000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
     this.error.set(null);
@@ -226,12 +244,25 @@ export class CompraForm implements OnInit {
     this.compraService.crearCompra(request).subscribe({
       next: () => {
         this.loading.set(false);
+        this.snackBar.open(`✅ Orden de compra ${numeroCompleto} registrada exitosamente.`, 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar'],
+        });
         this.router.navigate(['/compras']);
       },
       error: (err: HttpErrorResponse) => {
         const msg = (err.error as { message?: string } | null)?.message;
-        this.error.set(msg || 'Error al registrar la orden de compra.');
+        const errMsg = msg || 'Error al registrar la orden de compra.';
+        this.error.set(errMsg);
         this.loading.set(false);
+        this.snackBar.open(`❌ ${errMsg}`, 'Entendido', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
       },
     });
   }

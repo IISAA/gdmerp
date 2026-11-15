@@ -2,20 +2,24 @@ package pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.EstadoCredito;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CuentaPorCobrarResponse {
     private Long id;
     private String codigo;
+    private Long clienteId;
+    private Long ventaId;
     private String clienteNombre;
     private String clienteDocumento;
     private BigDecimal montoTotal;

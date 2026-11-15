@@ -14,6 +14,8 @@ public interface MovimientoCajaRepository extends JpaRepository<MovimientoCaja, 
 
     List<MovimientoCaja> findBySesionCajaIdOrderByFechaHoraAsc(Long sesionCajaId);
 
+    long countBySesionCajaId(Long sesionCajaId);
+
     @Query("SELECT m FROM MovimientoCaja m WHERE m.fechaHora >= :desde AND m.fechaHora <= :hasta ORDER BY m.fechaHora DESC")
     List<MovimientoCaja> findByRangoFechas(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 }

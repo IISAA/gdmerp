@@ -4,11 +4,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import pe.edu.upeu.gdmerp.catalogo.producto.dto.TipoProducto;
+import pe.edu.upeu.gdmerp.catalogo.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.catalogo.producto.repository.ProductoRepository;
 import pe.edu.upeu.gdmerp.compras.compra.entity.Compra;
 import pe.edu.upeu.gdmerp.compras.compra.entity.EstadoCompra;
 import pe.edu.upeu.gdmerp.compras.compra.repository.CompraRepository;
@@ -31,8 +35,9 @@ import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.categoria.service.CategoriaService;
 import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.entity.StockInventario;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.MovimientoInventarioRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.StockInventarioRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -57,7 +62,9 @@ class EventosTransaccionalesIntegrationTest {
     @Autowired private AlmacenRepository almacenRepository;
     @Autowired private CategoriaService categoriaService;
     @Autowired private CategoriaRepository categoriaRepository;
-    @Autowired private ProductoRepository productoRepository;
+    @Autowired @Qualifier("catalogoProductoRepository") private ProductoRepository productoRepository;
+    @Autowired private StockInventarioRepository stockRepository;
+    @Autowired private MovimientoInventarioRepository movimientoRepository;
     @Autowired private LoteRepository loteRepository;
 
     @Autowired private RendicionCajaChicaService rendicionService;
@@ -69,6 +76,7 @@ class EventosTransaccionalesIntegrationTest {
 
     private final List<Long> comprasCreadas = new ArrayList<>();
     private final List<Long> proveedoresCreados = new ArrayList<>();
+    private final List<Long> stocksCreados = new ArrayList<>();
     private final List<Long> productosCreados = new ArrayList<>();
     private final List<Long> almacenesCreados = new ArrayList<>();
     private final List<Long> categoriasCreadas = new ArrayList<>();
@@ -112,7 +120,18 @@ class EventosTransaccionalesIntegrationTest {
         cajasCreadas.clear();
 
         for (Long prodId : productosCreados) {
+            movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(prodId));
             loteRepository.deleteAll(loteRepository.findByProductoId(prodId));
+            stockRepository.findFirstByProductoIdOrderByIdAsc(prodId).ifPresent(stockRepository::delete);
+        }
+        for (Long stockId : stocksCreados) {
+            if (stockRepository.existsById(stockId)) {
+                stockRepository.deleteById(stockId);
+            }
+        }
+        stocksCreados.clear();
+
+        for (Long prodId : productosCreados) {
             if (productoRepository.existsById(prodId)) {
                 productoRepository.deleteById(prodId);
             }
@@ -175,7 +194,7 @@ class EventosTransaccionalesIntegrationTest {
 
     @Test
     void recepcionCompraValidaActualizaStockYLoteAtomicamente() {
-        Producto producto = crearProducto("5.0000");
+        StockInventario stock = crearProductoConStock("5.0000");
         Proveedor proveedor = crearProveedor();
 
         Long compraId = txTemplate.execute(status -> {
@@ -197,7 +216,7 @@ class EventosTransaccionalesIntegrationTest {
                     compra.getNumeroComprobante(),
                     LocalDateTime.now(),
                     List.of(new RecepcionCompraEvent.ItemRecepcion(
-                            producto.getId(),
+                            stock.getProductoId(),
                             new BigDecimal("15.0000"),
                             LocalDate.now().plusMonths(6)
                     ))
@@ -209,18 +228,60 @@ class EventosTransaccionalesIntegrationTest {
         comprasCreadas.add(compraId);
 
         assertTrue(compraRepository.existsById(compraId));
-        Producto actualizado = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("20.0000").compareTo(actualizado.getStockTotal()),
+        StockInventario actualizado = stockRepository.findFirstByProductoIdOrderByIdAsc(stock.getProductoId()).orElseThrow();
+        assertEquals(0, new BigDecimal("20.0000").compareTo(actualizado.getStockActual()),
                 "El stock del producto debe incrementarse atómicamente vía RecepcionCompraEvent");
-        assertEquals(1, loteRepository.findByProductoId(producto.getId()).size(),
+        assertEquals(1, loteRepository.findByProductoId(stock.getProductoId()).size(),
                 "Debe crearse el lote asociado a la recepción de compra");
     }
 
     @Test
+    void recepcionCompraInicializaStockDesdeCatalogoSiNoExisteFichaPrevia() {
+        Producto soloCatalogo = crearSoloCatalogoProducto("18.5000", "3.0000");
+        Proveedor proveedor = crearProveedor();
+
+        Long compraId = txTemplate.execute(status -> {
+            Compra compra = Compra.builder()
+                    .serieComprobante("F003")
+                    .numeroComprobante("INIT-" + sufijo)
+                    .proveedor(proveedor)
+                    .fechaEmision(LocalDate.now())
+                    .estado(EstadoCompra.REGISTRADA)
+                    .subtotal(new BigDecimal("100.00"))
+                    .igv(new BigDecimal("18.00"))
+                    .total(new BigDecimal("118.00"))
+                    .saldoPendiente(new BigDecimal("118.00"))
+                    .build();
+            compra = compraRepository.save(compra);
+
+            eventPublisher.publishEvent(new RecepcionCompraEvent(
+                    compra.getId(),
+                    compra.getNumeroComprobante(),
+                    LocalDateTime.now(),
+                    List.of(new RecepcionCompraEvent.ItemRecepcion(
+                            soloCatalogo.getId(),
+                            new BigDecimal("12.0000"),
+                            LocalDate.now().plusMonths(6)
+                    ))
+            ));
+            return compra.getId();
+        });
+
+        assertNotNull(compraId);
+        comprasCreadas.add(compraId);
+
+        StockInventario inicializado = stockRepository.findFirstByProductoIdOrderByIdAsc(soloCatalogo.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("12.0000").compareTo(inicializado.getStockActual()));
+        assertEquals(0, new BigDecimal("18.5000").compareTo(inicializado.getCostoPromedio()));
+        assertEquals(0, new BigDecimal("3.0000").compareTo(inicializado.getStockMinimo()));
+        assertEquals(1, loteRepository.findByProductoId(soloCatalogo.getId()).size());
+    }
+
+    @Test
     void eliminarAlmacenYCategoriaConProductosLanzaExcepcionDesacoplada() {
-        Producto producto = crearProducto("2.0000");
-        Long almacenId = producto.getAlmacen().getId();
-        Long categoriaId = producto.getCategoria().getId();
+        StockInventario stock = crearProductoConStock("2.0000");
+        Long almacenId = stock.getAlmacen().getId();
+        Long categoriaId = stock.getCategoriaId();
 
         assertThrows(IllegalStateException.class, () -> almacenService.eliminar(almacenId));
         assertTrue(almacenRepository.existsById(almacenId));
@@ -263,12 +324,12 @@ class EventosTransaccionalesIntegrationTest {
         assertEquals(0, new BigDecimal("500.00").compareTo(cajaTrasFallo.getSaldoDisponible()),
                 "El saldo de caja chica no debe descontarse si falla la validación por evento");
 
-        Producto productoValido = crearProducto("3.0000");
+        StockInventario stockValido = crearProductoConStock("3.0000");
         RendicionCajaChicaRequest reqValida = RendicionCajaChicaRequest.builder()
                 .codigo("REND-OK-" + sufijo)
                 .responsable("Operario")
                 .cajaChicaId(caja.getId())
-                .detalles(List.of(new DetalleRendicionRequest("Item valido", 2, new BigDecimal("50.00"), productoValido.getId())))
+                .detalles(List.of(new DetalleRendicionRequest("Item valido", 2, new BigDecimal("50.00"), stockValido.getProductoId())))
                 .build();
 
         RendicionCajaChicaResponse respuesta = rendicionService.registrarRendicion(reqValida);
@@ -290,7 +351,24 @@ class EventosTransaccionalesIntegrationTest {
         return p;
     }
 
-    private Producto crearProducto(String stock) {
+    private Producto crearSoloCatalogoProducto(String costoBase, String stockMinimo) {
+        Producto prod = Producto.builder()
+                .sku("SKU-CAT-" + sufijo + "-" + productosCreados.size())
+                .nombre("Producto Catalogo " + sufijo)
+                .unidadMedida("kg")
+                .precio(new BigDecimal("25.00"))
+                .costoBase(new BigDecimal(costoBase))
+                .tipoProducto(TipoProducto.MATERIA_PRIMA)
+                .stockMinimo(new BigDecimal(stockMinimo))
+                .stock(0)
+                .activo(Boolean.TRUE)
+                .build();
+        prod = productoRepository.save(prod);
+        productosCreados.add(prod.getId());
+        return prod;
+    }
+
+    private StockInventario crearProductoConStock(String stockInicial) {
         Almacen alm = new Almacen();
         alm.setNombre("ALM-EV-" + sufijo + "-" + almacenesCreados.size());
         alm.setUbicacion("Planta A");
@@ -303,17 +381,29 @@ class EventosTransaccionalesIntegrationTest {
         cat = categoriaRepository.save(cat);
         categoriasCreadas.add(cat.getId());
 
-        Producto prod = new Producto();
-        prod.setSku("SKU-EV-" + sufijo + "-" + productosCreados.size());
-        prod.setNombre("Producto Evento " + sufijo);
-        prod.setUnidadMedida("kg");
-        prod.setCostoPromedio(new BigDecimal("12.0000"));
-        prod.setStockTotal(new BigDecimal(stock));
-        prod.setStockMinimo(BigDecimal.ONE);
-        prod.setAlmacen(alm);
-        prod.setCategoria(cat);
+        Producto prod = Producto.builder()
+                .sku("SKU-EV-" + sufijo + "-" + productosCreados.size())
+                .nombre("Producto Evento " + sufijo)
+                .unidadMedida("kg")
+                .precio(new BigDecimal("20.00"))
+                .costoBase(new BigDecimal("12.0000"))
+                .tipoProducto(TipoProducto.TERMINADO)
+                .stockMinimo(BigDecimal.ONE)
+                .stock(0)
+                .activo(Boolean.TRUE)
+                .build();
         prod = productoRepository.save(prod);
         productosCreados.add(prod.getId());
-        return prod;
+
+        StockInventario stock = new StockInventario();
+        stock.setProductoId(prod.getId());
+        stock.setAlmacen(alm);
+        stock.setCategoriaId(cat.getId());
+        stock.setStockActual(new BigDecimal(stockInicial));
+        stock.setStockMinimo(BigDecimal.ONE);
+        stock.setCostoPromedio(new BigDecimal("12.0000"));
+        stock = stockRepository.save(stock);
+        stocksCreados.add(stock.getId());
+        return stock;
     }
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "DENOMINACIONES_MONEDA")
+@Table(name = "DENOMINACIONES_MONEDA", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder
@@ -26,7 +27,8 @@ import java.math.BigDecimal;
 public class DenominacionMoneda {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_denominaciones_moneda")
+    @SequenceGenerator(name = "seq_denominaciones_moneda", sequenceName = "SEQ_DENOMINACIONES_MONEDA", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 

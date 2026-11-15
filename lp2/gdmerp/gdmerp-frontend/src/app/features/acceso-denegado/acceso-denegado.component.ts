@@ -10,28 +10,27 @@ import { MatCardModule } from '@angular/material/card';
   imports: [RouterLink, MatButtonModule, MatIconModule, MatCardModule],
   template: `
     <div class="acceso-denegado-container">
-      <mat-card class="acceso-denegado-card">
-        <mat-card-header>
-          <div mat-card-avatar class="warning-icon-avatar">
-            <mat-icon color="warn">lock</mat-icon>
+      <div class="acceso-denegado-card">
+        <div class="card-top-icon">
+          <div class="icon-circle">
+            <mat-icon>lock</mat-icon>
           </div>
-          <mat-card-title>Acceso Denegado</mat-card-title>
-          <mat-card-subtitle>Permisos Insuficientes (403)</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>
-            No tienes los roles ni permisos necesarios para acceder a este recurso del sistema GDMERP.
-          </p>
-          <p>
-            Si consideras que esto es un error, por favor contacta al administrador del sistema para solicitar la asignación del rol correspondiente en Keycloak.
-          </p>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <a mat-flat-button color="primary" routerLink="/home">
-            <mat-icon>home</mat-icon> Volver al Inicio
+        </div>
+        <div class="badge-tag">Seguridad & Control de Acceso</div>
+        <h2 class="error-title">Acceso Restringido (403)</h2>
+        <p class="error-desc">
+          No cuentas con los roles ni permisos asignados en Keycloak para acceder a este módulo del sistema GDMERP.
+        </p>
+        <div class="help-box">
+          <mat-icon class="help-icon">info</mat-icon>
+          <span>Si requieres operar este módulo, por favor solicita la autorización correspondiente al Administrador de Sistemas.</span>
+        </div>
+        <div class="card-actions">
+          <a routerLink="/dashboard" class="btn-home">
+            <mat-icon>grid_view</mat-icon> Ir al Dashboard
           </a>
-        </mat-card-actions>
-      </mat-card>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
@@ -39,34 +38,108 @@ import { MatCardModule } from '@angular/material/card';
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 60vh;
-      padding: 1.5rem;
+      min-height: 70vh;
+      padding: 2rem;
     }
     .acceso-denegado-card {
       max-width: 520px;
       width: 100%;
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 2.25rem 2rem;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
-    .warning-icon-avatar {
+    .card-top-icon {
+      margin-bottom: 1rem;
+    }
+    .icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #fffbeb;
+      color: #d97706;
+      border: 2px solid #fde68a;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .warning-icon-avatar mat-icon {
-      font-size: 36px;
-      width: 36px;
-      height: 36px;
+    .icon-circle mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
     }
-    mat-card-title {
+    .badge-tag {
+      font-size: 0.72rem;
       font-weight: 700;
-      color: #c62828;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      margin-bottom: 0.5rem;
     }
-    mat-card-content p {
-      margin: 0.75rem 0;
-      color: #455a64;
+    .error-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0.25rem 0 0.5rem;
+    }
+    .error-desc {
+      color: #64748b;
+      font-size: 0.925rem;
       line-height: 1.5;
+      margin: 0 0 1.25rem;
+    }
+    .help-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-size: 0.825rem;
+      color: #475569;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+    .help-icon {
+      color: #94a3b8;
+      font-size: 1.15rem;
+      width: 1.15rem;
+      height: 1.15rem;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+    .card-actions {
+      width: 100%;
+    }
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      width: 100%;
+      padding: 0.75rem 1.25rem;
+      background: #d97706;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.925rem;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+      transition: all 0.2s ease;
+    }
+    .btn-home:hover {
+      background: #b45309;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+      transform: translateY(-1px);
     }
   `]
 })

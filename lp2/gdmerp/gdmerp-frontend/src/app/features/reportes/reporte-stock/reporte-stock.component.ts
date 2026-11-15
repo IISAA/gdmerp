@@ -4,6 +4,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProductoReporteService, StockConsolidadoDto } from '../services/producto-reporte.service';
 
 @Component({
@@ -15,7 +16,8 @@ import { ProductoReporteService, StockConsolidadoDto } from '../services/product
     MatTableModule,
     MatCardModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSnackBarModule,
   ],
   templateUrl: './reporte-stock.component.html',
   styleUrls: ['./reporte-stock.component.css']
@@ -23,6 +25,7 @@ import { ProductoReporteService, StockConsolidadoDto } from '../services/product
 export class ReporteStockComponent implements OnInit {
   private readonly reporteService = inject(ProductoReporteService);
   private readonly location = inject(Location);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly datosStock = signal<StockConsolidadoDto[]>([]);
   readonly textoBusqueda = signal<string>('');
@@ -85,7 +88,12 @@ export class ReporteStockComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar reporte de stock consolidado', err);
-        this.error.set('No se pudo obtener el consolidado de existencias. Verifique la conexión con el servidor.');
+        const msg = 'No se pudo obtener el consolidado de existencias. Verifique la conexión con el servidor.';
+        this.error.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.isLoading.set(false);
       }
     });

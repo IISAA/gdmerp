@@ -1,18 +1,18 @@
 <div class="feature-container">
   <div class="page-header">
     <div>
-      <div class="badge badge-warning">CATÁLOGO DE PRODUCTOS</div>
+      <div class="badge badge-amber">CATÁLOGO DE PRODUCTOS</div>
       <h1>Gestión de Categorías de Productos</h1>
       <p class="subtitle">Familias y clasificaciones oficiales de derivados de cacao y coco</p>
     </div>
     <div class="header-actions">
       @if (auth.tieneRol('ADMIN')) {
-        <a routerLink="/catalogo/categorias/nueva" class="btn btn-primary">
-          <span class="material-symbols-outlined icon-inline">add_circle</span> Nueva Categoría
+        <a routerLink="/catalogo/categorias/nueva" class="btn btn-glacier-primary">
+          <mat-icon class="icon-inline">add_circle</mat-icon> Nueva Categoría
         </a>
       }
-      <button class="btn btn-secondary" (click)="cargarDatos()">
-        <span class="material-symbols-outlined icon-inline">refresh</span> Actualizar
+      <button class="btn btn-neutral-secondary" (click)="cargarDatos()">
+        <mat-icon class="icon-inline">refresh</mat-icon> Actualizar
       </button>
     </div>
   </div>
@@ -26,19 +26,19 @@
 
   @if (error()) {
     <div class="alert alert-danger" style="display: flex; align-items: center; gap: 0.5rem;">
-      <span class="material-symbols-outlined">warning</span>
+      <mat-icon>warning</mat-icon>
       <span>{{ error() }}</span>
     </div>
   }
 
   @if (successMsg()) {
     <div class="alert alert-success" style="display: flex; align-items: center; gap: 0.5rem;">
-      <span class="material-symbols-outlined">check_circle</span>
+      <mat-icon>check_circle</mat-icon>
       <span>{{ successMsg() }}</span>
     </div>
   }
 
-  <div class="card mt-2">
+  <div class="card tabla-card mt-2">
     <div class="table-container">
       <table>
         <thead>
@@ -59,10 +59,10 @@
                 <div class="btn-group">
                   @if (auth.tieneRol('ADMIN')) {
                     <a [routerLink]="['/catalogo/categorias', categoria.id]" class="btn btn-neutral-secondary btn-sm">
-                      <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">edit</span> Editar
+                      <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">edit</mat-icon> Editar
                     </a>
                     <button class="btn-action-discreet-danger" (click)="eliminar(categoria)" title="Eliminar categoría">
-                      <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">delete</span> Eliminar
+                      <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">delete</mat-icon> Eliminar
                     </button>
                   } @else {
                     <span style="color:#94a3b8;font-size:0.75rem;font-weight:600;">Lectura</span>

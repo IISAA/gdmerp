@@ -11,6 +11,8 @@ import {
 } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import * as L from 'leaflet';
 import { DeliveryService } from '../services/delivery.service';
 import { PedidoDelivery, EstadoDelivery } from '../models/delivery.model';
@@ -39,12 +41,13 @@ const DISTRITOS_LIMA: Record<string, [number, number]> = {
 @Component({
   selector: 'app-delivery-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe, MatSnackBarModule, MatIconModule],
   templateUrl: './delivery-list.component.html',
   styleUrl: './delivery-list.component.css',
 })
 export class DeliveryListComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly deliveryService = inject(DeliveryService);
+  private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild('mapaElemento') mapaElemento?: ElementRef<HTMLDivElement>;
 
@@ -427,12 +430,26 @@ export class DeliveryListComponent implements OnInit, AfterViewInit, OnDestroy {
       observaciones: 'Repartidor salió a ruta de entrega',
     }).subscribe({
       next: () => {
-        this.exito.set(`Pedido ${p.codigoPedido} ahora está EN RUTA.`);
+        const msg = `🚚 Pedido ${p.codigoPedido} ahora está EN RUTA.`;
+        this.exito.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['info-snackbar'],
+        });
         this.cargarPedidos();
         this.pedidoDetalleMapa.set(p);
         setTimeout(() => this.exito.set(null), 4000);
       },
-      error: (err) => alert('Error: ' + err.message),
+      error: (err) => {
+        this.snackBar.open('❌ Error: ' + err.message, 'Entendido', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
+      },
     });
   }
 
@@ -442,12 +459,26 @@ export class DeliveryListComponent implements OnInit, AfterViewInit, OnDestroy {
       observaciones: 'Entregado en destino conforme con firma o foto',
     }).subscribe({
       next: () => {
-        this.exito.set(`Pedido ${p.codigoPedido} marcado como ENTREGADO.`);
+        const msg = `✅ Pedido ${p.codigoPedido} marcado como ENTREGADO.`;
+        this.exito.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar'],
+        });
         this.cargarPedidos();
         this.pedidoDetalleMapa.set(p);
         setTimeout(() => this.exito.set(null), 4000);
       },
-      error: (err) => alert('Error: ' + err.message),
+      error: (err) => {
+        this.snackBar.open('❌ Error: ' + err.message, 'Entendido', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
+      },
     });
   }
 
@@ -636,7 +667,12 @@ export class DeliveryListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   guardarNuevoDelivery(): void {
     if (!this.nuevoClienteNombre.trim() || !this.nuevaDireccion.trim()) {
-      alert('Por favor complete el nombre del cliente y la dirección.');
+      this.snackBar.open('⚠️ Por favor complete el nombre del cliente y la dirección de entrega.', 'Cerrar', {
+        duration: 4000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
@@ -660,10 +696,21 @@ export class DeliveryListComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.cerrarModalNuevo();
         this.cargarPedidos();
-        this.exito.set('Pedido de delivery registrado correctamente.');
-        setTimeout(() => this.exito.set(null), 4000);
+        this.snackBar.open('✅ Pedido de delivery registrado correctamente.', 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar'],
+        });
       },
-      error: (err) => alert('Error: ' + (err.error?.message || err.message)),
+      error: (err) => {
+        this.snackBar.open('❌ Error: ' + (err.error?.message || err.message), 'Entendido', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
+      },
     });
   }
 }

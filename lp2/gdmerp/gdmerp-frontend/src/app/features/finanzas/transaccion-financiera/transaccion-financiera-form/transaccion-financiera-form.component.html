@@ -1,141 +1,262 @@
-<div class="view-back-nav">
-  <a routerLink="/finanzas/transacciones" class="btn-back-nav">
-    <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_back</span>
-    Volver al Listado
-  </a>
-  <div class="breadcrumb-trail">
-    <a routerLink="/finanzas/transacciones">Finanzas</a>
-    <span class="separator">/</span>
-    <a routerLink="/finanzas/transacciones">Transacciones</a>
-    <span class="separator">/</span>
-    <span class="current">{{ id() ? 'Editar Transacción' : 'Nueva Transacción' }}</span>
+<div class="feature-container">
+  <!-- Navegación y Retorno -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <a routerLink="/finanzas/transacciones" class="btn btn-neutral-secondary" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.85rem; font-size: 0.875rem;">
+        <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem;">arrow_back</mat-icon>
+        Volver a Transacciones
+      </a>
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.875rem;">
+        <span>Finanzas</span>
+        <span>/</span>
+        <a routerLink="/finanzas/transacciones" style="color: #64748b; text-decoration: none;">Transacciones</a>
+        <span>/</span>
+        <span style="font-weight: 600; color: #0f172a;">{{ id() ? 'Editar Transacción' : 'Nueva Transacción' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Encabezado de Página -->
+  <div style="margin-bottom: 1.75rem;">
+    <div class="badge" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; font-size: 0.725rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px; text-transform: uppercase; margin-bottom: 0.5rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+      <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem;">receipt_long</mat-icon>
+      TESORERÍA & MOVIMIENTOS
+    </div>
+    <h1 style="margin: 0.25rem 0 0; font-size: 1.625rem; font-weight: 700; color: #0f172a;">
+      {{ id() ? 'Editar Transacción Financiera' : 'Nueva Transacción Financiera' }}
+    </h1>
+    <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.9rem;">
+      {{ id() ? 'Modifica los datos contables y comprobantes de la transacción registrada.' : 'Registra un movimiento monetario de ingreso o egreso en tesorería con su respectivo comprobante.' }}
+    </p>
+  </div>
+
+  <!-- Tarjeta de Formulario Principal -->
+  <div class="card" style="max-width: 760px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.75rem;">
+    @if (loading() && id()) {
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; gap: 0.75rem; color: #64748b;">
+        <mat-icon style="font-size: 2rem; width: 2rem; height: 2rem; animation: spin 1s linear infinite; color: #d97706;">sync</mat-icon>
+        <span style="font-weight: 500;">Cargando información de la transacción...</span>
+      </div>
+    } @else {
+      @if (categoriasCargadas() && categorias().length === 0) {
+        <div style="background: #fffbeb; border: 1px solid #fde68a; color: #b45309; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+          <mat-icon style="color: #d97706; margin-top: 2px;">info</mat-icon>
+          <div>
+            <strong style="display: block; margin-bottom: 0.25rem;">No hay categorías financieras disponibles</strong>
+            <span>Para registrar una transacción monetaria es necesario contar al menos con una categoría en el catálogo.</span>
+            <div style="margin-top: 0.5rem;">
+              <a routerLink="/finanzas/categorias/nueva" class="btn btn-glacier-primary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                + Crear Primera Categoría
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        
+        <!-- Fila 1: Código y Fecha -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              Código de Transacción <span style="color: #dc2626;">*</span>
+            </label>
+            <input 
+              type="text" 
+              formControlName="codigo" 
+              placeholder="Ej: TRX-2026-006"
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; font-family: monospace; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; text-transform: uppercase;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            />
+            @if (mensajeValidacion('codigo'); as mensaje) {
+              <p style="color: #dc2626; font-size: 0.8rem; margin: 0.35rem 0 0; display: flex; align-items: center; gap: 0.25rem;">
+                <mat-icon style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">error</mat-icon>
+                {{ mensaje }}
+              </p>
+            }
+          </div>
+
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              Fecha de Registro / Operación <span style="color: #dc2626;">*</span>
+            </label>
+            <input 
+              type="date" 
+              formControlName="fechaTransaccion"
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            />
+          </div>
+        </div>
+
+        <!-- Fila 2: Concepto / Glosa -->
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+            Concepto / Glosa de Operación <span style="color: #dc2626;">*</span>
+          </label>
+          <input 
+            type="text" 
+            formControlName="concepto" 
+            placeholder="Ej: Pago de flete terrestre por traslado de materias primas"
+            style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+            onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+            onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+          />
+          @if (mensajeValidacion('concepto'); as mensaje) {
+            <p style="color: #dc2626; font-size: 0.8rem; margin: 0.35rem 0 0; display: flex; align-items: center; gap: 0.25rem;">
+              <mat-icon style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">error</mat-icon>
+              {{ mensaje }}
+            </p>
+          }
+        </div>
+
+        <!-- Fila 3: Tipo y Estado -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              Naturaleza del Flujo <span style="color: #dc2626;">*</span>
+            </label>
+            <select 
+              formControlName="tipo"
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; background: #ffffff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            >
+              <option value="INGRESO">🟢 INGRESO (Entrada de dinero)</option>
+              <option value="EGRESO">🔴 EGRESO (Salida de dinero / Pago)</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              Estado Financiero <span style="color: #dc2626;">*</span>
+            </label>
+            <select 
+              formControlName="estado"
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; background: #ffffff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            >
+              <option value="PAGADO">PAGADO (Efectuado / Liquidado)</option>
+              <option value="PENDIENTE">PENDIENTE (Por abonar o cobrar)</option>
+              <option value="ANULADO">ANULADO (Sin efecto contable)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila 4: Monto y Categoría -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              Monto (S/) <span style="color: #dc2626;">*</span>
+            </label>
+            <input 
+              type="number" 
+              step="0.01" 
+              min="0.01" 
+              formControlName="monto" 
+              placeholder="0.00"
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-weight: 600; font-family: monospace; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            />
+            @if (mensajeValidacion('monto'); as mensaje) {
+              <p style="color: #dc2626; font-size: 0.8rem; margin: 0.35rem 0 0; display: flex; align-items: center; gap: 0.25rem;">
+                <mat-icon style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">error</mat-icon>
+                {{ mensaje }}
+              </p>
+            }
+          </div>
+
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              Categoría Financiera <span style="color: #dc2626;">*</span>
+            </label>
+            <select 
+              formControlName="categoriaFinancieraId"
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; background: #ffffff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            >
+              <option [ngValue]="0" disabled>-- Selecciona una categoría --</option>
+              @for (categoria of categorias(); track categoria.id) {
+                <option [ngValue]="categoria.id">{{ categoria.nombre }} ({{ categoria.tipoDefault }})</option>
+              }
+            </select>
+            @if (mensajeValidacion('categoriaFinancieraId'); as mensaje) {
+              <p style="color: #dc2626; font-size: 0.8rem; margin: 0.35rem 0 0; display: flex; align-items: center; gap: 0.25rem;">
+                <mat-icon style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">error</mat-icon>
+                {{ mensaje }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Fila 5: Comprobante de Pago -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              Tipo de Comprobante
+            </label>
+            <select 
+              formControlName="tipoComprobante"
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; background: #ffffff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            >
+              <option value="FACTURA">FACTURA ELECTRÓNICA</option>
+              <option value="BOLETA">BOLETA DE VENTA</option>
+              <option value="RECIBO">RECIBO POR HONORARIOS / CAJA</option>
+              <option value="TICKET">TICKET / VOUCHER BANCARIO</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+              N° Comprobante / Referencia
+            </label>
+            <input 
+              type="text" 
+              formControlName="numeroComprobante" 
+              placeholder="Ej: F001-00050" 
+              style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+              onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+              onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+            />
+          </div>
+        </div>
+
+        @if (error()) {
+          <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+            <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem; color: #dc2626;">warning</mat-icon>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <!-- Botones de Acción -->
+        <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+          <button 
+            type="submit" 
+            class="btn btn-glacier-primary" 
+            [disabled]="loading() || errorCarga() || categorias().length === 0"
+            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem;"
+          >
+            <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem;">save</mat-icon>
+            {{ id() ? 'Actualizar Transacción' : 'Guardar Transacción' }}
+          </button>
+          
+          <button 
+            type="button" 
+            class="btn btn-neutral-secondary" 
+            (click)="cancelar()"
+            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem;"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    }
   </div>
 </div>
-
-<h2>{{ id() ? 'Editar Transacción Financiera' : 'Nueva Transacción Financiera' }}</h2>
-
-<form [formGroup]="form" (ngSubmit)="guardar()" style="max-width: 500px; display: flex; flex-direction: column; gap: 1rem;">
-  @if (loading()) {
-    <p>Cargando...</p>
-  }
-
-  @if (categoriasCargadas() && categorias().length === 0) {
-    <p class="error" style="color: #b71c1c; background-color: #ffebee; padding: 0.75rem; border-radius: 4px;">
-      No hay categorías financieras registradas. Una transacción necesita una categoría:
-      <a routerLink="/finanzas/categorias/nueva">crea una primero</a>.
-    </p>
-  }
-
-  <div>
-    <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-      Código de Transacción
-    </label>
-    <input type="text" formControlName="codigo" placeholder="Ej: TRX-2026-006" style="width: 100%; padding: 0.5rem;" />
-    @if (mensajeValidacion('codigo'); as mensaje) {
-      <p class="error" style="color: red; margin: 0.25rem 0;">{{ mensaje }}</p>
-    }
-  </div>
-
-  <div>
-    <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-      Concepto / Glosa
-    </label>
-    <input type="text" formControlName="concepto" placeholder="Ej: Venta de manteca de cacao en feria" style="width: 100%; padding: 0.5rem;" />
-    @if (mensajeValidacion('concepto'); as mensaje) {
-      <p class="error" style="color: red; margin: 0.25rem 0;">{{ mensaje }}</p>
-    }
-  </div>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-    <div>
-      <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-        Tipo
-      </label>
-      <select formControlName="tipo" style="width: 100%; padding: 0.5rem;">
-        <option value="INGRESO">INGRESO</option>
-        <option value="EGRESO">EGRESO</option>
-      </select>
-    </div>
-
-    <div>
-      <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-        Estado
-      </label>
-      <select formControlName="estado" style="width: 100%; padding: 0.5rem;">
-        <option value="PAGADO">PAGADO</option>
-        <option value="PENDIENTE">PENDIENTE</option>
-        <option value="ANULADO">ANULADO</option>
-      </select>
-    </div>
-  </div>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-    <div>
-      <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-        Monto (S/)
-      </label>
-      <input type="number" step="0.01" min="0.01" formControlName="monto" style="width: 100%; padding: 0.5rem;" />
-      @if (mensajeValidacion('monto'); as mensaje) {
-        <p class="error" style="color: red; margin: 0.25rem 0;">{{ mensaje }}</p>
-      }
-    </div>
-
-    <div>
-      <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-        Fecha
-      </label>
-      <input type="date" formControlName="fechaTransaccion" style="width: 100%; padding: 0.5rem;" />
-    </div>
-  </div>
-
-  <div>
-    <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-      Categoría Financiera (Tabla Padre)
-    </label>
-    <select formControlName="categoriaFinancieraId" style="width: 100%; padding: 0.5rem;">
-      <option [ngValue]="0" disabled>Selecciona una categoría financiera</option>
-      @for (categoria of categorias(); track categoria.id) {
-        <option [ngValue]="categoria.id">{{ categoria.nombre }} ({{ categoria.tipoDefault }})</option>
-      }
-    </select>
-    @if (mensajeValidacion('categoriaFinancieraId'); as mensaje) {
-      <p class="error" style="color: red; margin: 0.25rem 0;">{{ mensaje }}</p>
-    }
-  </div>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-    <div>
-      <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-        Tipo Comprobante
-      </label>
-      <select formControlName="tipoComprobante" style="width: 100%; padding: 0.5rem;">
-        <option value="FACTURA">FACTURA</option>
-        <option value="BOLETA">BOLETA</option>
-        <option value="RECIBO">RECIBO</option>
-        <option value="TICKET">TICKET</option>
-      </select>
-    </div>
-
-    <div>
-      <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-        N° Comprobante
-      </label>
-      <input type="text" formControlName="numeroComprobante" placeholder="Ej: F001-00050" style="width: 100%; padding: 0.5rem;" />
-    </div>
-  </div>
-
-  @if (error()) {
-    <p class="error" style="color: red; background-color: #fff0f0; padding: 0.5rem; border-radius: 4px; margin: 0;">
-      {{ error() }}
-    </p>
-  }
-
-  <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-    <button type="submit" class="btn btn-glacier-primary" [disabled]="loading() || errorCarga() || categorias().length === 0">
-      Guardar Transacción
-    </button>
-    <button type="button" class="btn btn-neutral-secondary" (click)="cancelar()">
-      Cancelar
-    </button>
-  </div>
-</form>

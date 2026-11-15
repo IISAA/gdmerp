@@ -2,14 +2,16 @@ package pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.MetodoPago;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

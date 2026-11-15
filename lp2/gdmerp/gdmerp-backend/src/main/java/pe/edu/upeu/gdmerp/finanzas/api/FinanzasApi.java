@@ -6,32 +6,34 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Puerto público de Spring Modulith para el módulo de Finanzas.
- * Permite a otros módulos del ERP (Ventas POS, Delivery y Compras) impactar Sesiones de Caja,
- * Cuentas por Cobrar y Transacciones Financieras sin acoplarse a repositorios ni entidades JPA internas.
+ * API pública del módulo Finanzas expuesta a otros módulos del Monolito Modular (Spring Modulith).
  */
 public interface FinanzasApi {
 
-    /**
-     * Registra un cobro transaccional originado en una venta sobre la sesión activa del usuario.
-     */
     Long registrarCobroVenta(Long usuarioId, BigDecimal monto, MetodoPago metodoPago, String referenciaVenta, Long categoriaId);
 
-    /**
-     * Registra automáticamente el ingreso en el turno de caja abierto actual y la transacción financiera PAGADA
-     * al emitir una venta POS al contado o liquidar un cobro contra entrega (Delivery).
-     */
     default Long registrarIngresoVentaPos(BigDecimal monto, MetodoPago metodoPago, String numeroTicket, String clienteNombre) {
-        return registrarIngresoVentaPos(monto, metodoPago, numeroTicket, clienteNombre, null, null);
+        return registrarIngresoVentaPos(null, monto, metodoPago, numeroTicket, clienteNombre, null, null);
     }
 
-    Long registrarIngresoVentaPos(BigDecimal monto, MetodoPago metodoPago, String numeroTicket, String clienteNombre, Long sesionCajaId, String cajeroId);
+    default Long registrarIngresoVentaPos(BigDecimal monto, MetodoPago metodoPago, String numeroTicket, String clienteNombre, Long sesionCajaId, String cajeroId) {
+        return registrarIngresoVentaPos(null, monto, metodoPago, numeroTicket, clienteNombre, sesionCajaId, cajeroId);
+    }
 
-    /**
-     * Registra automáticamente una Cuenta por Cobrar (PENDIENTE) y su transacción financiera devengada
-     * cuando una venta POS se emite bajo modalidad CREDITO.
-     */
+    Long registrarIngresoVentaPos(Long ventaId, BigDecimal monto, MetodoPago metodoPago, String numeroTicket, String clienteNombre, Long sesionCajaId, String cajeroId);
+
+    default Long registrarVentaACredito(
+            String numeroTicket,
+            String clienteNombre,
+            String clienteDocumento,
+            BigDecimal montoTotal,
+            Integer diasCredito) {
+        return registrarVentaACredito(null, null, numeroTicket, clienteNombre, clienteDocumento, montoTotal, diasCredito);
+    }
+
     Long registrarVentaACredito(
+            Long ventaId,
+            Long clienteId,
             String numeroTicket,
             String clienteNombre,
             String clienteDocumento,
@@ -39,30 +41,46 @@ public interface FinanzasApi {
             Integer diasCredito
     );
 
-    /**
-     * Extorna el impacto financiero (Transacción Financiera, Sesión de Caja o Cuenta por Cobrar) al anular una venta POS.
-     */
     default void revertirVentaPos(String numeroTicket, BigDecimal monto, MetodoPago metodoPago, boolean eraCredito) {
-        revertirVentaPos(numeroTicket, monto, metodoPago, eraCredito, null);
+        revertirVentaPos(null, numeroTicket, monto, metodoPago, eraCredito, null);
     }
 
-    void revertirVentaPos(String numeroTicket, BigDecimal monto, MetodoPago metodoPago, boolean eraCredito, Long sesionCajaId);
+    default void revertirVentaPos(String numeroTicket, BigDecimal monto, MetodoPago metodoPago, boolean eraCredito, Long sesionCajaId) {
+        revertirVentaPos(null, numeroTicket, monto, metodoPago, eraCredito, sesionCajaId);
+    }
 
-    /**
-     * Registra la obligación financiera (EGRESO PENDIENTE) al ingresar una factura/comprobante de Compra de insumos.
-     */
+    void revertirVentaPos(Long ventaId, String numeroTicket, BigDecimal monto, MetodoPago metodoPago, boolean eraCredito, Long sesionCajaId);
+
+    default void registrarFacturaCompraPendiente(
+            String numeroComprobante,
+            String razonSocialProveedor,
+            BigDecimal montoTotal,
+            LocalDate fechaEmision) {
+        registrarFacturaCompraPendiente(null, null, numeroComprobante, razonSocialProveedor, montoTotal, fechaEmision);
+    }
+
     void registrarFacturaCompraPendiente(
+            Long compraId,
+            Long proveedorId,
             String numeroComprobante,
             String razonSocialProveedor,
             BigDecimal montoTotal,
             LocalDate fechaEmision
     );
 
-    /**
-     * Registra el egreso en la Sesión de Caja activa (aplicando RN-FIN-01 de solvencia en efectivo) y en
-     * Transacciones Financieras al amortizar o cancelar el pago a un proveedor.
-     */
+    void confirmarRecepcionCompra(Long compraId, String numeroComprobante);
+
+    default void registrarPagoProveedorCompra(
+            String numeroComprobante,
+            String razonSocialProveedor,
+            BigDecimal montoPagado,
+            MetodoPago metodoPago,
+            boolean liquidadaTotalmente) {
+        registrarPagoProveedorCompra(null, numeroComprobante, razonSocialProveedor, montoPagado, metodoPago, liquidadaTotalmente);
+    }
+
     void registrarPagoProveedorCompra(
+            Long compraId,
             String numeroComprobante,
             String razonSocialProveedor,
             BigDecimal montoPagado,
@@ -70,18 +88,13 @@ public interface FinanzasApi {
             boolean liquidadaTotalmente
     );
 
-    /**
-     * Anula la obligación financiera pendiente cuando una Orden de Compra se anula.
-     */
-    void anularFacturaCompra(String numeroComprobante);
+    default void anularFacturaCompra(String numeroComprobante) {
+        anularFacturaCompra(null, numeroComprobante);
+    }
 
-    /**
-     * Verifica si el usuario dispone de un turno de caja en estado ABIERTO.
-     */
+    void anularFacturaCompra(Long compraId, String numeroComprobante);
+
     boolean tieneSesionAbierta(Long usuarioId);
 
-    /**
-     * Retorna el ID de la sesión activa del usuario, o lanza excepción si no existe.
-     */
     Long obtenerIdSesionActiva(Long usuarioId);
 }

@@ -23,6 +23,8 @@ public class FinanzasVentaEventListener {
         log.info("Finanzas: procesando VentaCreadaEvent para ticket: {}", event.numeroTicket());
         if ("CREDITO".equalsIgnoreCase(event.metodoPago())) {
             finanzasApi.registrarVentaACredito(
+                    event.ventaId(),
+                    null,
                     event.numeroTicket(),
                     event.clienteNombre(),
                     null,
@@ -32,6 +34,7 @@ public class FinanzasVentaEventListener {
         } else {
             MetodoPago metodo = parseMetodoPago(event.metodoPago());
             finanzasApi.registrarIngresoVentaPos(
+                    event.ventaId(),
                     event.total(),
                     metodo,
                     event.numeroTicket(),
@@ -48,6 +51,7 @@ public class FinanzasVentaEventListener {
         boolean eraCredito = "CREDITO".equalsIgnoreCase(event.metodoPago());
         MetodoPago metodo = eraCredito ? null : parseMetodoPago(event.metodoPago());
         finanzasApi.revertirVentaPos(
+                event.ventaId(),
                 event.numeroTicket(),
                 event.total(),
                 metodo,
@@ -61,6 +65,7 @@ public class FinanzasVentaEventListener {
         log.info("Finanzas: procesando DeliveryEntregadoEvent para entrega: {}", event.codigo());
         MetodoPago metodo = parseMetodoPago(event.metodoPago());
         finanzasApi.registrarIngresoVentaPos(
+                event.ventaId(),
                 event.montoTotal(),
                 metodo,
                 event.codigo(),
@@ -71,7 +76,9 @@ public class FinanzasVentaEventListener {
     }
 
     private MetodoPago parseMetodoPago(String metodo) {
-        if (metodo == null) return MetodoPago.EFECTIVO;
+        if (metodo == null) {
+            return MetodoPago.EFECTIVO;
+        }
         try {
             return MetodoPago.valueOf(metodo.trim().toUpperCase());
         } catch (IllegalArgumentException ex) {

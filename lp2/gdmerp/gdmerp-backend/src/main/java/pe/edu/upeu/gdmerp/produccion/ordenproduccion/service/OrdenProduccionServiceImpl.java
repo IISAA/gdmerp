@@ -1,18 +1,20 @@
 package pe.edu.upeu.gdmerp.produccion.ordenproduccion.service;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import pe.edu.upeu.gdmerp.catalogo.producto.dto.ProductoResponse;
+import pe.edu.upeu.gdmerp.catalogo.producto.service.ProductoService;
 import pe.edu.upeu.gdmerp.exception.InsufficientStockException;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
-import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService;
-import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
+import pe.edu.upeu.gdmerp.inventario.stock.dto.CostoProductoDTO;
+import pe.edu.upeu.gdmerp.inventario.stock.dto.StockInventarioResponse;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioOperacionService;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioService;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
 import pe.edu.upeu.gdmerp.produccion.listamateriales.entity.DetalleListaMateriales;
@@ -39,20 +41,40 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class OrdenProduccionServiceImpl implements OrdenProduccionService {
 
     private final OrdenProduccionRepository ordenRepository;
     private final CentroTrabajoRepository centroTrabajoRepository;
     private final ListaMaterialesRepository listaMaterialesRepository;
-    private final ProductoService productoService;
+    private final ProductoService catalogoProductoService;
+    private final InventarioService stockService;
     private final InventarioOperacionService inventarioService;
     private final OrdenProduccionMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
+
+    public OrdenProduccionServiceImpl(
+            OrdenProduccionRepository ordenRepository,
+            CentroTrabajoRepository centroTrabajoRepository,
+            ListaMaterialesRepository listaMaterialesRepository,
+            @Qualifier("catalogoProductoService") ProductoService catalogoProductoService,
+            InventarioService stockService,
+            InventarioOperacionService inventarioService,
+            OrdenProduccionMapper mapper,
+            ApplicationEventPublisher eventPublisher) {
+        this.ordenRepository = ordenRepository;
+        this.centroTrabajoRepository = centroTrabajoRepository;
+        this.listaMaterialesRepository = listaMaterialesRepository;
+        this.catalogoProductoService = catalogoProductoService;
+        this.stockService = stockService;
+        this.inventarioService = inventarioService;
+        this.mapper = mapper;
+        this.eventPublisher = eventPublisher;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -84,8 +106,8 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
                         "Centro de trabajo no encontrado con ID: " + request.centroTrabajoId()));
         op.setCentroTrabajo(centro);
 
-        ProductoResponse pt = productoService.buscarPorId(request.productoTerminadoId());
-        op.setProducto(pt.nombre());
+        ProductoResponse pt = catalogoProductoService.obtener(request.productoTerminadoId());
+        op.setProducto(pt.getNombre());
 
         calcularYAsignarCostos(op, centro, request.horasTrabajadas());
         consumirDetallesIniciales(op, request.detalles());
@@ -217,39 +239,25 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
         }
 
         for (DetalleOrdenProduccion detalle : detalles) {
-            if (detalle == null) continue;
-
-            Producto insumo = detalle.getInsumo();
-            if (insumo == null && detalle.getMateriaPrimaId() != null && productoService != null) {
-                try {
-                    ProductoResponse prodResp = productoService.buscarPorId(detalle.getMateriaPrimaId());
-                    BigDecimal stockActual = prodResp.stockTotal() != null ? prodResp.stockTotal() : BigDecimal.ZERO;
-                    BigDecimal cantidadRequerida = detalle.getCantidadRequerida() != null ? detalle.getCantidadRequerida() : BigDecimal.ZERO;
-
-                    if (stockActual.compareTo(cantidadRequerida) < 0) {
-                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                                "Stock insuficiente para el insumo: " + prodResp.nombre() +
-                                ". Requerido: " + cantidadRequerida + ", Disponible: " + stockActual);
-                    }
-                    continue;
-                } catch (ResourceNotFoundException e) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Insumo no encontrado con ID: " + detalle.getMateriaPrimaId());
-                }
+            if (detalle == null || detalle.getMateriaPrimaId() == null) {
+                continue;
             }
+            try {
+                StockInventarioResponse stockResp = stockService.buscarPorProductoId(detalle.getMateriaPrimaId());
+                BigDecimal stockActual = stockResp.stockActual() != null ? stockResp.stockActual() : BigDecimal.ZERO;
+                BigDecimal cantidadRequerida = detalle.getCantidadRequerida() != null ? detalle.getCantidadRequerida() : BigDecimal.ZERO;
 
-            BigDecimal stockActual = (insumo != null && insumo.getStockActual() != null)
-                    ? insumo.getStockActual()
-                    : BigDecimal.ZERO;
-            BigDecimal cantidadRequerida = detalle.getCantidadRequerida() != null
-                    ? detalle.getCantidadRequerida()
-                    : BigDecimal.ZERO;
-
-            if (stockActual.compareTo(cantidadRequerida) < 0) {
-                String nombreInsumo = insumo != null ? insumo.getNombre() : detalle.getNombreProducto();
+                if (stockActual.compareTo(cantidadRequerida) < 0) {
+                    String nombreInsumo = stockResp.nombreProducto() != null
+                            ? stockResp.nombreProducto()
+                            : detalle.getNombreProducto();
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Stock insuficiente para el insumo: " + nombreInsumo +
+                                    ". Requerido: " + cantidadRequerida + ", Disponible: " + stockActual);
+                }
+            } catch (ResourceNotFoundException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Stock insuficiente para el insumo: " + nombreInsumo +
-                        ". Requerido: " + cantidadRequerida + ", Disponible: " + stockActual);
+                        "Insumo no encontrado con ID: " + detalle.getMateriaPrimaId());
             }
         }
     }
@@ -288,17 +296,33 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
         } else if (limpiarExistentes) {
             orden.getDetalles().clear();
         }
+
+        Set<Long> insumoIds = bom.getDetalles().stream()
+                .map(DetalleListaMateriales::getInsumoId)
+                .collect(Collectors.toSet());
+        Map<Long, ProductoResponse> catalogos = catalogoProductoService.listarPorIds(insumoIds);
+        Map<Long, BigDecimal> costos = stockService.obtenerCostoPromedioPorIds(insumoIds).stream()
+                .filter(c -> c.productoId() != null && c.costoPromedio() != null)
+                .collect(Collectors.toMap(CostoProductoDTO::productoId, CostoProductoDTO::costoPromedio, (a, b) -> a));
+
         for (DetalleListaMateriales detalleBom : bom.getDetalles()) {
-            Producto insumo = detalleBom.getInsumo();
+            Long insumoId = detalleBom.getInsumoId();
+            ProductoResponse catalogo = catalogos.get(insumoId);
             BigDecimal cantidadInsumo = detalleBom.getCantidadRequerida().multiply(factor)
                     .setScale(4, RoundingMode.HALF_UP);
+            BigDecimal costoUnitario = costos.getOrDefault(
+                    insumoId,
+                    catalogo != null && catalogo.getCostoBase() != null ? catalogo.getCostoBase() : BigDecimal.ZERO
+            );
 
             DetalleOrdenProduccion detalleOrden = new DetalleOrdenProduccion();
             detalleOrden.setOrdenProduccion(orden);
-            detalleOrden.setMateriaPrimaId(insumo.getId());
-            detalleOrden.setNombreProducto(insumo.getNombre());
+            detalleOrden.setMateriaPrimaId(insumoId);
+            detalleOrden.setNombreProducto(catalogo != null && catalogo.getNombre() != null
+                    ? catalogo.getNombre()
+                    : "Producto #" + insumoId);
             detalleOrden.setCantidadRequerida(cantidadInsumo);
-            detalleOrden.setCostoUnitario(insumo.getCostoPromedio() != null ? insumo.getCostoPromedio() : BigDecimal.ZERO);
+            detalleOrden.setCostoUnitario(costoUnitario);
             orden.getDetalles().add(detalleOrden);
         }
     }
@@ -324,10 +348,10 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
             BigDecimal cant = detalleReq.cantidadRequerida() != null ? detalleReq.cantidadRequerida() : BigDecimal.ONE;
             inventarioService.consumirStockFefo(detalleReq.materiaPrimaId(), cant);
 
-            ProductoResponse insumo = productoService.buscarPorId(detalleReq.materiaPrimaId());
+            StockInventarioResponse insumo = stockService.buscarPorProductoId(detalleReq.materiaPrimaId());
             DetalleOrdenProduccion detalle = new DetalleOrdenProduccion();
             detalle.setMateriaPrimaId(detalleReq.materiaPrimaId());
-            detalle.setNombreProducto(insumo.nombre());
+            detalle.setNombreProducto(insumo.nombreProducto());
             detalle.setCostoUnitario(insumo.costoPromedio());
             detalle.setCantidadRequerida(detalleReq.cantidadRequerida());
             op.addDetalle(detalle);
@@ -378,17 +402,17 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
     private void reemplazarDetallesOrdenPlanificada(OrdenProduccion orden, List<DetalleOrdenRequest> nuevosDetalles) {
         if (orden.getDetalles() != null) {
             orden.getDetalles().forEach(detalleAntiguo ->
-                    productoService.ajustarStock(detalleAntiguo.getMateriaPrimaId(), detalleAntiguo.getCantidadRequerida()));
+                    stockService.ajustarStock(detalleAntiguo.getMateriaPrimaId(), detalleAntiguo.getCantidadRequerida()));
             orden.getDetalles().clear();
         }
         for (DetalleOrdenRequest detalleReq : nuevosDetalles) {
-            ProductoResponse materiaPrima = productoService.buscarPorId(detalleReq.materiaPrimaId());
-            productoService.ajustarStock(detalleReq.materiaPrimaId(), detalleReq.cantidadRequerida().negate());
+            StockInventarioResponse materiaPrima = stockService.buscarPorProductoId(detalleReq.materiaPrimaId());
+            stockService.ajustarStock(detalleReq.materiaPrimaId(), detalleReq.cantidadRequerida().negate());
 
             DetalleOrdenProduccion nuevoDetalle = new DetalleOrdenProduccion();
             nuevoDetalle.setOrdenProduccion(orden);
             nuevoDetalle.setMateriaPrimaId(detalleReq.materiaPrimaId());
-            nuevoDetalle.setNombreProducto(materiaPrima.nombre());
+            nuevoDetalle.setNombreProducto(materiaPrima.nombreProducto());
             nuevoDetalle.setCantidadRequerida(detalleReq.cantidadRequerida());
             nuevoDetalle.setCostoUnitario(materiaPrima.costoPromedio());
             orden.getDetalles().add(nuevoDetalle);
@@ -476,7 +500,7 @@ public class OrdenProduccionServiceImpl implements OrdenProduccionService {
             for (DetalleOrdenProduccion detalle : orden.getDetalles()) {
                 BigDecimal cantidadARevertir = detalle.getCantidadRequerida();
                 if (cantidadARevertir != null) {
-                    productoService.ajustarStock(detalle.getMateriaPrimaId(), cantidadARevertir);
+                    stockService.ajustarStock(detalle.getMateriaPrimaId(), cantidadARevertir);
                 }
             }
         }

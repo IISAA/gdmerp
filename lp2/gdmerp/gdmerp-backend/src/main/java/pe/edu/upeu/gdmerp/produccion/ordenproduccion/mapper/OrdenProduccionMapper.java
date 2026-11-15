@@ -47,7 +47,6 @@ public interface OrdenProduccionMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "ordenProduccion", ignore = true)
     @Mapping(target = "materiaPrimaId", source = "materiaPrimaId")
-    @Mapping(target = "insumo.id", source = "materiaPrimaId")
     @Mapping(target = "cantidadRequerida", source = "cantidadRequerida")
     @Mapping(target = "nombreProducto", ignore = true)
     @Mapping(target = "costoUnitario", ignore = true)

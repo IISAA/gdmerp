@@ -1,13 +1,15 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { CategoriaFinancieraService } from '../services/categoria-financiera.service';
 import { TipoFinanciero } from '../models/categoria-financiera.model';
 
 @Component({
   selector: 'app-categoria-financiera-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './categoria-financiera-form.component.html',
 })
 export class CategoriaFinancieraForm {
@@ -15,6 +17,7 @@ export class CategoriaFinancieraForm {
   private readonly categoriaService = inject(CategoriaFinancieraService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly id = signal<number | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -46,6 +49,7 @@ export class CategoriaFinancieraForm {
           this.errorCarga.set(true);
           this.error.set('No se pudo cargar la categoría financiera.');
           this.loading.set(false);
+          this.mostrarMensaje('No se pudo cargar la categoría financiera.', 'error');
         },
       });
     }
@@ -71,15 +75,31 @@ export class CategoriaFinancieraForm {
 
     this.loading.set(true);
     peticion.subscribe({
-      next: () => this.router.navigate(['/finanzas/categorias']),
+      next: (resp) => {
+        const accion = id ? 'actualizada' : 'creada';
+        this.mostrarMensaje(`Categoría financiera "${resp.nombre}" ${accion} correctamente.`, 'success');
+        this.router.navigate(['/finanzas/categorias']);
+      },
       error: () => {
-        this.error.set('No se pudo guardar la categoría financiera.');
+        const accion = id ? 'actualizar' : 'crear';
+        this.error.set(`No se pudo ${accion} la categoría financiera.`);
         this.loading.set(false);
+        this.mostrarMensaje(`No se pudo ${accion} la categoría financiera. Verifique los datos ingresados.`, 'error');
       },
     });
   }
 
   cancelar(): void {
     this.router.navigate(['/finanzas/categorias']);
+  }
+
+  private mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
+    const panelClass = tipo === 'success' ? ['snackbar-success'] : tipo === 'error' ? ['snackbar-error'] : ['snackbar-warning'];
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 5000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass
+    });
   }
 }

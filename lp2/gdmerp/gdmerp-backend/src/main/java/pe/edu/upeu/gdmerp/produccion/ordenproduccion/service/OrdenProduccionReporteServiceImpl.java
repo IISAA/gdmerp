@@ -5,7 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioService;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.DetalleConsumoDTO;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.ReporteConsumoOrdenDTO;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.ResumenEstadoOrdenesDTO;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class OrdenProduccionReporteServiceImpl implements OrdenProduccionReporteService {
 
     private final OrdenProduccionRepository ordenRepository;
-    private final ProductoService productoService;
+    private final InventarioService inventarioService;
 
     @Override
     @Transactional(readOnly = true)
@@ -49,7 +49,7 @@ public class OrdenProduccionReporteServiceImpl implements OrdenProduccionReporte
                         .toList()
                 : List.of();
 
-        Map<Long, BigDecimal> costos = productoService.obtenerCostoPromedioPorIds(productoIds)
+        Map<Long, BigDecimal> costos = inventarioService.obtenerCostoPromedioPorIds(productoIds)
                 .stream()
                 .filter(dto -> dto != null && dto.productoId() != null)
                 .collect(Collectors.toMap(

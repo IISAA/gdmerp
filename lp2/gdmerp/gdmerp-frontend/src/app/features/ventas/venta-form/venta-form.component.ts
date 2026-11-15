@@ -7,6 +7,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { BrowserMultiFormatReader, IScannerControls } from '@zxing/browser';
 import { ProductoService } from '../../inventario/productos/services/producto.service';
 import { Producto } from '../../inventario/productos/models/producto.model';
@@ -26,6 +28,8 @@ import { AuthService } from '../../../core/services/auth.service';
     MatAutocompleteModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSnackBarModule,
+    MatIconModule,
   ],
   standalone: true,
   templateUrl: './venta-form.component.html',
@@ -39,6 +43,7 @@ export class VentaFormComponent implements OnInit, OnDestroy {
   protected readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild('videoScanner') videoScannerRef?: ElementRef<HTMLVideoElement>;
   private codeReader: BrowserMultiFormatReader | null = null;
@@ -93,7 +98,7 @@ export class VentaFormComponent implements OnInit, OnDestroy {
   protected readonly ticketCambio = signal<number | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
-    clienteNombre: ['Mercado Mayorista de Frutas Lima', [Validators.maxLength(100)]],
+    clienteNombre: ['Cliente Varios', [Validators.maxLength(100)]],
     clienteDocumento: [''],
     metodoPago: ['EFECTIVO' as MetodoPagoPos],
     diasCredito: [30, [Validators.min(1), Validators.max(180)]],
@@ -256,7 +261,12 @@ export class VentaFormComponent implements OnInit, OnDestroy {
   protected buscarPorDni(dni: string): void {
     const limpio = dni ? dni.trim() : '';
     if (!/^[0-9]{8}$/.test(limpio)) {
-      this.error.set('El DNI debe contener exactamente 8 dígitos numéricos.');
+      const warnMsg = 'El DNI debe contener exactamente 8 dígitos numéricos.';
+      this.error.set(warnMsg);
+      this.snackBar.open(warnMsg, 'Cerrar', {
+        duration: 3500,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
     this.buscandoDni.set(true);
@@ -267,10 +277,19 @@ export class VentaFormComponent implements OnInit, OnDestroy {
         const nombre = datos.nombreCompleto || `${datos.nombres ?? ''} ${datos.apellidoPaterno ?? ''} ${datos.apellidoMaterno ?? ''}`.trim();
         this.form.controls.clienteNombre.setValue(nombre);
         this.form.controls.clienteDocumento.setValue(limpio);
+        this.snackBar.open(`DNI verificado: ${nombre}`, 'Cerrar', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
       },
       error: (err: HttpErrorResponse) => {
         this.buscandoDni.set(false);
-        this.error.set(err.error?.message ?? 'No se pudo consultar el DNI ingresado.');
+        const errMsg = err.error?.message ?? 'No se pudo consultar el DNI ingresado.';
+        this.error.set(errMsg);
+        this.snackBar.open(errMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['warning-snackbar'],
+        });
       },
     });
   }
@@ -478,6 +497,10 @@ export class VentaFormComponent implements OnInit, OnDestroy {
           this.ventaGenerada.set(ventaCreada);
           this.esBorrador.set(false);
           this.mostrarModalTicket.set(true);
+          this.snackBar.open(`¡Venta #${ventaCreada.id} registrada exitosamente!`, 'Cerrar', {
+            duration: 3500,
+            panelClass: ['success-snackbar'],
+          });
           this.cargarProductos();
           this.cargarSesionCajaActiva();
         },
@@ -827,16 +850,23 @@ export class VentaFormComponent implements OnInit, OnDestroy {
 
   private manejarErrorGuardado(err: HttpErrorResponse): void {
     const mensaje: string = err.error?.message ?? '';
+    let errorTexto = 'No se pudo registrar la venta.';
 
     if (err.status === 404 && mensaje.startsWith('Producto no encontrado')) {
-      this.error.set('Uno de los productos elegidos ya no existe. Revisa las líneas de la venta.');
+      errorTexto = 'Uno de los productos elegidos ya no existe. Revisa las líneas de la venta.';
     } else if (err.status === 409) {
-      this.error.set(mensaje || 'No hay stock suficiente para completar la venta.');
+      errorTexto = mensaje || 'No hay stock suficiente para completar la venta.';
     } else if (err.status === 400) {
-      this.error.set(mensaje || 'Los datos enviados no son válidos. Revisa las líneas de la venta.');
-    } else {
-      this.error.set(mensaje || 'No se pudo registrar la venta.');
+      errorTexto = mensaje || 'Los datos enviados no son válidos. Revisa las líneas de la venta.';
+    } else if (mensaje) {
+      errorTexto = mensaje;
     }
+
+    this.error.set(errorTexto);
+    this.snackBar.open(errorTexto, 'Cerrar', {
+      duration: 4500,
+      panelClass: ['error-snackbar'],
+    });
     this.loading.set(false);
   }
 }

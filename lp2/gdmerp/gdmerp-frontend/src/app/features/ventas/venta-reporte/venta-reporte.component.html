@@ -1,4 +1,4 @@
-<div class="reporte-container">
+<div class="feature-container reporte-container">
   <div class="header-section">
     <div>
       <span class="badge badge-primary">REPORTE ANALÍTICO DE VENTAS</span>
@@ -9,14 +9,14 @@
     </div>
     <div class="header-actions">
       <a routerLink="/ventas/nueva" class="btn btn-glacier-primary">
-        <span class="material-symbols-outlined icon-inline">point_of_sale</span> + Nueva Venta POS
+        <mat-icon class="icon-inline">point_of_sale</mat-icon> + Nueva Venta POS
       </a>
     </div>
   </div>
 
   @if (error()) {
     <div class="alert alert-danger">
-      <span class="material-symbols-outlined alert-icon">warning</span>
+      <mat-icon class="alert-icon">warning</mat-icon>
       <div>{{ error() }}</div>
     </div>
   }
@@ -88,7 +88,7 @@
             class="btn btn-primary btn-filter"
             (click)="filtrarPorFecha(desde.value, hasta.value)"
           >
-            <span class="material-symbols-outlined icon-inline">filter_alt</span> Filtrar por fecha
+            <mat-icon class="icon-inline">filter_alt</mat-icon> Filtrar por fecha
           </button>
           @if (desdeFiltro() || hastaFiltro() || estadoFiltro() || metodoPagoFiltro()) {
             <button
@@ -97,7 +97,7 @@
               (click)="desde.value = ''; hasta.value = ''; limpiarFiltros()"
               title="Restablecer todos los filtros"
             >
-              <span class="material-symbols-outlined icon-inline">restart_alt</span> Limpiar
+              <mat-icon class="icon-inline">restart_alt</mat-icon> Limpiar
             </button>
           }
         </div>
@@ -111,7 +111,7 @@
       <!-- 1. Total de Ventas (Con indicador de anuladas al lado) -->
       <div class="card metrica-card">
         <div class="metrica-header">
-          <span class="material-symbols-outlined metrica-icono text-primary">receipt_long</span>
+          <mat-icon class="metrica-icono text-primary">receipt_long</mat-icon>
           <span class="metrica-titulo">Total de Ventas</span>
           @if (totalAnuladas() > 0) {
             <span class="badge badge-danger badge-sm" title="Ventas anuladas">{{ totalAnuladas() }} anulada(s)</span>
@@ -129,7 +129,7 @@
       <!-- 2. Ventas Anuladas (Tarjeta contigua específica) -->
       <div class="card metrica-card card-anuladas" [class.has-anuladas]="totalAnuladas() > 0">
         <div class="metrica-header">
-          <span class="material-symbols-outlined metrica-icono text-danger">cancel</span>
+          <mat-icon class="metrica-icono text-danger">cancel</mat-icon>
           <span class="metrica-titulo">Ventas Anuladas</span>
         </div>
         <div class="metrica-valor text-danger">{{ totalAnuladas() }}</div>
@@ -145,7 +145,7 @@
       <!-- 3. Monto Total Facturado (Descontando ventas anuladas) -->
       <div class="card metrica-card highlight">
         <div class="metrica-header">
-          <span class="material-symbols-outlined metrica-icono text-success">payments</span>
+          <mat-icon class="metrica-icono text-success">payments</mat-icon>
           <span class="metrica-titulo">Monto Total Facturado</span>
         </div>
         <div class="metrica-valor text-success">
@@ -154,7 +154,7 @@
         <div class="metrica-pie">
           @if (totalAnuladas() > 0) {
             <span class="pie-descuento">
-              <span class="material-symbols-outlined icon-mini">info</span> Descontando {{ totalAnuladas() }} venta(s) anulada(s)
+              <mat-icon class="icon-mini">info</mat-icon> Descontando {{ totalAnuladas() }} venta(s) anulada(s)
             </span>
           } @else {
             Recaudación neta acumulada
@@ -165,7 +165,7 @@
       <!-- 4. Ticket Promedio -->
       <div class="card metrica-card">
         <div class="metrica-header">
-          <span class="material-symbols-outlined metrica-icono text-info">trending_up</span>
+          <mat-icon class="metrica-icono text-info">trending_up</mat-icon>
           <span class="metrica-titulo">Ticket Promedio</span>
         </div>
         <div class="metrica-valor">
@@ -218,7 +218,7 @@
                 </td>
                 <td>
                   <span class="badge badge-metodo-pago" [ngClass]="getClaseMetodoPago(venta.metodoPago)">
-                    <span class="material-symbols-outlined icon-inline" style="font-size: 0.95rem;">{{ getIconoMetodoPago(venta.metodoPago) }}</span>
+                    <mat-icon class="icon-inline" style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">{{ getIconoMetodoPago(venta.metodoPago) }}</mat-icon>
                     {{ getEtiquetaMetodoPago(venta.metodoPago) }}
                   </span>
                 </td>
@@ -243,7 +243,7 @@
                       (click)="verDetalle(venta)"
                       title="Ver comprobante y detalle de venta"
                     >
-                      <span class="material-symbols-outlined icon-inline" style="font-size: 0.95rem;">receipt_long</span> Ver Ticket
+                      <mat-icon class="icon-inline" style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">receipt_long</mat-icon> Ver Ticket
                     </button>
                     @if (auth.tieneRol('SUPERVISOR', 'ADMIN')) {
                       @if (venta.estado === 'SOLICITADA_ANULACION') {
@@ -253,7 +253,7 @@
                           (click)="solicitarAnularVenta(venta.id)"
                           title="Aprobar anulación y devolver mercadería al stock"
                         >
-                          <span class="material-symbols-outlined icon-inline" style="font-size: 0.95rem;">check_circle</span> Aprobar Anulación
+                          <mat-icon class="icon-inline" style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">check_circle</mat-icon> Aprobar Anulación
                         </button>
                         <button
                           type="button"
@@ -261,7 +261,7 @@
                           (click)="rechazarSolicitudAnulacion(venta.id)"
                           title="Rechazar solicitud y devolver venta a estado Registrada"
                         >
-                          <span class="material-symbols-outlined icon-inline" style="font-size: 0.95rem;">close</span> Rechazar
+                          <mat-icon class="icon-inline" style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">close</mat-icon> Rechazar
                         </button>
                       } @else if (venta.estado === 'REGISTRADA') {
                         <button
@@ -270,7 +270,7 @@
                           (click)="solicitarAnularVenta(venta.id)"
                           title="Anular venta y restaurar stock en catálogo"
                         >
-                          <span class="material-symbols-outlined icon-inline" style="font-size: 0.95rem;">block</span> Anular
+                          <mat-icon class="icon-inline" style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">block</mat-icon> Anular
                         </button>
                       } @else if (venta.estado === 'ANULADA') {
                         <span class="badge-anulado-label">Anulada</span>
@@ -284,11 +284,11 @@
                           (click)="solicitarAnulacionVenta(venta.id)"
                           title="Solicitar al Administrador la anulación de esta venta"
                         >
-                          <span class="material-symbols-outlined icon-inline" style="font-size: 0.95rem;">assignment_return</span> Solicitar Anulación
+                          <mat-icon class="icon-inline" style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">assignment_return</mat-icon> Solicitar Anulación
                         </button>
                       } @else if (venta.estado === 'SOLICITADA_ANULACION') {
                         <span class="badge-solicitada-revision" title="Solicitud enviada al Administrador para su aprobación">
-                          <span class="material-symbols-outlined icon-inline" style="font-size: 0.9rem;">hourglass_top</span> En Revisión Admin
+                          <mat-icon class="icon-inline" style="font-size: 0.9rem; width: 0.9rem; height: 0.9rem;">hourglass_top</mat-icon> En Revisión Admin
                         </span>
                       } @else if (venta.estado === 'ANULADA') {
                         <span class="badge-anulado-label">Anulada</span>
@@ -301,7 +301,7 @@
               <tr>
                 <td colspan="6" class="empty-state">
                   <div class="empty-content">
-                    <span class="material-symbols-outlined empty-icon">inbox</span>
+                    <mat-icon class="empty-icon">inbox</mat-icon>
                     <p>No hay ventas registradas para este filtro o rango de fechas.</p>
                   </div>
                 </td>
@@ -338,7 +338,7 @@
               [disabled]="pageIndex() === 0"
               (click)="cambiarPagina(pageIndex() - 1)"
             >
-              <span class="material-symbols-outlined icon-inline">chevron_left</span> Anterior
+              <mat-icon class="icon-inline">chevron_left</mat-icon> Anterior
             </button>
             <button
               type="button"
@@ -346,7 +346,7 @@
               [disabled]="pageIndex() >= totalPages() - 1"
               (click)="cambiarPagina(pageIndex() + 1)"
             >
-              Siguiente <span class="material-symbols-outlined icon-inline">chevron_right</span>
+              Siguiente <mat-icon class="icon-inline">chevron_right</mat-icon>
             </button>
           </div>
         </div>
@@ -366,7 +366,7 @@
     <div class="safe-modal-backdrop" (click)="cancelarSolicitudAnulacion()">
       <div class="safe-modal-dialog" (click)="$event.stopPropagation()">
         <div class="safe-modal-header">
-          <span class="material-symbols-outlined" style="font-size: 1.5rem; color: #d97706;">help_outline</span>
+          <mat-icon style="font-size: 1.5rem; width: 1.5rem; height: 1.5rem; color: #d97706;">help_outline</mat-icon>
           <h3>Solicitar Anulación de Venta #{{ vId }}</h3>
         </div>
 
@@ -391,7 +391,7 @@
           </div>
 
           <div class="friendly-help-note" style="margin-bottom: 0.5rem;">
-            <span class="material-symbols-outlined note-icon" style="color: #0284c7;">admin_panel_settings</span>
+            <mat-icon class="note-icon" style="color: #0284c7;">admin_panel_settings</mat-icon>
             <div>
               <strong>Control y Seguridad:</strong>
               <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: #475569;">
@@ -406,7 +406,7 @@
             ← Cancelar / Volver
           </button>
           <button type="button" class="btn-confirmar-solicitud" (click)="confirmarSolicitudAnulacion()" [disabled]="loading()">
-            <span class="material-symbols-outlined icon-mini">send</span>
+            <mat-icon class="icon-mini">send</mat-icon>
             {{ loading() ? 'Enviando...' : 'Enviar Solicitud a Admin' }}
           </button>
         </div>
@@ -419,7 +419,7 @@
     <div class="safe-modal-backdrop" (click)="cancelarAnularVenta()">
       <div class="safe-modal-dialog" (click)="$event.stopPropagation()">
         <div class="safe-modal-header">
-          <span class="material-symbols-outlined" style="font-size: 1.5rem; color: #dc2626;">warning</span>
+          <mat-icon style="font-size: 1.5rem; width: 1.5rem; height: 1.5rem; color: #dc2626;">warning</mat-icon>
           <h3>¿Deseas anular la Venta #{{ vId }}?</h3>
         </div>
 
@@ -429,7 +429,7 @@
           </p>
 
           <div class="friendly-help-note" style="margin-bottom: 0.85rem;">
-            <span class="material-symbols-outlined note-icon">inventory_2</span>
+            <mat-icon class="note-icon">inventory_2</mat-icon>
             <div>
               <strong>Reintegro automático a inventario:</strong>
               <p style="margin: 0.2rem 0 0 0;">
@@ -448,7 +448,7 @@
             ← Cancelar / Volver seguro
           </button>
           <button type="button" class="btn-action-discreet-danger" (click)="confirmarAnularVenta()" [disabled]="loading()">
-            <span class="material-symbols-outlined icon-mini">check</span>
+            <mat-icon class="icon-mini">check</mat-icon>
             {{ loading() ? 'Anulando...' : 'Sí, anular venta' }}
           </button>
         </div>
@@ -463,7 +463,7 @@
         <!-- Header del Modal -->
         <div class="safe-modal-header no-print" style="justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span class="material-symbols-outlined" style="font-size: 1.4rem; color: var(--primary);">receipt_long</span>
+            <mat-icon style="font-size: 1.4rem; width: 1.4rem; height: 1.4rem; color: var(--primary);">receipt_long</mat-icon>
             <div>
               <h3 style="margin: 0; font-size: 1.05rem;">Detalle de Comprobante</h3>
               <small style="color: #64748b;">{{ ticket.numeroTicket || ('Venta #' + ticket.id) }}</small>
@@ -559,7 +559,7 @@
             Cerrar
           </button>
           <button type="button" class="btn btn-glacier-primary" (click)="imprimirTicket()">
-            <span class="material-symbols-outlined icon-inline">print</span> Imprimir Ticket (ESC/POS)
+            <mat-icon class="icon-inline">print</mat-icon> Imprimir Ticket (ESC/POS)
           </button>
         </div>
       </div>

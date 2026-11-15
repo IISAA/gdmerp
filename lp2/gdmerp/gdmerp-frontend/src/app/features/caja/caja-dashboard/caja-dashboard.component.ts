@@ -3,6 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { CajaService } from '../services/caja.service';
 import { SesionCaja, CajaReporte } from '../models/caja.model';
 import { AuthService } from '../../../core/services/auth.service';
@@ -10,13 +12,14 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-caja-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, CurrencyPipe, DatePipe, MatSnackBarModule, MatIconModule],
   templateUrl: './caja-dashboard.component.html',
   styleUrl: './caja-dashboard.component.css',
 })
 export class CajaDashboard implements OnInit {
   private readonly cajaService = inject(CajaService);
   private readonly fb = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
   protected readonly authService = inject(AuthService);
 
   protected readonly sesionActiva = signal<SesionCaja | null>(null);
@@ -31,24 +34,24 @@ export class CajaDashboard implements OnInit {
   protected readonly modalApertura = signal(false);
   protected readonly modalCierre = signal(false);
 
-  // Formularios Reactivos
+  // Formularios Reactivos sin datos hardcodeados
   protected readonly formMovimiento = this.fb.nonNullable.group({
     tipo: ['INGRESO' as 'INGRESO' | 'EGRESO', [Validators.required]],
-    monto: [10, [Validators.required, Validators.min(0.1)]],
+    monto: [0, [Validators.required, Validators.min(0.01)]],
     concepto: ['', [Validators.required, Validators.maxLength(100)]],
     metodoPago: ['EFECTIVO' as 'EFECTIVO' | 'YAPE' | 'PLIN' | 'TRANSFERENCIA', [Validators.required]],
     referencia: [''],
   });
 
   protected readonly formApertura = this.fb.nonNullable.group({
-    cajeroNombre: ['Cajero de Turno', [Validators.required]],
-    montoApertura: [350, [Validators.required, Validators.min(0)]],
-    observaciones: ['Apertura de turno de caja diaria'],
+    cajeroNombre: ['', [Validators.required]],
+    montoApertura: [0, [Validators.required, Validators.min(0)]],
+    observaciones: [''],
   });
 
   protected readonly formCierre = this.fb.nonNullable.group({
     saldoReal: [0, [Validators.required, Validators.min(0)]],
-    observaciones: ['Cierre y arqueo de caja conforme'],
+    observaciones: [''],
   });
 
   ngOnInit(): void {
@@ -82,6 +85,7 @@ export class CajaDashboard implements OnInit {
       error: (err: HttpErrorResponse) => {
         console.error('Error al cargar historial de caja:', err);
         this.error.set('No se pudo cargar el historial de sesiones de caja.');
+        this.mostrarMensaje('No se pudo cargar el historial de sesiones de caja.', 'error');
       },
     });
 
@@ -100,6 +104,7 @@ export class CajaDashboard implements OnInit {
 
     if (this.formMovimiento.invalid) {
       this.formMovimiento.markAllAsTouched();
+      this.mostrarMensaje('Por favor complete los datos del movimiento.', 'warning');
       return;
     }
 
@@ -108,11 +113,11 @@ export class CajaDashboard implements OnInit {
 
     this.cajaService.registrarMovimiento(sesion.id, val).subscribe({
       next: () => {
-        this.successMsg.set(`Movimiento de ${val.tipo} registrado correctamente.`);
+        this.mostrarMensaje(`Movimiento de ${val.tipo} por S/ ${val.monto.toFixed(2)} registrado correctamente.`, 'success');
         this.modalMovimiento.set(false);
         this.formMovimiento.reset({
           tipo: 'INGRESO',
-          monto: 10,
+          monto: 0,
           concepto: '',
           metodoPago: 'EFECTIVO',
           referencia: '',
@@ -120,7 +125,9 @@ export class CajaDashboard implements OnInit {
         this.cargarDatos();
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(err?.error?.message || 'Error al registrar el movimiento.');
+        const errorMsg = err?.error?.message || 'Error al registrar el movimiento.';
+        this.error.set(errorMsg);
+        this.mostrarMensaje(errorMsg, 'error');
         this.loading.set(false);
       },
     });
@@ -129,6 +136,7 @@ export class CajaDashboard implements OnInit {
   abrirTurno(): void {
     if (this.formApertura.invalid) {
       this.formApertura.markAllAsTouched();
+      this.mostrarMensaje('Por favor complete los datos obligatorios para abrir la caja.', 'warning');
       return;
     }
 
@@ -146,12 +154,14 @@ export class CajaDashboard implements OnInit {
       cajeroRol: rol,
     }).subscribe({
       next: () => {
-        this.successMsg.set('Nuevo turno de caja aperturado con éxito.');
+        this.mostrarMensaje('Nuevo turno de caja aperturado con éxito.', 'success');
         this.modalApertura.set(false);
         this.cargarDatos();
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(err?.error?.message || err?.message || 'Error al aperturar caja.');
+        const errorMsg = err?.error?.message || err?.message || 'Error al aperturar caja.';
+        this.error.set(errorMsg);
+        this.mostrarMensaje(errorMsg, 'error');
         this.loading.set(false);
       },
     });
@@ -164,14 +174,26 @@ export class CajaDashboard implements OnInit {
     this.loading.set(true);
     this.cajaService.cerrarCaja(sesion.id, this.formCierre.getRawValue()).subscribe({
       next: () => {
-        this.successMsg.set('Turno de caja cerrado y arqueo asentado con éxito.');
+        this.mostrarMensaje('Turno de caja cerrado y arqueo asentado con éxito.', 'success');
         this.modalCierre.set(false);
         this.cargarDatos();
       },
       error: (err: HttpErrorResponse) => {
-        this.error.set(err?.error?.message || 'Error al cerrar caja.');
+        const errorMsg = err?.error?.message || 'Error al cerrar caja.';
+        this.error.set(errorMsg);
+        this.mostrarMensaje(errorMsg, 'error');
         this.loading.set(false);
       },
+    });
+  }
+
+  private mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
+    const panelClass = tipo === 'success' ? ['snackbar-success'] : tipo === 'error' ? ['snackbar-error'] : ['snackbar-warning'];
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 5000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass
     });
   }
 }

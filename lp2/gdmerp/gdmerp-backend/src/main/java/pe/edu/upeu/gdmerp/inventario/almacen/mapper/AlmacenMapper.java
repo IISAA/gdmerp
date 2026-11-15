@@ -12,10 +12,8 @@ public interface AlmacenMapper {
     AlmacenResponse toResponse(Almacen almacen);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "productos", ignore = true)
     Almacen toEntity(AlmacenRequest request);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "productos", ignore = true)
     void updateEntity(@MappingTarget Almacen almacen, AlmacenRequest request);
 }

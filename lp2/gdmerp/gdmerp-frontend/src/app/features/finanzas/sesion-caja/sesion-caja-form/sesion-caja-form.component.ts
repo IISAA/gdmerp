@@ -2,6 +2,8 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { SesionCajaService } from '../services/sesion-caja.service';
 import { CategoriaFinancieraService } from '../../categoria-financiera/services/categoria-financiera.service';
 import { CategoriaFinanciera } from '../../categoria-financiera/models/categoria-financiera.model';
@@ -27,7 +29,7 @@ export interface ItemArqueo {
 @Component({
   selector: 'app-sesion-caja-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, CurrencyPipe, DatePipe, RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './sesion-caja-form.component.html',
   styleUrls: ['./sesion-caja-form.component.css'],
 })
@@ -38,6 +40,7 @@ export class SesionCajaForm implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   // Estados
   protected readonly modoApertura = signal(false);
@@ -290,12 +293,22 @@ export class SesionCajaForm implements OnInit {
 
     this.sesionService.abrir(val).subscribe({
       next: (s) => {
-        this.exitoMensaje.set(`Turno de caja ${s.codigoSesion} abierto con éxito.`);
+        const msg = `Turno de caja ${s.codigoSesion} abierto con éxito.`;
+        this.exitoMensaje.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 3500,
+          panelClass: ['success-snackbar'],
+        });
         this.sesionId.set(s.id);
         this.cargarDetalle(s.id);
       },
       error: (err) => {
-        this.error.set(err?.error?.message || 'No se pudo abrir el turno de caja.');
+        const errMsg = err?.error?.message || 'No se pudo abrir el turno de caja.';
+        this.error.set(errMsg);
+        this.snackBar.open(errMsg, 'Cerrar', {
+          duration: 4500,
+          panelClass: ['error-snackbar'],
+        });
         this.loading.set(false);
       },
     });
@@ -306,6 +319,10 @@ export class SesionCajaForm implements OnInit {
 
     if (this.formMovimiento.invalid) {
       this.formMovimiento.markAllAsTouched();
+      this.snackBar.open('Por favor complete los campos obligatorios del movimiento.', 'Cerrar', {
+        duration: 3500,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
@@ -329,7 +346,12 @@ export class SesionCajaForm implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.exitoMensaje.set('Movimiento registrado correctamente.');
+          const msg = 'Movimiento registrado correctamente.';
+          this.exitoMensaje.set(msg);
+          this.snackBar.open(msg, 'Cerrar', {
+            duration: 3000,
+            panelClass: ['success-snackbar'],
+          });
           this.formMovimiento.reset({
             tipo: 'INGRESO',
             metodoPago: 'EFECTIVO',
@@ -341,7 +363,12 @@ export class SesionCajaForm implements OnInit {
           this.cargarDetalle(id);
         },
         error: (err) => {
-          this.error.set(err?.error?.message || 'Error al registrar el movimiento.');
+          const errMsg = err?.error?.message || 'Error al registrar el movimiento.';
+          this.error.set(errMsg);
+          this.snackBar.open(errMsg, 'Cerrar', {
+            duration: 4000,
+            panelClass: ['error-snackbar'],
+          });
           this.loading.set(false);
         },
       });
@@ -429,11 +456,21 @@ export class SesionCajaForm implements OnInit {
       })
       .subscribe({
         next: (cerrada) => {
-          this.exitoMensaje.set(`¡Turno ${cerrada.codigoSesion} cerrado exitosamente! Registro consolidado para auditoría.`);
+          const msg = `¡Turno ${cerrada.codigoSesion} cerrado exitosamente! Registro consolidado para auditoría.`;
+          this.exitoMensaje.set(msg);
+          this.snackBar.open(msg, 'Cerrar', {
+            duration: 4000,
+            panelClass: ['success-snackbar'],
+          });
           this.cargarDetalle(id);
         },
         error: (err) => {
-          this.error.set(err?.error?.message || 'No se pudo cerrar el turno de caja.');
+          const errMsg = err?.error?.message || 'No se pudo cerrar el turno de caja.';
+          this.error.set(errMsg);
+          this.snackBar.open(errMsg, 'Cerrar', {
+            duration: 4500,
+            panelClass: ['error-snackbar'],
+          });
           this.loading.set(false);
         },
       });

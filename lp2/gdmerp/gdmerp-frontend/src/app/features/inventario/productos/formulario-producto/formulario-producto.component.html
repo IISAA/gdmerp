@@ -141,8 +141,19 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Costo Promedio (S/)</mat-label>
+            <mat-label>Costo Base / Promedio (S/)</mat-label>
             <input matInput type="number" formControlName="costoPromedio" step="0.0001" min="0">
+          </mat-form-field>
+        </div>
+
+        <div class="row-2-cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Precio de Venta (S/)</mat-label>
+            <input matInput type="number" formControlName="precio" step="0.01" min="0">
+            <mat-icon matSuffix matTooltip="Precio de venta al público para el catálogo comercial y ventas">payments</mat-icon>
+            @if (form.get('precio')?.hasError('min')) {
+              <mat-error>El precio no puede ser negativo</mat-error>
+            }
           </mat-form-field>
         </div>
 

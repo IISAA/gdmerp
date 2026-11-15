@@ -102,33 +102,29 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/almacenes/**",
                                 "/api/v1/categorias/**",
-                                "/api/v1/productos/**",
-                                "/api/v1/inventario/unidades-medida/**",
+                                "/api/v1/inventario/**",
                                 "/api/v1/unidades-medida/**")
-                        .hasAnyRole("ADMIN", "ALMACENERO", "JEFE_PRODUCCION", "OPERARIO")
+                        .hasAnyRole("ADMIN", "ALMACENERO", "JEFE_PRODUCCION", "OPERARIO", "OPERARIO_PLANTA", "SUPERVISOR", "VENDEDOR", "CAJERO", "ADMIN_FINANZAS")
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/almacenes/**",
                                 "/api/v1/categorias/**",
-                                "/api/v1/productos/**",
-                                "/api/v1/inventario/unidades-medida/**",
+                                "/api/v1/inventario/**",
                                 "/api/v1/unidades-medida/**")
                         .hasAnyRole("ADMIN", "ALMACENERO")
                         .requestMatchers(HttpMethod.PUT,
                                 "/api/v1/almacenes/**",
                                 "/api/v1/categorias/**",
-                                "/api/v1/productos/**",
-                                "/api/v1/inventario/unidades-medida/**",
+                                "/api/v1/inventario/**",
                                 "/api/v1/unidades-medida/**")
                         .hasAnyRole("ADMIN", "ALMACENERO")
                         .requestMatchers(HttpMethod.PATCH,
-                                "/api/v1/inventario/unidades-medida/**",
+                                "/api/v1/inventario/**",
                                 "/api/v1/unidades-medida/**")
                         .hasAnyRole("ADMIN", "ALMACENERO")
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/v1/almacenes/**",
                                 "/api/v1/categorias/**",
-                                "/api/v1/productos/**",
-                                "/api/v1/inventario/unidades-medida/**",
+                                "/api/v1/inventario/**",
                                 "/api/v1/unidades-medida/**")
                         .hasAnyRole("ADMIN", "ALMACENERO")
 

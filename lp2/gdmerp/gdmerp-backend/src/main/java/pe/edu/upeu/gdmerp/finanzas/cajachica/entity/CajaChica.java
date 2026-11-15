@@ -1,24 +1,37 @@
 package pe.edu.upeu.gdmerp.finanzas.cajachica.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "CAJAS_CHICAS")
+@Table(name = "CAJAS_CHICAS", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CajaChica {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_cajas_chicas")
+    @SequenceGenerator(name = "seq_cajas_chicas", sequenceName = "SEQ_CAJAS_CHICAS", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 
@@ -34,54 +47,16 @@ public class CajaChica {
     @Column(name = "LIMITE_MAXIMO", nullable = false, precision = 12, scale = 2)
     private BigDecimal limiteMaximo;
 
+    @Column(name = "CENTRO_COSTO_ID")
+    private Long centroCostoId;
+
     @ElementCollection
     @CollectionTable(
         name = "CAJA_CHICA_CUSTODIOS",
+        schema = "GDM_FINANZAS",
         joinColumns = @JoinColumn(name = "CAJA_CHICA_ID")
     )
     @Column(name = "USUARIO_ID")
     @Builder.Default
     private Set<Long> custodiosAutorizados = new HashSet<>();
-
-    @OneToMany(mappedBy = "cajaChica", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private java.util.List<AsignacionCajaCentroCosto> asignacionesPresupuesto = new java.util.ArrayList<>();
-
-    public void agregarAsignacion(AsignacionCajaCentroCosto asignacion) {
-        if (this.asignacionesPresupuesto == null) {
-            this.asignacionesPresupuesto = new java.util.ArrayList<>();
-        }
-        asignacion.setCajaChica(this);
-        if (asignacion.getId() == null) {
-            asignacion.setId(new AsignacionCajaCentroCostoId());
-        }
-        if (this.id != null) {
-            asignacion.getId().setCajaChicaId(this.id);
-        }
-        if (asignacion.getCentroCosto() != null) {
-            asignacion.getId().setCentroCostoId(asignacion.getCentroCosto().getId());
-        }
-        this.asignacionesPresupuesto.add(asignacion);
-    }
-
-    public CajaChica() {
-    }
-
-    public CajaChica(Long id, String codigo, String responsable, BigDecimal saldoDisponible, BigDecimal limiteMaximo) {
-        this(id, codigo, responsable, saldoDisponible, limiteMaximo, new HashSet<>(), new java.util.ArrayList<>());
-    }
-
-    public CajaChica(Long id, String codigo, String responsable, BigDecimal saldoDisponible, BigDecimal limiteMaximo, Set<Long> custodiosAutorizados) {
-        this(id, codigo, responsable, saldoDisponible, limiteMaximo, custodiosAutorizados, new java.util.ArrayList<>());
-    }
-
-    public CajaChica(Long id, String codigo, String responsable, BigDecimal saldoDisponible, BigDecimal limiteMaximo, Set<Long> custodiosAutorizados, java.util.List<AsignacionCajaCentroCosto> asignacionesPresupuesto) {
-        this.id = id;
-        this.codigo = codigo;
-        this.responsable = responsable;
-        this.saldoDisponible = saldoDisponible;
-        this.limiteMaximo = limiteMaximo;
-        this.custodiosAutorizados = custodiosAutorizados != null ? custodiosAutorizados : new HashSet<>();
-        this.asignacionesPresupuesto = asignacionesPresupuesto != null ? asignacionesPresupuesto : new java.util.ArrayList<>();
-    }
 }

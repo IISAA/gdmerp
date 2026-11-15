@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto.AbonoResponse;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto.CrearCreditoRequest;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto.CuentaPorCobrarDetalleResponse;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto.CuentaPorCobrarResponse;
@@ -14,7 +13,9 @@ import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto.RegistrarAbonoRequest;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.AbonoCuentaPorCobrar;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.CuentaPorCobrar;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.EstadoCredito;
+import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.mapper.CuentaPorCobrarMapper;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.repository.CuentaPorCobrarRepository;
+import pe.edu.upeu.gdmerp.finanzas.mapper.FinanzasMappingHelper;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.MovimientoCajaRequest;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.SesionCajaResponse;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.service.SesionCajaService;
@@ -28,11 +29,11 @@ import pe.edu.upeu.gdmerp.shared.event.ConsultaVentaPorTicketEvent;
 import pe.edu.upeu.gdmerp.shared.event.PagoVentaRegistradoEvent;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -47,6 +48,7 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
     private final CategoriaFinancieraRepository categoriaRepository;
     private final TransaccionFinancieraRepository transaccionRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final CuentaPorCobrarMapper cuentaPorCobrarMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -55,13 +57,14 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
                 ? cuentaRepository.findByEstadoOrderByFechaEmisionDesc(estado)
                 : cuentaRepository.findAllByOrderByFechaEmisionDesc();
 
-        return lista.stream().map(this::mapToResponse).toList();
+        return cuentaPorCobrarMapper.toResponseList(
+                lista, FinanzasMappingHelper.toCountMap(cuentaRepository.contarAbonosPorCuenta()));
     }
 
     @Override
     @Transactional(readOnly = true)
     public CuentaPorCobrarDetalleResponse obtenerPorId(Long id) {
-        return mapToDetalleResponse(buscarCuentaOFallar(id));
+        return cuentaPorCobrarMapper.toDetalleResponse(buscarCuentaConAbonosOFallar(id));
     }
 
     @Override
@@ -79,6 +82,8 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
 
         CuentaPorCobrar cuenta = CuentaPorCobrar.builder()
                 .codigo(codigo)
+                .clienteId(req.getClienteId())
+                .ventaId(req.getVentaId())
                 .clienteNombre(req.getClienteNombre().trim())
                 .clienteDocumento(req.getClienteDocumento() != null ? req.getClienteDocumento().trim() : null)
                 .montoTotal(req.getMontoTotal())
@@ -90,13 +95,13 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
 
         CuentaPorCobrar guardada = cuentaRepository.save(cuenta);
         log.info("Crédito registrado exitosamente: {} para cliente {}", guardada.getCodigo(), guardada.getClienteNombre());
-        return mapToResponse(guardada);
+        return cuentaPorCobrarMapper.toSummaryResponse(guardada);
     }
 
     @Override
     @Transactional
     public CuentaPorCobrarDetalleResponse registrarAbono(Long creditoId, RegistrarAbonoRequest req) {
-        CuentaPorCobrar cuenta = buscarCuentaOFallar(creditoId);
+        CuentaPorCobrar cuenta = buscarCuentaConAbonosOFallar(creditoId);
         validarEstadoYMontoAbono(cuenta, req.getMonto());
         aplicarAmortizacion(cuenta, req.getMonto());
 
@@ -114,31 +119,18 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
 
         log.info("Abono de S/ {} registrado con éxito en crédito {}. Saldo restante: S/ {}",
                 req.getMonto(), guardada.getCodigo(), guardada.getSaldoPendiente());
-        return mapToDetalleResponse(guardada);
+        return cuentaPorCobrarMapper.toDetalleResponse(guardada);
     }
 
     private void notificarLiquidacionVentaAsociada(CuentaPorCobrar guardada) {
-        if (guardada.getCodigo() == null || !guardada.getCodigo().startsWith(PREFIJO_CREDITO_VENTA)) {
-            return;
-        }
-        String numeroTicket = guardada.getCodigo().substring(PREFIJO_CREDITO_VENTA.length()).trim();
-        if (numeroTicket.isBlank()) {
+        String numeroTicket = extraerTicketSiCorresponde(guardada.getCodigo());
+        if (numeroTicket == null && guardada.getVentaId() == null) {
             return;
         }
 
-        TransaccionFinanciera trx = transaccionRepository.findFirstByNumeroComprobante(numeroTicket).orElse(null);
-        if (trx != null && trx.getEstado() != EstadoFinanciero.PAGADO) {
-            trx.setEstado(EstadoFinanciero.PAGADO);
-            trx = transaccionRepository.save(trx);
-        }
-
+        TransaccionFinanciera trx = buscarYMarcarTransaccionPagada(guardada.getVentaId(), numeroTicket);
         Long transaccionId = trx != null ? trx.getId() : null;
-        Long ventaId = trx != null ? trx.getVentaId() : null;
-        if (ventaId == null) {
-            ConsultaVentaPorTicketEvent consulta = new ConsultaVentaPorTicketEvent(numeroTicket);
-            eventPublisher.publishEvent(consulta);
-            ventaId = consulta.ventaIdEncontrado().get();
-        }
+        Long ventaId = resolverVentaIdParaLiquidacion(guardada, trx, numeroTicket);
 
         if (ventaId != null) {
             eventPublisher.publishEvent(new PagoVentaRegistradoEvent(
@@ -147,6 +139,47 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
                     guardada.getMontoTotal()
             ));
         }
+    }
+
+    private String extraerTicketSiCorresponde(String codigo) {
+        if (codigo == null || !codigo.startsWith(PREFIJO_CREDITO_VENTA)) {
+            return null;
+        }
+        String numeroTicket = codigo.substring(PREFIJO_CREDITO_VENTA.length()).trim();
+        return numeroTicket.isBlank() ? null : numeroTicket;
+    }
+
+    private TransaccionFinanciera buscarYMarcarTransaccionPagada(Long ventaId, String numeroTicket) {
+        Optional<TransaccionFinanciera> trxOpt = (ventaId != null)
+                ? transaccionRepository.findFirstByVentaId(ventaId)
+                : Optional.empty();
+        if (trxOpt.isEmpty() && numeroTicket != null) {
+            trxOpt = transaccionRepository.findFirstByNumeroComprobante(numeroTicket);
+        }
+        if (trxOpt.isEmpty()) {
+            return null;
+        }
+        TransaccionFinanciera trx = trxOpt.get();
+        if (trx.getEstado() != EstadoFinanciero.PAGADO) {
+            trx.setEstado(EstadoFinanciero.PAGADO);
+            trx = transaccionRepository.save(trx);
+        }
+        return trx;
+    }
+
+    private Long resolverVentaIdParaLiquidacion(CuentaPorCobrar cuenta, TransaccionFinanciera trx, String numeroTicket) {
+        if (cuenta.getVentaId() != null) {
+            return cuenta.getVentaId();
+        }
+        if (trx != null && trx.getVentaId() != null) {
+            return trx.getVentaId();
+        }
+        if (numeroTicket == null) {
+            return null;
+        }
+        ConsultaVentaPorTicketEvent consulta = new ConsultaVentaPorTicketEvent(numeroTicket);
+        eventPublisher.publishEvent(consulta);
+        return consulta.ventaIdEncontrado().get();
     }
 
     private String generarCodigoCredito(String codigoSolicitado) {
@@ -208,6 +241,7 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
                     .monto(req.getMonto())
                     .descripcion(String.format("Cobro crédito %s - %s", cuenta.getCodigo(), cuenta.getClienteNombre()))
                     .referenciaExterna(cuenta.getCodigo())
+                    .ventaId(cuenta.getVentaId())
                     .categoriaFinancieraId(catCobro.getId())
                     .build();
 
@@ -245,65 +279,8 @@ public class CuentaPorCobrarServiceImpl implements CuentaPorCobrarService {
                 .build();
     }
 
-    private CuentaPorCobrar buscarCuentaOFallar(Long id) {
-        return cuentaRepository.findById(id)
+    private CuentaPorCobrar buscarCuentaConAbonosOFallar(Long id) {
+        return cuentaRepository.findWithAbonosById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cuenta por cobrar no encontrada con ID: " + id));
-    }
-
-    private CuentaPorCobrarResponse mapToResponse(CuentaPorCobrar c) {
-        BigDecimal montoTotal = c.getMontoTotal() != null ? c.getMontoTotal() : BigDecimal.ZERO;
-        BigDecimal saldoPendiente = c.getSaldoPendiente() != null ? c.getSaldoPendiente() : BigDecimal.ZERO;
-        BigDecimal montoPagado = montoTotal.subtract(saldoPendiente).max(BigDecimal.ZERO);
-
-        double pct = montoTotal.compareTo(BigDecimal.ZERO) > 0
-                ? montoPagado.multiply(BigDecimal.valueOf(100)).divide(montoTotal, 1, RoundingMode.HALF_UP).doubleValue()
-                : 0.0;
-
-        int abonosCount = c.getAbonos() != null ? c.getAbonos().size() : 0;
-
-        return CuentaPorCobrarResponse.builder()
-                .id(c.getId())
-                .codigo(c.getCodigo())
-                .clienteNombre(c.getClienteNombre())
-                .clienteDocumento(c.getClienteDocumento())
-                .montoTotal(montoTotal)
-                .saldoPendiente(saldoPendiente)
-                .montoPagado(montoPagado)
-                .porcentajePagado(pct)
-                .fechaEmision(c.getFechaEmision())
-                .fechaVencimiento(c.getFechaVencimiento())
-                .estado(c.getEstado())
-                .cantidadAbonos(abonosCount)
-                .build();
-    }
-
-    private CuentaPorCobrarDetalleResponse mapToDetalleResponse(CuentaPorCobrar c) {
-        CuentaPorCobrarResponse base = mapToResponse(c);
-        List<AbonoResponse> abonosDto = (c.getAbonos() != null)
-                ? c.getAbonos().stream().map(a -> AbonoResponse.builder()
-                        .id(a.getId())
-                        .cuentaPorCobrarId(c.getId())
-                        .sesionCajaId(a.getSesionCajaId())
-                        .monto(a.getMonto())
-                        .metodoPago(a.getMetodoPago())
-                        .fecha(a.getFecha())
-                        .nota(a.getNota())
-                        .build()).toList()
-                : List.of();
-
-        return CuentaPorCobrarDetalleResponse.builder()
-                .id(base.getId())
-                .codigo(base.getCodigo())
-                .clienteNombre(base.getClienteNombre())
-                .clienteDocumento(base.getClienteDocumento())
-                .montoTotal(base.getMontoTotal())
-                .saldoPendiente(base.getSaldoPendiente())
-                .montoPagado(base.getMontoPagado())
-                .porcentajePagado(base.getPorcentajePagado())
-                .fechaEmision(base.getFechaEmision())
-                .fechaVencimiento(base.getFechaVencimiento())
-                .estado(base.getEstado())
-                .abonos(abonosDto)
-                .build();
     }
 }

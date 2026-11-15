@@ -1,8 +1,8 @@
-<div class="transaccion-container">
+<div class="feature-container transaccion-container">
   <!-- NAVEGACIÓN ESTANDARIZADA & BREADCRUMB (Pilar 1) -->
   <div class="view-back-nav">
     <a routerLink="/ventas/reporte" class="btn-back-nav">
-      <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_back</span>
+      <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">arrow_back</mat-icon>
       Volver al Reporte
     </a>
     <div class="breadcrumb-trail">
@@ -30,7 +30,7 @@
         style="display: inline-flex; align-items: center; gap: 0.4rem;"
         title="Abrir hoja de códigos de barras y QR para escanear"
       >
-        <span class="material-symbols-outlined" style="font-size: 1.15rem; color: #0284c7;">qr_code_2</span>
+        <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem; color: #0284c7;">qr_code_2</mat-icon>
         Ver Códigos de Barra
       </a>
       <button
@@ -40,11 +40,11 @@
         style="display: inline-flex; align-items: center; gap: 0.4rem;"
         title="Abrir cámara de laptop o celular para leer códigos de barra"
       >
-        <span class="material-symbols-outlined" style="font-size: 1.15rem; color: #0284c7;">barcode_scanner</span>
+        <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem; color: #0284c7;">barcode_scanner</mat-icon>
         Escanear Código (Cámara)
       </button>
       <a routerLink="/ventas/reporte" class="btn btn-neutral-secondary">
-        <span class="material-symbols-outlined icon-inline">bar_chart</span>
+        <mat-icon class="icon-inline">bar_chart</mat-icon>
         Ir a Reporte de Ventas
       </a>
     </div>
@@ -52,7 +52,7 @@
 
   <!-- NOTA AMABLE TRANQUILIZADORA (Pilar 2) -->
   <div class="friendly-help-note">
-    <span class="material-symbols-outlined note-icon">lightbulb</span>
+    <mat-icon class="note-icon">lightbulb</mat-icon>
     <div>
       💡 <strong>Emisión Segura de Comprobante:</strong> Puedes buscar clientes por DNI/RUC y agregar productos por escáner o selección en lista. El stock FEFO y el vuelto se calculan en vivo antes de emitir.
     </div>
@@ -63,7 +63,7 @@
     <div class="sesion-pos-card activa">
       <div class="sesion-pos-left">
         <div class="sesion-badge-icon">
-          <span class="material-symbols-outlined icon-sesion">point_of_sale</span>
+          <mat-icon class="icon-sesion">point_of_sale</mat-icon>
         </div>
         <div class="sesion-pos-text">
           <div class="sesion-pos-title">
@@ -82,7 +82,7 @@
       </div>
       <div class="sesion-pos-right">
         <a [routerLink]="['/finanzas/sesiones', sesion.id]" class="btn btn-secondary btn-sm btn-rendir" title="Ir al arqueo físico de billetes y monedas para rendición de cuentas">
-          <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">account_balance</span>
+          <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">account_balance</mat-icon>
           Rendir Cuentas / Arqueo
         </a>
       </div>
@@ -91,7 +91,7 @@
     <div class="sesion-pos-card inactiva">
       <div class="sesion-pos-left">
         <div class="sesion-badge-icon inactivo">
-          <span class="material-symbols-outlined icon-sesion" style="color: #d97706;">warning</span>
+          <mat-icon class="icon-sesion" style="color: #d97706;">warning</mat-icon>
         </div>
         <div class="sesion-pos-text">
           <div class="sesion-pos-title" style="color: #b45309;">
@@ -105,7 +105,7 @@
       </div>
       <div class="sesion-pos-right">
         <button type="button" class="btn btn-warning btn-sm btn-abrir-caja" (click)="abrirModalApertura()">
-          <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">login</span>
+          <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">login</mat-icon>
           Iniciar Sesión de Caja
         </button>
       </div>
@@ -114,7 +114,7 @@
 
   @if (error()) {
     <div class="alert alert-danger">
-      <span class="material-symbols-outlined icon-inline" style="color: #dc2626;">warning</span>
+      <mat-icon class="icon-inline" style="color: #dc2626;">warning</mat-icon>
       <div>
         <strong>Error de Transacción:</strong> {{ error() }}
       </div>
@@ -146,7 +146,7 @@
             @if (buscandoDni()) {
               <span class="spinner-small"></span> Buscando...
             } @else {
-              <span class="material-symbols-outlined" style="font-size: 1.15rem;">search</span>
+              <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem;">search</mat-icon>
               Buscar
             }
           </button>
@@ -180,7 +180,7 @@
     @if (form.controls.metodoPago.value === 'CREDITO') {
       <div class="alert alert-info" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.75rem; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span class="material-symbols-outlined" style="color: #0284c7;">credit_score</span>
+          <mat-icon style="color: #0284c7;">credit_score</mat-icon>
           <span>
             <strong>Integración con Cuentas por Cobrar:</strong> Esta venta no ingresará efectivo hoy; generará automáticamente un crédito pendiente para <strong>{{ form.controls.clienteNombre.value || 'el cliente' }}</strong> en el módulo de Finanzas.
           </span>
@@ -272,7 +272,7 @@
                     [disabled]="lineasForm.length <= 1"
                     title="Quitar esta línea de la venta"
                   >
-                    <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">delete</span>
+                    <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">delete</mat-icon>
                     Quitar
                   </button>
                 </td>
@@ -294,7 +294,7 @@
 
       <div class="acciones-lineas" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
         <button type="button" class="btn btn-secondary" (click)="agregarLinea()">
-          <span class="material-symbols-outlined icon-inline" style="font-size: 1.1rem;">add</span>
+          <mat-icon class="icon-inline" style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">add</mat-icon>
           Agregar otra línea
         </button>
         <button
@@ -304,7 +304,7 @@
           style="display: inline-flex; align-items: center; gap: 0.4rem; border-color: #0284c7; color: #0284c7; background: #f0f9ff;"
           title="Escanear producto con cámara web o móvil"
         >
-          <span class="material-symbols-outlined" style="font-size: 1.15rem;">barcode_scanner</span>
+          <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem;">barcode_scanner</mat-icon>
           Escanear Código de Barras (Cámara)
         </button>
       </div>
@@ -315,7 +315,7 @@
       <div class="cambio-efectivo-card">
         <div class="cambio-header">
           <div class="cambio-titulo">
-            <span class="material-symbols-outlined icon-pagos">payments</span>
+            <mat-icon class="icon-pagos">payments</mat-icon>
             <div>
               <h4>Calculadora de Cobro en Efectivo & Cambio (Vuelto)</h4>
               <p class="cambio-sub">Ingrese el efectivo entregado por el cliente para calcular el vuelto exacto al instante</p>
@@ -388,13 +388,13 @@
           <div class="cambio-resultado-col">
             @if (montoRecibido() === null || montoRecibido() === undefined || montoRecibido() === 0) {
               <div class="cambio-box cambio-espera">
-                <span class="material-symbols-outlined icon-cambio">point_of_sale</span>
+                <mat-icon class="icon-cambio">point_of_sale</mat-icon>
                 <span class="txt-espera">Ingrese el efectivo entregado para calcular el vuelto</span>
               </div>
             } @else if (cambio()! > 0) {
               <div class="cambio-box cambio-positivo">
                 <div class="cambio-box-header">
-                  <span class="material-symbols-outlined" style="font-size: 1.25rem;">change_circle</span>
+                  <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">change_circle</mat-icon>
                   <span>VUELTO A ENTREGAR</span>
                 </div>
                 <div class="cambio-monto-destacado">
@@ -407,7 +407,7 @@
             } @else if (cambio() === 0) {
               <div class="cambio-box cambio-exacto">
                 <div class="cambio-box-header">
-                  <span class="material-symbols-outlined" style="font-size: 1.25rem;">check_circle</span>
+                  <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">check_circle</mat-icon>
                   <span>PAGO EXACTO</span>
                 </div>
                 <div class="cambio-monto-destacado">
@@ -418,7 +418,7 @@
             } @else {
               <div class="cambio-box cambio-insuficiente">
                 <div class="cambio-box-header">
-                  <span class="material-symbols-outlined" style="font-size: 1.25rem;">warning</span>
+                  <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">warning</mat-icon>
                   <span>MONTO INSUFICIENTE</span>
                 </div>
                 <div class="cambio-monto-destacado">
@@ -436,7 +436,7 @@
 
     <div class="form-footer">
       <div class="info-aviso">
-        <span class="material-symbols-outlined icon-inline" style="color: #0284c7;">info</span>
+        <mat-icon class="icon-inline" style="color: #0284c7;">info</mat-icon>
         <em>Al confirmar, el ERP descuenta automáticamente los lotes más próximos a vencer (FEFO), registra la salida en el Kardex Físico e impacta la Sesión de Caja activa o Cuentas por Cobrar.</em>
       </div>
 
@@ -444,7 +444,7 @@
         <a routerLink="/ventas/reporte" class="btn btn-secondary">Cancelar</a>
         @if (esEfectivo() && cambio() !== null && cambio()! >= 0) {
           <div class="pill-vuelto-footer" title="Cambio que debes entregar al cliente">
-            <span class="material-symbols-outlined" style="font-size: 1.15rem; color: #16a34a;">payments</span>
+            <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem; color: #16a34a;">payments</mat-icon>
             <span>Vuelto: <strong>{{ cambio() | currency:'PEN':'S/ ' }}</strong></span>
           </div>
         }
@@ -455,7 +455,7 @@
           [disabled]="loading() || lineasForm.length === 0"
           title="Ver cómo quedará el comprobante impreso antes de emitir"
         >
-          <span class="material-symbols-outlined icon-inline" style="font-size: 1.1rem;">visibility</span>
+          <mat-icon class="icon-inline" style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">visibility</mat-icon>
           Previsualizar Ticket
         </button>
         <button
@@ -467,7 +467,7 @@
           @if (loading() || guardando()) {
             <span class="spinner-small"></span> Registrando venta...
           } @else {
-            <span class="material-symbols-outlined icon-inline" style="font-size: 1.1rem;">check_circle</span>
+            <mat-icon class="icon-inline" style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">check_circle</mat-icon>
             Registrar Venta (S/ {{ total().toFixed(2) }})
           }
         </button>
@@ -587,22 +587,22 @@
           </button>
 
           <button type="button" class="btn btn-info btn-print" (click)="imprimirTicket()">
-            <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">print</span>
+            <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">print</mat-icon>
             Imprimir Ticket (ESC/POS)
           </button>
 
           @if (esBorrador()) {
             <button type="button" class="btn btn-primary" (click)="mostrarModalTicket.set(false); confirmarYGuardar()">
-              <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">check_circle</span>
+              <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">check_circle</mat-icon>
               Confirmar y Emitir
             </button>
           } @else {
             <button type="button" class="btn btn-success" (click)="nuevaVenta()">
-              <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">add_shopping_cart</span>
+              <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">add_shopping_cart</mat-icon>
               Nueva Venta
             </button>
             <button type="button" class="btn btn-secondary" (click)="irAReporte()">
-              <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">bar_chart</span>
+              <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">bar_chart</mat-icon>
               Ver en Reporte
             </button>
           }
@@ -617,7 +617,7 @@
       <div class="modal-scanner-card" (click)="$event.stopPropagation()">
         <div class="scanner-header">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span class="material-symbols-outlined" style="font-size: 1.6rem; color: #0284c7;">barcode_scanner</span>
+            <mat-icon style="font-size: 1.6rem; width: 1.6rem; height: 1.6rem; color: #0284c7;">barcode_scanner</mat-icon>
             <div>
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <h3 style="margin: 0; font-size: 1.15rem;">Lector de Código de Barras POS</h3>
@@ -631,7 +631,7 @@
             </div>
           </div>
           <button type="button" class="btn-close-scanner" (click)="cerrarEscanerCamara()" aria-label="Cerrar">
-            <span class="material-symbols-outlined">close</span>
+            <mat-icon>close</mat-icon>
           </button>
         </div>
 
@@ -649,14 +649,14 @@
 
             @if (flashEscaneo()) {
               <div class="scanner-flash-indicator">
-                <span class="material-symbols-outlined">check_circle</span>
+                <mat-icon>check_circle</mat-icon>
                 <span>¡CÓDIGO LEÍDO!</span>
               </div>
             }
 
             @if (errorCamara()) {
               <div class="scanner-camera-error">
-                <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #ef4444;">videocam_off</span>
+                <mat-icon style="font-size: 2.5rem; width: 2.5rem; height: 2.5rem; color: #ef4444;">videocam_off</mat-icon>
                 <p>{{ errorCamara() }}</p>
                 <small>Verifica los permisos de cámara en tu navegador o selecciona otra cámara.</small>
               </div>
@@ -666,7 +666,7 @@
           @if (camarasDisponibles().length > 1) {
             <div class="scanner-camera-selector">
               <label for="selectCamara" class="camera-label">
-                <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">photo_camera</span>
+                <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">photo_camera</mat-icon>
                 Cambiar de cámara:
               </label>
               <select
@@ -690,14 +690,14 @@
               [class.feedback-success]="msg.exito"
               [class.feedback-warning]="!msg.exito"
             >
-              <span class="material-symbols-outlined" style="font-size: 1.25rem;">
+              <mat-icon style="font-size: 1.25rem; width: 1.25rem; height: 1.25rem;">
                 {{ msg.exito ? 'check_circle' : 'help' }}
-              </span>
+              </mat-icon>
               <span>{{ msg.texto }}</span>
             </div>
           } @else {
             <div class="scanner-instruction">
-              <span class="material-symbols-outlined" style="font-size: 1.1rem; color: #0284c7;">center_focus_strong</span>
+              <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem; color: #0284c7;">center_focus_strong</mat-icon>
               <span>Apunta el código de barras o QR de tus productos hacia el recuadro central</span>
             </div>
           }
@@ -706,7 +706,7 @@
           <div class="scanner-cart-drawer">
             <div class="scanner-cart-header">
               <div class="scanner-cart-title">
-                <span class="material-symbols-outlined" style="font-size: 1.15rem; color: #0284c7;">shopping_cart</span>
+                <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem; color: #0284c7;">shopping_cart</mat-icon>
                 <strong>Productos en este Ticket</strong>
                 <span class="badge badge-info" style="font-size: 0.75rem;">{{ totalUnidadesEscaneadas() }} un.</span>
               </div>
@@ -715,7 +715,7 @@
 
             @if (itemsEnCarrito().length === 0) {
               <div class="scanner-cart-empty">
-                <span class="material-symbols-outlined" style="font-size: 1.8rem; color: #94a3b8;">qr_code_scanner</span>
+                <mat-icon style="font-size: 1.8rem; width: 1.8rem; height: 1.8rem; color: #94a3b8;">qr_code_scanner</mat-icon>
                 <span>Apunta un código de barras o presiona un producto para comenzar a sumar</span>
               </div>
             } @else {
@@ -742,7 +742,7 @@
           <div class="scanner-demo-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
               <span class="demo-box-title" style="margin: 0;">
-                <span class="material-symbols-outlined icon-inline" style="font-size: 0.9rem;">touch_app</span>
+                <mat-icon class="icon-inline" style="font-size: 0.9rem; width: 0.9rem; height: 0.9rem;">touch_app</mat-icon>
                 Simulación rápida o escanear hoja:
               </span>
               <a
@@ -750,7 +750,7 @@
                 target="_blank"
                 style="font-size: 0.8rem; color: #0284c7; text-decoration: underline; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;"
               >
-                <span class="material-symbols-outlined" style="font-size: 0.95rem;">open_in_new</span>
+                <mat-icon style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">open_in_new</mat-icon>
                 Abrir Catálogo de Códigos
               </a>
             </div>
@@ -792,7 +792,7 @@
             <span class="footer-count">({{ totalUnidadesEscaneadas() }} unidades en {{ itemsEnCarrito().length }} productos)</span>
           </div>
           <button type="button" class="btn btn-primary" (click)="cerrarEscanerCamara()">
-            <span class="material-symbols-outlined icon-inline" style="font-size: 1rem;">check</span>
+            <mat-icon class="icon-inline" style="font-size: 1rem; width: 1rem; height: 1rem;">check</mat-icon>
             Listo, Volver al Ticket
           </button>
         </div>
@@ -804,7 +804,7 @@
   @if (toastEscaneoHardware(); as toast) {
     <div class="toast-hardware-scanner">
       <div class="toast-hw-icon-wrapper">
-        <span class="material-symbols-outlined icon-gun">barcode_scanner</span>
+        <mat-icon class="icon-gun">barcode_scanner</mat-icon>
       </div>
       <div class="toast-hw-body">
         <span class="toast-hw-title">¡Escaneado con Pistola POS!</span>
@@ -820,7 +820,7 @@
       <div class="modal-content modal-apertura-caja" (click)="$event.stopPropagation()">
         <div class="modal-top-bar">
           <div class="modal-title-group">
-            <span class="material-symbols-outlined" style="color: #059669; font-size: 1.5rem;">point_of_sale</span>
+            <mat-icon style="color: #059669; font-size: 1.5rem; width: 1.5rem; height: 1.5rem;">point_of_sale</mat-icon>
             <h3 style="margin: 0; font-size: 1.15rem; color: #0f172a; font-weight: 700;">Aperturar Sesión de Caja (Turno POS)</h3>
           </div>
           <button type="button" class="btn-close-modal" (click)="cerrarModalApertura()">&times;</button>
@@ -833,7 +833,7 @@
 
           @if (errorAperturaCaja()) {
             <div class="alert alert-danger" style="margin-bottom: 1rem;">
-              <span class="material-symbols-outlined icon-inline" style="color: #dc2626;">warning</span>
+              <mat-icon class="icon-inline" style="color: #dc2626;">warning</mat-icon>
               <div>{{ errorAperturaCaja() }}</div>
             </div>
           }
@@ -884,7 +884,7 @@
             @if (abriendoCaja()) {
               <span class="spinner-small"></span> Aperturando...
             } @else {
-              <span class="material-symbols-outlined icon-inline" style="font-size: 1.1rem;">check_circle</span>
+              <mat-icon class="icon-inline" style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">check_circle</mat-icon>
               Aperturar Turno (S/ {{ saldoInicialApertura().toFixed(2) }})
             }
           </button>

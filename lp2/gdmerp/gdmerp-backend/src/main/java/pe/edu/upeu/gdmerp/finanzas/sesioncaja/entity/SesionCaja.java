@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,14 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "SESIONES_CAJA")
+@Table(name = "SESIONES_CAJA", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder
 public class SesionCaja {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_sesiones_caja")
+    @SequenceGenerator(name = "seq_sesiones_caja", sequenceName = "SEQ_SESIONES_CAJA", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 

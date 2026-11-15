@@ -1,61 +1,129 @@
-<div class="view-back-nav">
-  <a routerLink="/finanzas/categorias" class="btn-back-nav">
-    <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_back</span>
-    Volver al Listado
-  </a>
-  <div class="breadcrumb-trail">
-    <a routerLink="/finanzas/categorias">Finanzas</a>
-    <span class="separator">/</span>
-    <a routerLink="/finanzas/categorias">Categorías Financieras</a>
-    <span class="separator">/</span>
-    <span class="current">{{ id() ? 'Editar Categoría' : 'Nueva Categoría' }}</span>
+<div class="feature-container">
+  <!-- Navegación y Retorno -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <a routerLink="/finanzas/categorias" class="btn btn-neutral-secondary" style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.85rem; font-size: 0.875rem;">
+        <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem;">arrow_back</mat-icon>
+        Volver a Categorías
+      </a>
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: #64748b; font-size: 0.875rem;">
+        <span>Finanzas</span>
+        <span>/</span>
+        <a routerLink="/finanzas/categorias" style="color: #64748b; text-decoration: none;">Categorías</a>
+        <span>/</span>
+        <span style="font-weight: 600; color: #0f172a;">{{ id() ? 'Editar Categoría' : 'Nueva Categoría' }}</span>
+      </div>
+    </div>
   </div>
-</div>
 
-<h2>{{ id() ? 'Editar Categoría Financiera' : 'Nueva Categoría Financiera' }}</h2>
+  <!-- Encabezado de Página -->
+  <div style="margin-bottom: 1.75rem;">
+    <div class="badge" style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; font-size: 0.725rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px; text-transform: uppercase; margin-bottom: 0.5rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+      <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem;">category</mat-icon>
+      MAESTROS FINANCIEROS
+    </div>
+    <h1 style="margin: 0.25rem 0 0; font-size: 1.625rem; font-weight: 700; color: #0f172a;">
+      {{ id() ? 'Editar Categoría Financiera' : 'Nueva Categoría Financiera' }}
+    </h1>
+    <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.9rem;">
+      {{ id() ? 'Actualiza los parámetros y clasificaciones contables de este concepto de tesorería.' : 'Registra un nuevo concepto para clasificar ingresos y egresos en las transacciones del sistema.' }}
+    </p>
+  </div>
 
-<form [formGroup]="form" (ngSubmit)="guardar()" style="max-width: 450px; display: flex; flex-direction: column; gap: 1rem;">
-  @if (loading()) {
-    <p>Cargando...</p>
-  }
+  <!-- Tarjeta de Formulario Principal -->
+  <div class="card" style="max-width: 650px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.75rem;">
+    @if (loading() && id()) {
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem; gap: 0.75rem; color: #64748b;">
+        <mat-icon style="font-size: 2rem; width: 2rem; height: 2rem; animation: spin 1s linear infinite; color: #d97706;">sync</mat-icon>
+        <span style="font-weight: 500;">Cargando información de la categoría...</span>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="guardar()" style="display: flex; flex-direction: column; gap: 1.25rem;">
+        
+        <!-- Campo: Nombre -->
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+            Nombre de la Categoría <span style="color: #dc2626;">*</span>
+          </label>
+          <input 
+            type="text" 
+            formControlName="nombre" 
+            placeholder="Ej: Cobro de Servicios, Pago de Proveedores, Alquiler"
+            style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+            onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+            onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+          />
+          @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
+            <p style="color: #dc2626; font-size: 0.8rem; margin: 0.35rem 0 0; display: flex; align-items: center; gap: 0.25rem;">
+              <mat-icon style="font-size: 0.95rem; width: 0.95rem; height: 0.95rem;">error</mat-icon>
+              El nombre de la categoría es obligatorio.
+            </p>
+          }
+        </div>
 
-  <div>
-    <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-      Nombre
-    </label>
-    <input type="text" formControlName="nombre" style="width: 100%; padding: 0.5rem;" />
-    @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
-      <p style="color: red; margin: 0.25rem 0;">Este campo es obligatorio.</p>
+        <!-- Campo: Tipo Financiero -->
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+            Naturaleza de Flujo Predeterminada <span style="color: #dc2626;">*</span>
+          </label>
+          <select 
+            formControlName="tipoDefault"
+            style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; background-color: #ffffff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box;"
+            onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+            onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+          >
+            <option value="INGRESO">🟢 INGRESO (Entrada de Fondos / Tesorería)</option>
+            <option value="EGRESO">🔴 EGRESO (Salida de Fondos / Pago / Gasto)</option>
+          </select>
+          <p style="font-size: 0.775rem; color: #64748b; margin: 0.35rem 0 0;">
+            Determina la naturaleza automática aplicada a transacciones creadas bajo esta categoría.
+          </p>
+        </div>
+
+        <!-- Campo: Descripción -->
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.875rem; color: #334155; margin-bottom: 0.35rem;">
+            Descripción / Observaciones
+          </label>
+          <textarea 
+            formControlName="descripcion" 
+            rows="3" 
+            placeholder="Añada una breve descripción contable o notas de control interno..."
+            style="width: 100%; padding: 0.625rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.925rem; font-family: inherit; outline: none; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; resize: vertical;"
+            onfocus="this.style.borderColor='#d97706'; this.style.boxShadow='0 0 0 3px rgba(217, 119, 6, 0.15)';"
+            onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none';"
+          ></textarea>
+        </div>
+
+        @if (error()) {
+          <div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+            <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem; color: #dc2626;">warning</mat-icon>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <!-- Botones de Acción -->
+        <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+          <button 
+            type="submit" 
+            class="btn btn-glacier-primary" 
+            [disabled]="loading() || errorCarga()"
+            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem;"
+          >
+            <mat-icon style="font-size: 1.15rem; width: 1.15rem; height: 1.15rem;">save</mat-icon>
+            {{ id() ? 'Actualizar Categoría' : 'Guardar Categoría' }}
+          </button>
+          
+          <button 
+            type="button" 
+            class="btn btn-neutral-secondary" 
+            (click)="cancelar()"
+            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1.25rem;"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
     }
   </div>
-
-  <div>
-    <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-      Tipo Financiero Predeterminado
-    </label>
-    <select formControlName="tipoDefault" style="width: 100%; padding: 0.5rem;">
-      <option value="INGRESO">INGRESO</option>
-      <option value="EGRESO">EGRESO</option>
-    </select>
-  </div>
-
-  <div>
-    <label style="display: block; font-weight: bold; margin-bottom: 0.25rem;">
-      Descripción
-    </label>
-    <textarea formControlName="descripcion" rows="3" style="width: 100%; padding: 0.5rem;"></textarea>
-  </div>
-
-  @if (error()) {
-    <p style="color: red; margin: 0;">{{ error() }}</p>
-  }
-
-  <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
-    <button type="submit" class="btn btn-glacier-primary" [disabled]="loading() || errorCarga()">
-      Guardar Categoría
-    </button>
-    <button type="button" class="btn btn-neutral-secondary" (click)="cancelar()">
-      Cancelar
-    </button>
-  </div>
-</form>
+</div>

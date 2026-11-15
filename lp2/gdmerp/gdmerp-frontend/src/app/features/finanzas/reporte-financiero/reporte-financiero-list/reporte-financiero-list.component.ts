@@ -12,6 +12,8 @@ import {
 import { CommonModule, CurrencyPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { Chart, registerables, TooltipItem, ChartTypeRegistry } from 'chart.js';
 import { ReporteFinancieroService } from '../services/reporte-financiero.service';
 import {
@@ -29,12 +31,13 @@ export type MetricaPastel = 'ESTRUCTURA' | 'CATEGORIAS' | 'METODOS';
 @Component({
   selector: 'app-reporte-financiero-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, CurrencyPipe, DecimalPipe, DatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, CurrencyPipe, DecimalPipe, DatePipe, MatSnackBarModule, MatIconModule],
   templateUrl: './reporte-financiero-list.component.html',
   styleUrls: ['./reporte-financiero-list.component.css'],
 })
 export class ReporteFinancieroList implements OnInit, AfterViewInit, OnDestroy {
   private readonly reporteService = inject(ReporteFinancieroService);
+  private readonly snackBar = inject(MatSnackBar);
 
   @ViewChild('omnicanalCanvas', { static: false }) omnicanalCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('productosCanvas', { static: false }) productosCanvas?: ElementRef<HTMLCanvasElement>;
@@ -505,7 +508,10 @@ export class ReporteFinancieroList implements OnInit, AfterViewInit, OnDestroy {
   async descargarReporteActiva(formato: 'PDF' | 'EXCEL'): Promise<void> {
     const dash = this.dashboard();
     if (!dash || !dash.sesionActivaId) {
-      alert('No hay un turno de caja activo para exportar.');
+      this.snackBar.open('No hay un turno de caja activo para exportar.', 'Cerrar', {
+        duration: 4000,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
@@ -540,6 +546,10 @@ export class ReporteFinancieroList implements OnInit, AfterViewInit, OnDestroy {
             await writable.write(blob);
             await writable.close();
             this.exportando.set(false);
+            this.snackBar.open('Reporte descargado exitosamente.', 'Cerrar', {
+              duration: 3000,
+              panelClass: ['success-snackbar'],
+            });
             return;
           } catch (err: any) {
             if (err.name === 'AbortError') {
@@ -558,9 +568,16 @@ export class ReporteFinancieroList implements OnInit, AfterViewInit, OnDestroy {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
         this.exportando.set(false);
+        this.snackBar.open('Reporte descargado exitosamente.', 'Cerrar', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
       },
       error: () => {
-        alert('Error al descargar el archivo de reporte.');
+        this.snackBar.open('Error al descargar el archivo de reporte.', 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.exportando.set(false);
       },
     });

@@ -9,6 +9,8 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { CategoriaService } from '../../categoria/services/categoria.service';
 import { Categoria } from '../../categoria/models/categoria.model';
 import { ProductoService } from '../services/producto.service';
@@ -22,7 +24,7 @@ function entero(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-producto-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './producto-form.component.html',
   styleUrl: './producto-form.component.css',
 })
@@ -32,6 +34,7 @@ export class ProductoForm implements OnInit {
   private readonly categoriaService = inject(CategoriaService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly id = signal<number | null>(null);
   protected readonly categorias = signal<Categoria[]>([]);
@@ -116,23 +119,38 @@ export class ProductoForm implements OnInit {
 
     this.loading.set(true);
     peticion.subscribe({
-      next: () => this.router.navigate(['/catalogo/productos']),
+      next: () => {
+        this.snackBar.open(
+          id ? 'Producto actualizado exitosamente en el catálogo.' : 'Producto registrado exitosamente en el catálogo.',
+          'Cerrar',
+          { duration: 3000, panelClass: ['success-snackbar'] }
+        );
+        this.router.navigate(['/catalogo/productos']);
+      },
       error: (err: HttpErrorResponse) => this.manejarErrorGuardado(err),
     });
   }
 
   private manejarErrorGuardado(err: HttpErrorResponse): void {
     const mensaje = (err.error as { message?: string } | null)?.message ?? '';
+    let finalMsg = 'No se pudo guardar el producto en el catálogo.';
 
     if (err.status === 404 && mensaje.toLowerCase().includes('categor')) {
-      this.error.set('La categoría seleccionada ya no existe en la base de datos. Por favor elija otra.');
+      finalMsg = 'La categoría seleccionada ya no existe en la base de datos. Por favor elija otra.';
+      this.error.set(finalMsg);
       this.form.controls.categoriaId.setValue(0);
       this.cargarCategorias();
     } else if (err.status === 400) {
-      this.error.set(mensaje || 'Los datos enviados no son válidos. Revise los campos del formulario.');
+      finalMsg = mensaje || 'Los datos enviados no son válidos. Revise los campos del formulario.';
+      this.error.set(finalMsg);
     } else {
-      this.error.set('No se pudo guardar el producto en el catálogo.');
+      this.error.set(finalMsg);
     }
+
+    this.snackBar.open(finalMsg, 'Cerrar', {
+      duration: 4000,
+      panelClass: ['error-snackbar'],
+    });
     this.loading.set(false);
   }
 

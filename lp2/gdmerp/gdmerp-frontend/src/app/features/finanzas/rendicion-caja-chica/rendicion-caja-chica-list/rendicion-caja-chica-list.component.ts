@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { RendicionCajaChicaService } from '../services/rendicion-caja-chica.service';
 import {
   AsignacionCajaCentroCosto,
@@ -16,12 +18,13 @@ import {
 @Component({
   selector: 'app-rendicion-caja-chica-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, MatSnackBarModule, MatIconModule],
   templateUrl: './rendicion-caja-chica-list.component.html',
   styleUrls: ['./rendicion-caja-chica-list.component.css'],
 })
 export class RendicionCajaChicaList implements OnInit {
   private readonly rendicionService = inject(RendicionCajaChicaService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // Señales de Estado Principal
   protected readonly rendiciones = signal<RendicionCajaChica[]>([]);
@@ -54,6 +57,7 @@ export class RendicionCajaChicaList implements OnInit {
   protected nuevaCajaResponsable = signal('');
   protected nuevaCajaLimite = signal(1000);
   protected nuevaCajaSaldo = signal(1000);
+  protected nuevaCajaCentroCostoId = signal<number | null>(null);
   protected loadingCrearCaja = signal(false);
   protected readonly presupuestosPorCaja = signal<Record<number, AsignacionCajaCentroCosto[]>>({});
 
@@ -188,9 +192,12 @@ export class RendicionCajaChicaList implements OnInit {
       next: (anulada) => {
         this.loadingAnular.set(false);
         this.cerrarModalAnular();
-        this.mensajeExito.set(
-          `¡Rendición ${anulada.codigo} ANULADA con éxito! Se restituyeron S/ ${anulada.montoTotal.toFixed(2)} al saldo de la Caja Chica.`
-        );
+        const msg = `¡Rendición ${anulada.codigo} ANULADA con éxito! Se restituyeron S/ ${anulada.montoTotal.toFixed(2)} al saldo de la Caja Chica.`;
+        this.mensajeExito.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['success-snackbar'],
+        });
         this.aplicarFiltros();
         this.cargarCajasChicas();
       },
@@ -199,14 +206,16 @@ export class RendicionCajaChicaList implements OnInit {
         this.cerrarModalAnular();
         const status = err.status;
         const msg = err.error?.message || '';
+        let errorMsg = msg || 'No se pudo anular la rendición seleccionada.';
 
         if (status === 409 || msg.includes('ANULADO') || err.error?.reglaNegocio === 'RN-FIN-02') {
-          this.mensajeError.set(
-            `REGLA DE NEGOCIO RN-FIN-02: ${msg || 'La transacción ya fue anulada previamente y no puede repetirse.'}`
-          );
-        } else {
-          this.mensajeError.set(msg || 'No se pudo anular la rendición seleccionada.');
+          errorMsg = `REGLA DE NEGOCIO RN-FIN-02: ${msg || 'La transacción ya fue anulada previamente y no puede repetirse.'}`;
         }
+        this.mensajeError.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Cerrar', {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+        });
       },
     });
   }
@@ -237,6 +246,10 @@ export class RendicionCajaChicaList implements OnInit {
     this.nuevaCajaResponsable.set('');
     this.nuevaCajaLimite.set(1000);
     this.nuevaCajaSaldo.set(1000);
+    this.nuevaCajaCentroCostoId.set(null);
+    if (this.centrosCosto().length === 0) {
+      this.cargarCentrosCosto();
+    }
     this.mostrarModalCajaChica.set(true);
   }
 
@@ -249,9 +262,15 @@ export class RendicionCajaChicaList implements OnInit {
     const responsable = this.nuevaCajaResponsable().trim();
     const limite = this.nuevaCajaLimite();
     const saldo = this.nuevaCajaSaldo();
+    const centroCostoId = this.nuevaCajaCentroCostoId() ?? undefined;
 
     if (!codigo || !responsable || limite <= 0 || saldo < 0) {
-      this.mensajeError.set('Por favor completa todos los campos válidos para la Caja Chica.');
+      const errorMsg = 'Por favor completa todos los campos válidos para la Caja Chica.';
+      this.mensajeError.set(errorMsg);
+      this.snackBar.open(errorMsg, 'Cerrar', {
+        duration: 4000,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
@@ -264,16 +283,27 @@ export class RendicionCajaChicaList implements OnInit {
         responsable,
         limiteMaximo: limite,
         saldoInicial: saldo,
+        centroCostoId,
       })
       .subscribe({
         next: (caja) => {
-          this.mensajeExito.set(`Caja Chica ${caja.codigo} (${caja.responsable}) creada con éxito.`);
+          const okMsg = `Caja Chica ${caja.codigo} (${caja.responsable}) creada con éxito.`;
+          this.mensajeExito.set(okMsg);
+          this.snackBar.open(okMsg, 'Cerrar', {
+            duration: 3000,
+            panelClass: ['success-snackbar'],
+          });
           this.mostrarModalCajaChica.set(false);
           this.loadingCrearCaja.set(false);
           this.cargarCajasChicas();
         },
         error: (err) => {
-          this.mensajeError.set(err?.error?.message || 'Error al crear la caja chica.');
+          const errDetail = err?.error?.message || 'Error al crear la caja chica.';
+          this.mensajeError.set(errDetail);
+          this.snackBar.open(errDetail, 'Cerrar', {
+            duration: 4000,
+            panelClass: ['error-snackbar'],
+          });
           this.loadingCrearCaja.set(false);
         },
       });
@@ -316,6 +346,10 @@ export class RendicionCajaChicaList implements OnInit {
 
     if (!codigo || !nombre) {
       this.errorCrearCC.set('Por favor completa el código y el nombre del Centro de Costo.');
+      this.snackBar.open('Por favor completa el código y el nombre del Centro de Costo.', 'Cerrar', {
+        duration: 4000,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
@@ -326,7 +360,12 @@ export class RendicionCajaChicaList implements OnInit {
     this.rendicionService.crearCentroCosto({ codigoCc: codigo, nombreArea: nombre }).subscribe({
       next: (nuevoCC) => {
         this.loadingCrearCC.set(false);
-        this.exitoCrearCC.set(`¡Centro de Costo "${nuevoCC.nombreArea}" creado con éxito!`);
+        const okMsg = `¡Centro de Costo "${nuevoCC.nombreArea}" creado con éxito!`;
+        this.exitoCrearCC.set(okMsg);
+        this.snackBar.open(okMsg, 'Cerrar', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
         this.nuevoCcCodigo.set('');
         this.nuevoCcNombre.set('');
         this.cargarCentrosCosto(nuevoCC.id);
@@ -336,7 +375,12 @@ export class RendicionCajaChicaList implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.loadingCrearCC.set(false);
-        this.errorCrearCC.set(err?.error?.message || 'Error al registrar el Centro de Costo.');
+        const errMsg = err?.error?.message || 'Error al registrar el Centro de Costo.';
+        this.errorCrearCC.set(errMsg);
+        this.snackBar.open(errMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
       },
     });
   }

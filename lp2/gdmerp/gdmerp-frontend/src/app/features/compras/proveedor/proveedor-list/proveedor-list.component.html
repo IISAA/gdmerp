@@ -6,21 +6,21 @@
       <p class="subtitle">Gestión de adquisiciones, recepción de insumos y cuentas por pagar</p>
     </div>
     <div class="header-actions">
-      <a routerLink="/compras/proveedores/nuevo" class="btn btn-primary">
-        <span class="material-symbols-outlined icon-inline">add_circle</span> Registrar Proveedor
+      <a routerLink="/compras/proveedores/nuevo" class="btn btn-glacier-primary">
+        <mat-icon class="icon-inline">add_circle</mat-icon> Registrar Proveedor
       </a>
-      <a routerLink="/compras" class="btn btn-secondary">
-        <span class="material-symbols-outlined icon-inline">shopping_bag</span> Ver Compras
+      <a routerLink="/compras" class="btn btn-neutral-secondary">
+        <mat-icon class="icon-inline">shopping_bag</mat-icon> Ver Compras
       </a>
-      <button class="btn btn-secondary" (click)="cargarDatos()" title="Actualizar">
-        <span class="material-symbols-outlined" style="vertical-align: middle;">refresh</span>
+      <button class="btn btn-neutral-secondary" (click)="cargarDatos()" title="Actualizar">
+        <mat-icon style="vertical-align: middle;">refresh</mat-icon>
       </button>
     </div>
   </div>
 
   @if (error()) {
     <div class="alert alert-danger" style="display: flex; align-items: center; gap: 0.5rem;">
-      <span class="material-symbols-outlined">warning</span>
+      <mat-icon>warning</mat-icon>
       <span>{{ error() }}</span>
     </div>
   }

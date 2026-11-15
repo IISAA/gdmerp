@@ -23,21 +23,21 @@ public class CategoriaController {
 
     @Operation(summary = "Lista todas las categorías")
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     public ResponseEntity<List<CategoriaResponse>> listar() {
         return ResponseEntity.ok(categoriaService.listar());
     }
 
     @Operation(summary = "Reporte de costos y promedios por categoría con protección de nulls")
     @GetMapping("/reportes/costos")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     public ResponseEntity<List<ReporteCategoriaCostoDTO>> reporteCostos() {
         return ResponseEntity.ok(categoriaService.obtenerReporteCostosPorCategoria());
     }
 
     @Operation(summary = "Busca una categoría por ID")
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO', 'OPERARIO_PLANTA', 'SUPERVISOR', 'VENDEDOR', 'CAJERO', 'ADMIN_FINANZAS')")
     public ResponseEntity<CategoriaResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.buscarPorId(id));
     }

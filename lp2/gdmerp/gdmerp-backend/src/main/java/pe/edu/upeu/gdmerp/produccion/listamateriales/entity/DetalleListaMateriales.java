@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 
 import java.math.BigDecimal;
 
@@ -24,9 +23,8 @@ public class DetalleListaMateriales {
     @JoinColumn(name = "LISTA_MATERIALES_ID", nullable = false)
     private ListaMateriales listaMateriales;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "INSUMO_ID", nullable = false)
-    private Producto insumo;
+    @Column(name = "INSUMO_ID", nullable = false)
+    private Long insumoId;
 
     @Column(name = "CANTIDAD_REQUERIDA", nullable = false, precision = 12, scale = 4)
     private BigDecimal cantidadRequerida;

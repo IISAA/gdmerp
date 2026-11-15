@@ -1,5 +1,6 @@
 package pe.edu.upeu.gdmerp.finanzas.sesioncaja.repository;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,6 +28,12 @@ public interface SesionCajaRepository extends JpaRepository<SesionCaja, Long> {
     boolean existsByUsuarioIdAndEstado(Long usuarioId, EstadoCaja estado);
 
     List<SesionCaja> findAllByOrderByFechaAperturaDesc();
+
+    @EntityGraph(attributePaths = {"movimientos", "movimientos.categoriaFinanciera"})
+    Optional<SesionCaja> findWithMovimientosById(Long id);
+
+    @Query("SELECT m.sesionCaja.id, COUNT(m) FROM MovimientoCaja m GROUP BY m.sesionCaja.id")
+    List<Object[]> contarMovimientosPorSesion();
 
     @Query("SELECT s FROM SesionCaja s WHERE s.fechaApertura >= :inicio AND s.fechaApertura <= :fin ORDER BY s.fechaApertura DESC")
     List<SesionCaja> findByRangoFechas(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);

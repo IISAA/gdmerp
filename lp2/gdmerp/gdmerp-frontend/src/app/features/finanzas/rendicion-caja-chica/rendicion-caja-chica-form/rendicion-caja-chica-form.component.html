@@ -1,8 +1,8 @@
-<div class="page-container">
-  <!-- NAVEGACIÓN ESTANDARIZADA & BREADCRUMB (Pilar 1) -->
+<div class="feature-container">
+  <!-- NAVEGACIÓN ESTANDARIZADA & BREADCRUMB -->
   <div class="view-back-nav">
     <a routerLink="/finanzas/rendiciones" class="btn-back-nav">
-      <span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_back</span>
+      <mat-icon style="font-size: 1.1rem; width: 1.1rem; height: 1.1rem;">arrow_back</mat-icon>
       Volver al Listado
     </a>
     <div class="breadcrumb-trail">
@@ -21,9 +21,9 @@
     </div>
   </div>
 
-  <!-- NOTA DE AYUDA AMABLE (Pilar 2) -->
+  <!-- NOTA DE AYUDA AMABLE -->
   <div class="friendly-help-note">
-    <span class="material-symbols-outlined note-icon">lightbulb</span>
+    <mat-icon class="note-icon">lightbulb</mat-icon>
     <div>
       <strong>💡 Gestión de comprobantes asistida:</strong>
       El selector de Centro de Costo te muestra cuánto saldo disponible le queda a cada área o línea. Si un comprobante sobrepasa el presupuesto disponible, te avisaremos de inmediato.
@@ -38,7 +38,7 @@
     </div>
   }
 
-  <!-- ALERTAS AMABLES DE VALIDACIÓN (Pilar 5) -->
+  <!-- ALERTAS AMABLES DE VALIDACIÓN -->
   @if (errorSolvencia()) {
     <div class="alert alert-solvencia">
       <span class="alert-icon">[!]</span>
@@ -51,7 +51,7 @@
 
   @if (alertaRnFin06()) {
     <div class="alert alert-solvencia" style="border-left: 4px solid #ea580c; background: #fff7ed; color: #9a3412;">
-      <span class="material-symbols-outlined alert-icon" style="color: #ea580c;">warning</span>
+      <mat-icon class="alert-icon" style="color: #ea580c;">warning</mat-icon>
       <div>
         <strong>Aviso de Presupuesto Asignado</strong>
         <p>{{ alertaRnFin06() }}</p>

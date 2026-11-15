@@ -3,16 +3,22 @@ package pe.edu.upeu.gdmerp.produccion.ordenproduccion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.web.server.ResponseStatusException;
+import pe.edu.upeu.gdmerp.catalogo.producto.dto.TipoProducto;
+import pe.edu.upeu.gdmerp.catalogo.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.catalogo.producto.repository.ProductoRepository;
 import pe.edu.upeu.gdmerp.inventario.almacen.entity.Almacen;
 import pe.edu.upeu.gdmerp.inventario.almacen.repository.AlmacenRepository;
 import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.lote.entity.Lote;
 import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.entity.StockInventario;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.MovimientoInventarioRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.StockInventarioRepository;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.DetalleOrdenRequest;
@@ -28,9 +34,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.web.server.ResponseStatusException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -39,7 +42,8 @@ class OrdenProduccionTransactionTest {
 
     @Autowired private OrdenProduccionService ordenService;
     @Autowired private OrdenProduccionRepository ordenRepository;
-    @Autowired private ProductoRepository productoRepository;
+    @Autowired @Qualifier("catalogoProductoRepository") private ProductoRepository productoRepository;
+    @Autowired private StockInventarioRepository stockRepository;
     @Autowired private LoteRepository loteRepository;
     @Autowired private MovimientoInventarioRepository movimientoRepository;
     @Autowired private AlmacenRepository almacenRepository;
@@ -63,10 +67,10 @@ class OrdenProduccionTransactionTest {
         // Estado ANTES (datos que el test crea y deja listos antes de la operación)
         BigDecimal costoInsumo = new BigDecimal("10.00");
         int stockInsumoAntes = 8;
-        productoConStock("Insumo-Principal", costoInsumo, stockInsumoAntes,
+        productoConStock("Insumo-Principal", costoInsumo, TipoProducto.MATERIA_PRIMA, stockInsumoAntes,
                 lote(5, LocalDate.of(2026, 12, 1)),
                 lote(3, LocalDate.of(2027, 3, 1)));
-        productoT = producto("Producto-Terminado", new BigDecimal("50.00"), 0);
+        productoT = productoConFichaStock("Producto-Terminado", new BigDecimal("50.00"), TipoProducto.TERMINADO, 0);
         centro = new CentroTrabajo();
         centro.setNombre("CT-" + sufijo);
         centro.setCapacidad(BigDecimal.valueOf(10));
@@ -87,8 +91,8 @@ class OrdenProduccionTransactionTest {
         assertBigDecimalEquals(new BigDecimal("60.00"), resp.totalCostoInsumos()); // suma de subtotales
 
         // Estado DESPUÉS: recarga fresca de la BD
-        Producto insumoBd = productoRepository.findById(insumo.getId()).orElseThrow();
-        assertBigDecimalEquals(BigDecimal.valueOf(2), insumoBd.getStockTotal());
+        StockInventario insumoBd = stockRepository.findFirstByProductoIdOrderByIdAsc(insumo.getId()).orElseThrow();
+        assertBigDecimalEquals(BigDecimal.valueOf(2), insumoBd.getStockActual());
 
         List<Lote> lotesInsumo = loteRepository
                 .findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(insumo.getId(), 0);
@@ -98,8 +102,8 @@ class OrdenProduccionTransactionTest {
         // 6 consumidos = 5 del lote viejo + 1 del nuevo -> el lote nuevo queda en 2.
         assertEquals(2, lotesInsumo.get(0).getCantidadActual());
 
-        Producto productoTBd = productoRepository.findById(productoT.getId()).orElseThrow();
-        assertBigDecimalEquals(BigDecimal.valueOf(cantidadPlanes), productoTBd.getStockTotal());
+        StockInventario productoTBd = stockRepository.findFirstByProductoIdOrderByIdAsc(productoT.getId()).orElseThrow();
+        assertBigDecimalEquals(BigDecimal.valueOf(cantidadPlanes), productoTBd.getStockActual());
         assertEquals(1, loteRepository.findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(
                 productoT.getId(), 0).size());
 
@@ -113,37 +117,39 @@ class OrdenProduccionTransactionTest {
         long ordenesAntes = ordenRepository.count();
         int stockInsuficiente = 2;
         int cantidadPedida = 5;
-        productoConStock("Insumo-Escaso", new BigDecimal("10.00"), stockInsuficiente,
+        productoConStock("Insumo-Escaso", new BigDecimal("10.00"), TipoProducto.MATERIA_PRIMA, stockInsuficiente,
                 lote(stockInsuficiente, LocalDate.of(2026, 12, 1)));
-        productoT = producto("Producto-Terminado-RB", new BigDecimal("50.00"), 0);
+        productoT = productoConFichaStock("Producto-Terminado-RB", new BigDecimal("50.00"), TipoProducto.TERMINADO, 0);
         centro = new CentroTrabajo();
         centro.setNombre("CT-RB-" + sufijo);
         centro.setCapacidad(BigDecimal.valueOf(10));
         centro.setCostoHora(new BigDecimal("25.00"));
         centro = centroRepository.save(centro);
 
-        Producto insumoAntes = productoRepository.findById(insumo.getId()).orElseThrow();
+        StockInventario insumoAntes = stockRepository.findFirstByProductoIdOrderByIdAsc(insumo.getId()).orElseThrow();
         Lote loteInsumoAntes = loteRepository.findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(
                 insumo.getId(), 0).get(0);
-        BigDecimal stockAntes = insumoAntes.getStockTotal();
+        BigDecimal stockAntes = insumoAntes.getStockActual();
         int cantidadLoteAntes = loteInsumoAntes.getCantidadActual();
-        BigDecimal stockPtoAntes = productoRepository.findById(productoT.getId()).orElseThrow().getStockTotal();
+        BigDecimal stockPtoAntes = stockRepository.findFirstByProductoIdOrderByIdAsc(productoT.getId())
+                .orElseThrow().getStockActual();
         int lotesPtoAntes = loteRepository.findAll().size();
 
-        // La regla de negocio se activa: cantidad demánda (5) > stock disponible (2)
+        // La regla de negocio se activa: cantidad demandada (5) > stock disponible (2)
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> ordenService.crear(ordenRequest(productoT.getId(), 4, cantidadPedida)));
         assertTrue(ex.getReason() != null && ex.getReason().contains("Stock insuficiente"), ex.getMessage());
 
         // Estado DESPUÉS: nada debe haber cambiado -> rollback total de la transacción.
-        Producto insumoDespues = productoRepository.findById(insumo.getId()).orElseThrow();
-        assertBigDecimalEquals(stockAntes, insumoDespues.getStockTotal());
+        StockInventario insumoDespues = stockRepository.findFirstByProductoIdOrderByIdAsc(insumo.getId()).orElseThrow();
+        assertBigDecimalEquals(stockAntes, insumoDespues.getStockActual());
 
         Lote loteDespues = loteRepository.findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(
                 insumo.getId(), 0).get(0);
         assertEquals(cantidadLoteAntes, loteDespues.getCantidadActual(), "ningún lote puede consumirse");
 
-        assertBigDecimalEquals(stockPtoAntes, productoRepository.findById(productoT.getId()).orElseThrow().getStockTotal());
+        assertBigDecimalEquals(stockPtoAntes,
+                stockRepository.findFirstByProductoIdOrderByIdAsc(productoT.getId()).orElseThrow().getStockActual());
         assertEquals(lotesPtoAntes, loteRepository.findAll().size(), "no debe crearse lote de ingreso");
 
         assertEquals(ordenesAntes, ordenRepository.count(), "no debe persistirse la cabecera (ni el detalle)");
@@ -162,27 +168,40 @@ class OrdenProduccionTransactionTest {
                 List.of(new DetalleOrdenRequest(insumo.getId(), cantidadRequerida)));
     }
 
-    private void productoConStock(String nombreProducto, BigDecimal costo, int stockTotal, Lote... lotes) {
-        insumo = producto(nombreProducto, costo, stockTotal);
+    private void productoConStock(String nombreProducto, BigDecimal costo, TipoProducto tipo, int stockTotal, Lote... lotes) {
+        insumo = productoConFichaStock(nombreProducto, costo, tipo, stockTotal);
         for (Lote lote : lotes) {
-            lote.setProducto(insumo);
+            lote.setProductoId(insumo.getId());
             loteRepository.save(lote);
         }
     }
 
-    private Producto producto(String nombreProducto, BigDecimal costo, int stockTotal) {
+    private Producto productoConFichaStock(String nombreProducto, BigDecimal costo, TipoProducto tipo, int stockTotal) {
         garantizarAlmacenYCategoria();
 
-        Producto p = new Producto();
-        p.setSku("SKU-" + nombreProducto.substring(0, 1).toUpperCase() + "-" + sufijo);
-        p.setNombre(nombreProducto + "-" + sufijo);
-        p.setUnidadMedida("kg");
-        p.setCostoPromedio(costo);
-        p.setStockTotal(stockTotal);
-        p.setStockMinimo(1);
-        p.setAlmacen(almacen);
-        p.setCategoria(categoria);
-        return productoRepository.save(p);
+        Producto p = Producto.builder()
+                .sku("SKU-" + nombreProducto.substring(0, 1).toUpperCase() + "-" + sufijo)
+                .nombre(nombreProducto + "-" + sufijo)
+                .unidadMedida("kg")
+                .precio(costo)
+                .costoBase(costo)
+                .tipoProducto(tipo)
+                .stockMinimo(BigDecimal.ONE)
+                .stock(0)
+                .activo(Boolean.TRUE)
+                .build();
+        p = productoRepository.save(p);
+
+        StockInventario stock = new StockInventario();
+        stock.setProductoId(p.getId());
+        stock.setAlmacen(almacen);
+        stock.setCategoriaId(categoria.getId());
+        stock.setCostoPromedio(costo);
+        stock.setStockActual(BigDecimal.valueOf(stockTotal));
+        stock.setStockMinimo(BigDecimal.ONE);
+        stockRepository.save(stock);
+
+        return p;
     }
 
     // Almacén y categoría se crean UNA sola vez por caso de prueba y se reutilizan
@@ -214,26 +233,21 @@ class OrdenProduccionTransactionTest {
     @AfterEach
     void limpiarDatosDeTest() {
         if (centro != null) {
-            // Borra cualquier orden de producción quedada para este centro en este caso
-            // (aunque el test haya fallado antes de asignar el id de la orden).
             ordenRepository.deleteAll(ordenRepository.findByCentroTrabajoId(centro.getId()));
             centroRepository.delete(centro);
             centro = null;
         }
         if (productoT != null) {
-            // Borrar primero los movimientos y lotes por repositorio (evita cascadas/merge sobre el
-            // producto detached) y luego el producto con su versión vigente.
             movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(productoT.getId()));
             loteRepository.deleteAll(loteRepository.findByProductoId(productoT.getId()));
+            stockRepository.findFirstByProductoIdOrderByIdAsc(productoT.getId()).ifPresent(stockRepository::delete);
             productoRepository.deleteById(productoT.getId());
             productoT = null;
         }
         if (insumo != null) {
             movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(insumo.getId()));
             loteRepository.deleteAll(loteRepository.findByProductoId(insumo.getId()));
-            // El stock del insumo se consumió en el test: su @Version subió en la BD,
-            // por lo que se borra recargando la fila actual (deleteById) y no la imagen
-            // en memoria (delete), que lanzaría StaleObjectStateException.
+            stockRepository.findFirstByProductoIdOrderByIdAsc(insumo.getId()).ifPresent(stockRepository::delete);
             productoRepository.deleteById(insumo.getId());
             insumo = null;
         }

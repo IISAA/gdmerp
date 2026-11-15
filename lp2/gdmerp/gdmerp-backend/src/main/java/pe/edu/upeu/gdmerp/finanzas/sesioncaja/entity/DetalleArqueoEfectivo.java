@@ -17,7 +17,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "DETALLES_ARQUEO_EFECTIVO")
+@Table(name = "DETALLES_ARQUEO_EFECTIVO", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder

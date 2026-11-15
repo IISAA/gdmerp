@@ -9,9 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import pe.edu.upeu.gdmerp.catalogo.producto.dto.TipoProducto;
+import pe.edu.upeu.gdmerp.catalogo.producto.service.ProductoService;
 import pe.edu.upeu.gdmerp.exception.InsufficientStockException;
 import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService;
+import pe.edu.upeu.gdmerp.inventario.stock.dto.StockInventarioResponse;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioOperacionService;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioService;
+import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
 import pe.edu.upeu.gdmerp.produccion.listamateriales.repository.ListaMaterialesRepository;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.DetalleOrdenProduccion;
@@ -38,6 +43,9 @@ class OrdenProduccionTransicionEstadoTest {
     private OrdenProduccionRepository ordenRepository;
 
     @Mock
+    private CentroTrabajoRepository centroTrabajoRepository;
+
+    @Mock
     private InventarioOperacionService inventarioService;
 
     @Mock
@@ -47,7 +55,10 @@ class OrdenProduccionTransicionEstadoTest {
     private OrdenProduccionMapper mapper;
 
     @Mock
-    private pe.edu.upeu.gdmerp.inventario.producto.service.ProductoService productoService;
+    private ProductoService catalogoProductoService;
+
+    @Mock
+    private InventarioService stockService;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
@@ -78,13 +89,12 @@ class OrdenProduccionTransicionEstadoTest {
         detalles.add(detalle1);
         orden.setDetalles(detalles);
 
-        pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse mockProd =
-                new pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse(
-                        200L, "HAR-001", "Harina de Trigo", "KG",
-                        BigDecimal.valueOf(3.50), BigDecimal.valueOf(100), BigDecimal.valueOf(10),
-                        null, null, pe.edu.upeu.gdmerp.inventario.producto.entity.TipoProducto.MATERIA_PRIMA
-                );
-        lenient().when(productoService.buscarPorId(any())).thenReturn(mockProd);
+        StockInventarioResponse mockStock = new StockInventarioResponse(
+                1L, 200L, "HAR-001", "Harina de Trigo", "KG",
+                TipoProducto.MATERIA_PRIMA, BigDecimal.ZERO, null, null,
+                BigDecimal.valueOf(100), BigDecimal.valueOf(10), null, BigDecimal.valueOf(3.50)
+        );
+        lenient().when(stockService.buscarPorProductoId(any())).thenReturn(mockStock);
     }
 
     @Test

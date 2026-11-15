@@ -3,6 +3,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CategoriaService } from '../../categoria/services/categoria.service';
 import { Categoria } from '../../categoria/models/categoria.model';
@@ -12,7 +14,7 @@ import { Producto } from '../models/producto.model';
 @Component({
   selector: 'app-producto-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, CurrencyPipe, FormsModule],
+  imports: [CommonModule, RouterLink, CurrencyPipe, FormsModule, MatSnackBarModule, MatIconModule],
   templateUrl: './producto-list.component.html',
   styleUrl: './producto-list.component.css',
 })
@@ -20,6 +22,7 @@ export class ProductoList implements OnInit {
   protected readonly auth = inject(AuthService);
   private readonly productoService = inject(ProductoService);
   private readonly categoriaService = inject(CategoriaService);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly productos = signal<Producto[]>([]);
   protected readonly categorias = signal<Categoria[]>([]);
@@ -84,12 +87,21 @@ export class ProductoList implements OnInit {
     this.loading.set(true);
     this.productoService.eliminar(producto.id).subscribe({
       next: () => {
-        this.successMsg.set(`Producto "${producto.nombre}" eliminado correctamente.`);
+        const msg = `Producto "${producto.nombre}" eliminado correctamente.`;
+        this.successMsg.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
         this.cargar();
       },
       error: (err: HttpErrorResponse) => {
-        const msg = (err.error as { message?: string } | null)?.message;
-        this.error.set(msg || 'No se pudo eliminar el producto.');
+        const msg = (err.error as { message?: string } | null)?.message || 'No se pudo eliminar el producto.';
+        this.error.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.loading.set(false);
       },
     });

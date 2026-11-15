@@ -6,6 +6,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { CategoriaFinancieraService } from '../../categoria-financiera/services/categoria-financiera.service';
 import {
   CategoriaFinanciera,
@@ -17,7 +19,7 @@ import { TransaccionFinancieraService } from '../services/transaccion-financiera
 @Component({
   selector: 'app-transaccion-financiera-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './transaccion-financiera-form.component.html',
 })
 export class TransaccionFinancieraForm {
@@ -26,6 +28,7 @@ export class TransaccionFinancieraForm {
   private readonly categoriaService = inject(CategoriaFinancieraService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly id = signal<number | null>(null);
   protected readonly categorias = signal<CategoriaFinanciera[]>([]);
@@ -73,6 +76,7 @@ export class TransaccionFinancieraForm {
           this.errorCarga.set(true);
           this.error.set('No se pudo cargar la transacción financiera.');
           this.loading.set(false);
+          this.mostrarMensaje('No se pudo cargar la transacción financiera.', 'error');
         },
       });
     }
@@ -84,7 +88,10 @@ export class TransaccionFinancieraForm {
         this.categorias.set(data);
         this.categoriasCargadas.set(true);
       },
-      error: () => this.error.set('No se pudieron cargar las categorías financieras.'),
+      error: () => {
+        this.error.set('No se pudieron cargar las categorías financieras.');
+        this.mostrarMensaje('No se pudieron cargar las categorías financieras.', 'error');
+      },
     });
   }
 
@@ -97,6 +104,7 @@ export class TransaccionFinancieraForm {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.mostrarMensaje('Por favor revise los campos requeridos del formulario.', 'warning');
       return;
     }
 
@@ -108,7 +116,11 @@ export class TransaccionFinancieraForm {
 
     this.loading.set(true);
     peticion.subscribe({
-      next: () => this.router.navigate(['/finanzas/transacciones']),
+      next: (resp) => {
+        const accion = id ? 'actualizada' : 'registrada';
+        this.mostrarMensaje(`Transacción "${resp.codigo}" ${accion} exitosamente.`, 'success');
+        this.router.navigate(['/finanzas/transacciones']);
+      },
       error: (err: HttpErrorResponse) => this.manejarErrorGuardado(err),
     });
   }
@@ -122,14 +134,28 @@ export class TransaccionFinancieraForm {
 
     if (err.status === 404 && mensaje.toLowerCase().includes('categor')) {
       this.error.set('La categoría financiera seleccionada ya no existe. Elige otra de la lista.');
+      this.mostrarMensaje('La categoría financiera seleccionada ya no existe.', 'warning');
       this.form.controls.categoriaFinancieraId.setValue(0);
       this.cargarCategorias();
     } else if (err.status === 400) {
-      this.error.set(mensaje || 'Los datos enviados no son válidos. Revisa los campos del formulario.');
+      const msg = mensaje || 'Los datos enviados no son válidos. Revisa los campos del formulario.';
+      this.error.set(msg);
+      this.mostrarMensaje(msg, 'error');
     } else {
       this.error.set('No se pudo guardar la transacción financiera.');
+      this.mostrarMensaje('No se pudo guardar la transacción financiera.', 'error');
     }
     this.loading.set(false);
+  }
+
+  private mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
+    const panelClass = tipo === 'success' ? ['snackbar-success'] : tipo === 'error' ? ['snackbar-error'] : ['snackbar-warning'];
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 5000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass
+    });
   }
 
   protected mensajeValidacion(campo: 'codigo' | 'concepto' | 'monto' | 'categoriaFinancieraId'): string {

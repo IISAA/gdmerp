@@ -1,18 +1,21 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { VentaService } from '../services/venta.service';
 import { Venta, VentaReporte } from '../models/venta.model';
 
 @Component({
   selector: 'app-venta-list',
-  imports: [CommonModule, RouterLink, CurrencyPipe, DatePipe],
+  imports: [CommonModule, RouterLink, CurrencyPipe, DatePipe, MatSnackBarModule, MatIconModule],
   standalone: true,
   templateUrl: './venta-list.component.html',
   styleUrl: './venta-list.component.css',
 })
 export class VentaListComponent implements OnInit {
   private readonly ventaService = inject(VentaService);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly ventas = signal<Venta[]>([]);
   protected readonly resumen = signal<VentaReporte | null>(null);
@@ -37,7 +40,12 @@ export class VentaListComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('No se pudo cargar el historial de ventas.');
+        const errorMsg = 'No se pudo cargar el historial de ventas.';
+        this.error.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.loading.set(false);
       },
     });
@@ -73,11 +81,21 @@ export class VentaListComponent implements OnInit {
     this.loading.set(true);
     this.ventaService.anular(id).subscribe({
       next: () => {
-        this.successMsg.set(`Venta #${id} anulada con éxito y stock repuesto en catálogo.`);
+        const msg = `Venta #${id} anulada con éxito y stock repuesto en catálogo.`;
+        this.successMsg.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 3500,
+          panelClass: ['success-snackbar'],
+        });
         this.cargarDatos();
       },
       error: (err) => {
-        this.error.set(err?.error?.message || 'Error al anular la venta.');
+        const errMsg = err?.error?.message || 'Error al anular la venta.';
+        this.error.set(errMsg);
+        this.snackBar.open(errMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.loading.set(false);
       },
     });

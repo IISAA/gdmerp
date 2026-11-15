@@ -7,19 +7,21 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "CATEGORIAS_FINANCIERAS")
+@Table(name = "CATEGORIAS_FINANCIERAS", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @NoArgsConstructor
 public class CategoriaFinanciera {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_categorias_financieras")
+    @SequenceGenerator(name = "seq_categorias_financieras", sequenceName = "SEQ_CATEGORIAS_FINANCIERAS", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 

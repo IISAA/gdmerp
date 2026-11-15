@@ -1,16 +1,19 @@
-<div class="page-container">
-  <!-- Encabezado Principal -->
-  <div class="header-section">
-    <div>
+<div class="feature-container">
+  <!-- Encabezado Principal Estilo Producción -->
+  <div class="feature-header">
+    <div class="header-title">
       <div class="breadcrumb">Finanzas &gt; Cartera Comercial</div>
-      <h2 class="title">Cuentas por Cobrar y Fiados</h2>
-      <p class="subtitle">
-        Control de ventas al crédito, amortizaciones y sincronización automática a caja activa (Estilo Odoo 17)
+      <div class="title-with-badge">
+        <h2>Cuentas por Cobrar y Fiados</h2>
+        <span class="badge badge-amber">CRÉDITO COMERCIAL</span>
+      </div>
+      <p class="description">
+        Control de ventas al crédito, amortizaciones y sincronización automática a caja activa
       </p>
     </div>
-    <div class="actions">
-      <button type="button" class="btn btn-primary" (click)="abrirModalNuevo()">
-        <span class="icon">+</span> Nuevo Crédito / Fiado
+    <div class="header-actions">
+      <button type="button" class="btn-glacier-primary" (click)="abrirModalNuevo()">
+        <mat-icon>add</mat-icon> Nuevo Crédito / Fiado
       </button>
     </div>
   </div>
@@ -19,7 +22,7 @@
   @if (mensajeExito()) {
     <div class="alert alert-success">
       <div class="alert-content">
-        <span class="material-symbols-outlined alert-icon" style="font-size:1.25rem">check_circle</span>
+        <mat-icon class="alert-icon">check_circle</mat-icon>
         <span>{{ mensajeExito() }}</span>
       </div>
       <button type="button" class="btn-close" (click)="mensajeExito.set(null)">×</button>
@@ -29,7 +32,7 @@
   @if (mensajeError()) {
     <div class="alert alert-danger">
       <div class="alert-content">
-        <span class="material-symbols-outlined alert-icon" style="font-size:1.25rem">warning</span>
+        <mat-icon class="alert-icon">warning</mat-icon>
         <span>{{ mensajeError() }}</span>
       </div>
       <button type="button" class="btn-close" (click)="mensajeError.set(null)">×</button>
@@ -39,7 +42,7 @@
   <!-- Métricas Rápidas Estilo KPI Odoo -->
   <div class="metrics-grid">
     <div class="metric-card">
-      <div class="metric-icon"><span class="material-symbols-outlined">receipt_long</span></div>
+      <div class="metric-icon"><mat-icon>receipt_long</mat-icon></div>
       <div class="metric-content">
         <span class="metric-label">Créditos Otorgados</span>
         <span class="metric-value">S/ {{ totalCreditosMonto() | number:'1.2-2' }}</span>
@@ -48,7 +51,7 @@
     </div>
 
     <div class="metric-card">
-      <div class="metric-icon text-success-icon"><span class="material-symbols-outlined">payments</span></div>
+      <div class="metric-icon text-success-icon"><mat-icon>payments</mat-icon></div>
       <div class="metric-content">
         <span class="metric-label">Total Cobrado (Amortizado)</span>
         <span class="metric-value text-success">S/ {{ totalCobradoMonto() | number:'1.2-2' }}</span>
@@ -57,7 +60,7 @@
     </div>
 
     <div class="metric-card">
-      <div class="metric-icon text-warning-icon"><span class="material-symbols-outlined">hourglass_empty</span></div>
+      <div class="metric-icon text-warning-icon"><mat-icon>hourglass_empty</mat-icon></div>
       <div class="metric-content">
         <span class="metric-label">Saldo Pendiente por Cobrar</span>
         <span class="metric-value text-warning">S/ {{ totalPendienteMonto() | number:'1.2-2' }}</span>
@@ -66,7 +69,7 @@
     </div>
 
     <div class="metric-card">
-      <div class="metric-icon text-primary-icon"><span class="material-symbols-outlined">query_stats</span></div>
+      <div class="metric-icon text-primary-icon"><mat-icon>query_stats</mat-icon></div>
       <div class="metric-content">
         <span class="metric-label">Tasa de Recuperación</span>
         <span class="metric-value text-primary">{{ tasaRecuperacion() }}%</span>
@@ -124,7 +127,7 @@
   </div>
 
   <!-- Tabla de Cuentas por Cobrar -->
-  <div class="card table-card">
+  <div class="card tabla-card">
     @if (loading()) {
       <div class="loading-state">
         <div class="spinner"></div>
@@ -132,11 +135,11 @@
       </div>
     } @else if (creditosFiltrados().length === 0) {
       <div class="empty-state">
-        <div class="empty-icon"><span class="material-symbols-outlined" style="font-size:3rem">folder_open</span></div>
+        <div class="empty-icon"><mat-icon style="font-size:3rem; width: 3rem; height: 3rem;">folder_open</mat-icon></div>
         <h3>No se encontraron cuentas por cobrar</h3>
         <p>No hay créditos que coincidan con los filtros seleccionados o aún no has registrado fiados.</p>
-        <button type="button" class="btn btn-primary" (click)="abrirModalNuevo()">
-          Crear Primer Crédito
+        <button type="button" class="btn-glacier-primary" (click)="abrirModalNuevo()">
+          <mat-icon>add</mat-icon> Crear Primer Crédito
         </button>
       </div>
     } @else {
@@ -220,7 +223,7 @@
                         title="Registrar cobro o amortización"
                         (click)="abrirModalAbono(cred)"
                       >
-                        <span class="material-symbols-outlined icon-inline">payments</span> Cobrar / Abonar
+                        <mat-icon class="icon-inline">payments</mat-icon> Cobrar / Abonar
                       </button>
                     }
                     <button
@@ -229,7 +232,7 @@
                       title="Ver historial de abonos"
                       (click)="verDetalle(cred)"
                     >
-                      <span class="material-symbols-outlined icon-inline">history</span> Historial ({{ cred.cantidadAbonos }})
+                      <mat-icon class="icon-inline">history</mat-icon> Historial ({{ cred.cantidadAbonos }})
                     </button>
                   </div>
                 </td>
@@ -271,9 +274,9 @@
             </div>
           </div>
 
-          <!-- NOTA AMABLE TRANQUILIZADORA (Pilar 2) -->
+          <!-- NOTA AMABLE TRANQUILIZADORA -->
           <div class="friendly-help-note" style="margin-bottom: 1rem;">
-            <span class="material-symbols-outlined note-icon">lightbulb</span>
+            <mat-icon class="note-icon">lightbulb</mat-icon>
             <div>
               💡 <strong>Cobro Seguro:</strong> Puedes registrar un pago parcial o total. El saldo restante se calculará automáticamente y se sincronizará con tu turno de caja activo.
             </div>
@@ -281,7 +284,7 @@
 
           @if (errorAbono()) {
             <div class="alert alert-danger-sm">
-              <span><span class="material-symbols-outlined icon-inline">error</span> {{ errorAbono() }}</span>
+              <span><mat-icon class="icon-inline">error</mat-icon> {{ errorAbono() }}</span>
             </div>
           }
 
@@ -326,7 +329,7 @@
                   [ngModel]="abonoMetodo()"
                   (ngModelChange)="abonoMetodo.set($event)"
                 />
-                <span class="icon"><span class="material-symbols-outlined">payments</span></span>
+                <span class="icon"><mat-icon>payments</mat-icon></span>
                 <span class="name">Efectivo</span>
               </label>
 
@@ -338,7 +341,7 @@
                   [ngModel]="abonoMetodo()"
                   (ngModelChange)="abonoMetodo.set($event)"
                 />
-                <span class="icon"><span class="material-symbols-outlined">qr_code_2</span></span>
+                <span class="icon"><mat-icon>qr_code_2</mat-icon></span>
                 <span class="name">Yape</span>
               </label>
 
@@ -350,7 +353,7 @@
                   [ngModel]="abonoMetodo()"
                   (ngModelChange)="abonoMetodo.set($event)"
                 />
-                <span class="icon"><span class="material-symbols-outlined">qr_code</span></span>
+                <span class="icon"><mat-icon>qr_code</mat-icon></span>
                 <span class="name">Plin</span>
               </label>
 
@@ -362,7 +365,7 @@
                   [ngModel]="abonoMetodo()"
                   (ngModelChange)="abonoMetodo.set($event)"
                 />
-                <span class="icon"><span class="material-symbols-outlined">account_balance</span></span>
+                <span class="icon"><mat-icon>account_balance</mat-icon></span>
                 <span class="name">Transferencia</span>
               </label>
             </div>
@@ -383,7 +386,7 @@
 
           <!-- Callout de Integración con Turnos de Caja -->
           <div class="callout-caja">
-            <span class="callout-icon"><span class="material-symbols-outlined">info</span></span>
+            <span class="callout-icon"><mat-icon>info</mat-icon></span>
             <div class="callout-text">
               <strong>Impacto en Turno de Caja Diario:</strong>
               <span>
@@ -395,14 +398,14 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cerrarModalAbono()" [disabled]="abonoLoading()">
+          <button type="button" class="btn-neutral-secondary" (click)="cerrarModalAbono()" [disabled]="abonoLoading()">
             Cancelar
           </button>
-          <button type="button" class="btn btn-success" (click)="confirmarAbono()" [disabled]="abonoLoading()">
+          <button type="button" class="btn-glacier-primary" (click)="confirmarAbono()" [disabled]="abonoLoading()">
             @if (abonoLoading()) {
               <span class="spinner-sm"></span> Procesando Cobro...
             } @else {
-              <span class="material-symbols-outlined icon-inline">check</span> Confirmar y Recibir S/ {{ abonoMonto() | number:'1.2-2' }}
+              <mat-icon class="icon-inline">check</mat-icon> Confirmar y Recibir S/ {{ abonoMonto() | number:'1.2-2' }}
             }
           </button>
         </div>
@@ -426,7 +429,7 @@
         <div class="modal-body">
           @if (errorNuevo()) {
             <div class="alert alert-danger-sm">
-              <span><span class="material-symbols-outlined icon-inline">error</span> {{ errorNuevo() }}</span>
+              <span><mat-icon class="icon-inline">error</mat-icon> {{ errorNuevo() }}</span>
             </div>
           }
 
@@ -510,14 +513,14 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cerrarModalNuevo()" [disabled]="nuevoLoading()">
+          <button type="button" class="btn-neutral-secondary" (click)="cerrarModalNuevo()" [disabled]="nuevoLoading()">
             Cancelar
           </button>
-          <button type="button" class="btn btn-primary" (click)="confirmarNuevoCredito()" [disabled]="nuevoLoading()">
+          <button type="button" class="btn-glacier-primary" (click)="confirmarNuevoCredito()" [disabled]="nuevoLoading()">
             @if (nuevoLoading()) {
               <span class="spinner-sm"></span> Guardando...
             } @else {
-              <span class="material-symbols-outlined icon-inline">check</span> Registrar Crédito
+              <mat-icon class="icon-inline">check</mat-icon> Registrar Crédito
             }
           </button>
         </div>
@@ -571,7 +574,7 @@
               <div class="empty-state-sm">
                 <p>No se han registrado abonos aún para este crédito. La deuda se encuentra intacta.</p>
                 <button type="button" class="btn-sm btn-cobrar" (click)="cerrarModalDetalle(); abrirModalAbono(cred)">
-                  <span class="material-symbols-outlined icon-inline">credit_card</span> Realizar Primer Cobro
+                  <mat-icon class="icon-inline">payments</mat-icon> Realizar Primer Cobro
                 </button>
               </div>
             } @else {
@@ -616,16 +619,16 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalle()">
+          <button type="button" class="btn-neutral-secondary" (click)="cerrarModalDetalle()">
             Cerrar Historial
           </button>
           @if (cred.estado !== 'PAGADO_TOTAL') {
             <button
               type="button"
-              class="btn btn-success"
+              class="btn-glacier-primary"
               (click)="cerrarModalDetalle(); abrirModalAbono(cred)"
             >
-              <span class="material-symbols-outlined icon-inline">credit_card</span> Registrar Nuevo Abono
+              <mat-icon class="icon-inline">payments</mat-icon> Registrar Nuevo Abono
             </button>
           }
         </div>

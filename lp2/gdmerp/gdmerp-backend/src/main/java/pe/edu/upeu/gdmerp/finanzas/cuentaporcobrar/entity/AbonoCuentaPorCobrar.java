@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ABONOS_CUENTA_POR_COBRAR")
+@Table(name = "ABONOS_CUENTA_POR_COBRAR", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,7 +33,8 @@ import java.time.LocalDateTime;
 public class AbonoCuentaPorCobrar {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_abonos_cuenta_por_cobrar")
+    @SequenceGenerator(name = "seq_abonos_cuenta_por_cobrar", sequenceName = "SEQ_ABONOS_CUENTA_POR_COBRAR", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 

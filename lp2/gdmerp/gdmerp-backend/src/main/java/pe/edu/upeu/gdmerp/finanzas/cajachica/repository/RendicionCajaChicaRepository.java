@@ -2,6 +2,7 @@ package pe.edu.upeu.gdmerp.finanzas.cajachica.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +23,9 @@ public interface RendicionCajaChicaRepository extends JpaRepository<RendicionCaj
     Optional<RendicionCajaChica> findByCodigo(String codigo);
 
     boolean existsByCodigo(String codigo);
+
+    @EntityGraph(attributePaths = {"cajaChica", "detalles", "detalles.centroCosto"})
+    Optional<RendicionCajaChica> findWithDetallesById(Long id);
 
     List<RendicionCajaChica> findByCajaChicaId(Long cajaChicaId);
 

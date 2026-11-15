@@ -4,13 +4,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.server.ResponseStatusException;
+import pe.edu.upeu.gdmerp.catalogo.producto.dto.TipoProducto;
+import pe.edu.upeu.gdmerp.catalogo.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.catalogo.producto.repository.ProductoRepository;
 import pe.edu.upeu.gdmerp.exception.VentaYaAnuladaException;
+import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto.RegistrarAbonoRequest;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.CuentaPorCobrar;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.entity.EstadoCredito;
-import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.dto.RegistrarAbonoRequest;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.repository.CuentaPorCobrarRepository;
 import pe.edu.upeu.gdmerp.finanzas.cuentaporcobrar.service.CuentaPorCobrarService;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.MetodoPago;
@@ -29,12 +33,11 @@ import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.lote.entity.Lote;
 import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.MovimientoInventario;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.TipoProducto;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
-import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService;
+import pe.edu.upeu.gdmerp.inventario.stock.entity.MovimientoInventario;
+import pe.edu.upeu.gdmerp.inventario.stock.entity.StockInventario;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.MovimientoInventarioRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.repository.StockInventarioRepository;
+import pe.edu.upeu.gdmerp.inventario.stock.service.InventarioOperacionService;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.entity.CentroTrabajo;
 import pe.edu.upeu.gdmerp.produccion.centrotrabajo.repository.CentroTrabajoRepository;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.dto.OrdenProduccionResponse;
@@ -67,7 +70,8 @@ class WorkflowsEventosErpIntegrationTest {
     @Autowired private OrdenProduccionService ordenProduccionService;
     @Autowired private OrdenProduccionRepository ordenProduccionRepository;
     @Autowired private CentroTrabajoRepository centroTrabajoRepository;
-    @Autowired private ProductoRepository productoRepository;
+    @Autowired @Qualifier("catalogoProductoRepository") private ProductoRepository productoRepository;
+    @Autowired private StockInventarioRepository stockRepository;
     @Autowired private LoteRepository loteRepository;
     @Autowired private MovimientoInventarioRepository movimientoRepository;
     @Autowired private AlmacenRepository almacenRepository;
@@ -89,6 +93,7 @@ class WorkflowsEventosErpIntegrationTest {
     private final List<String> codigosTransaccion = new ArrayList<>();
     private final List<String> comprobantesCreados = new ArrayList<>();
     private final List<Long> categoriasFinancierasCreadas = new ArrayList<>();
+    private final List<Long> stocksCreados = new ArrayList<>();
     private final List<Long> productosCreados = new ArrayList<>();
     private final List<Long> almacenesCreados = new ArrayList<>();
     private final List<Long> categoriasCreadas = new ArrayList<>();
@@ -147,6 +152,15 @@ class WorkflowsEventosErpIntegrationTest {
         for (Long prodId : productosCreados) {
             movimientoRepository.deleteAll(movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(prodId));
             loteRepository.deleteAll(loteRepository.findByProductoId(prodId));
+        }
+        for (Long stockId : stocksCreados) {
+            if (stockRepository.existsById(stockId)) {
+                stockRepository.deleteById(stockId);
+            }
+        }
+        stocksCreados.clear();
+
+        for (Long prodId : productosCreados) {
             if (productoRepository.existsById(prodId)) {
                 productoRepository.deleteById(prodId);
             }
@@ -196,8 +210,8 @@ class WorkflowsEventosErpIntegrationTest {
                 orden.getId(), EstadoOrdenProduccion.EN_PROCESO);
         assertEquals(EstadoOrdenProduccion.EN_PROCESO, iniciada.estado());
 
-        Producto insumoPostInicio = productoRepository.findById(insumo.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("30.0000").compareTo(insumoPostInicio.getStockTotal()));
+        StockInventario insumoPostInicio = stockRepository.findFirstByProductoIdOrderByIdAsc(insumo.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("30.0000").compareTo(insumoPostInicio.getStockActual()));
         List<MovimientoInventario> movsInsumo = movimientoRepository.findByProductoIdOrderByFechaMovimientoDesc(insumo.getId());
         assertEquals(1, movsInsumo.size());
         assertEquals("SALIDA_PRODUCCION", movsInsumo.get(0).getTipoMovimiento());
@@ -208,8 +222,8 @@ class WorkflowsEventosErpIntegrationTest {
         assertEquals(EstadoOrdenProduccion.FINALIZADA, finalizada.estado());
         assertNotNull(finalizada.loteGenerado());
 
-        Producto terminadoPostFin = productoRepository.findById(terminado.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("10.0000").compareTo(terminadoPostFin.getStockTotal()));
+        StockInventario terminadoPostFin = stockRepository.findFirstByProductoIdOrderByIdAsc(terminado.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("10.0000").compareTo(terminadoPostFin.getStockActual()));
         List<Lote> lotesTerminado = loteRepository.findByProductoId(terminado.getId());
         assertEquals(1, lotesTerminado.size());
         assertEquals(10, lotesTerminado.get(0).getCantidadActual());
@@ -248,8 +262,8 @@ class WorkflowsEventosErpIntegrationTest {
         OrdenProduccion trasFallo = ordenProduccionRepository.findById(ordenId).orElseThrow();
         assertEquals(EstadoOrdenProduccion.PLANIFICADO, trasFallo.getEstado(),
                 "La falla en BEFORE_COMMIT del listener debe hacer rollback al estado PLANIFICADO");
-        Producto insumoIntacto = productoRepository.findById(insumo.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("5.0000").compareTo(insumoIntacto.getStockTotal()));
+        StockInventario insumoIntacto = stockRepository.findFirstByProductoIdOrderByIdAsc(insumo.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("5.0000").compareTo(insumoIntacto.getStockActual()));
     }
 
     @Test
@@ -365,8 +379,8 @@ class WorkflowsEventosErpIntegrationTest {
         assertNotNull(mermaId);
         comprobantesCreados.add("AJU-" + mermaId);
 
-        Producto trasMerma = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("36.0000").compareTo(trasMerma.getStockTotal()));
+        StockInventario trasMerma = stockRepository.findFirstByProductoIdOrderByIdAsc(producto.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("36.0000").compareTo(trasMerma.getStockActual()));
 
         TransaccionFinanciera trxMerma = transaccionRepository.findFirstByNumeroComprobante("AJU-" + mermaId)
                 .orElseThrow();
@@ -385,8 +399,8 @@ class WorkflowsEventosErpIntegrationTest {
         assertNotNull(gananciaId);
         comprobantesCreados.add("AJU-" + gananciaId);
 
-        Producto trasAjustePos = productoRepository.findById(producto.getId()).orElseThrow();
-        assertEquals(0, new BigDecimal("38.0000").compareTo(trasAjustePos.getStockTotal()));
+        StockInventario trasAjustePos = stockRepository.findFirstByProductoIdOrderByIdAsc(producto.getId()).orElseThrow();
+        assertEquals(0, new BigDecimal("38.0000").compareTo(trasAjustePos.getStockActual()));
 
         TransaccionFinanciera trxGanancia = transaccionRepository.findFirstByNumeroComprobante("AJU-" + gananciaId)
                 .orElseThrow();
@@ -396,7 +410,7 @@ class WorkflowsEventosErpIntegrationTest {
         assertEquals("AJUSTE_INVENTARIO", trxGanancia.getTipoComprobante());
     }
 
-    private Producto crearProducto(String stock, int cantidadLote, TipoProducto tipoProducto, String costo) {
+    private Producto crearProducto(String stockInicial, int cantidadLote, TipoProducto tipoProducto, String costo) {
         Almacen alm = new Almacen();
         alm.setNombre("ALM-WF-" + sufijo + "-" + almacenesCreados.size());
         alm.setUbicacion("Planta Principal");
@@ -409,22 +423,33 @@ class WorkflowsEventosErpIntegrationTest {
         cat = categoriaRepository.save(cat);
         categoriasCreadas.add(cat.getId());
 
-        Producto prod = new Producto();
-        prod.setSku("SKU-WF-" + sufijo + "-" + productosCreados.size());
-        prod.setNombre("Producto Workflow " + sufijo + "-" + productosCreados.size());
-        prod.setUnidadMedida("unidad");
-        prod.setCostoPromedio(new BigDecimal(costo));
-        prod.setStockTotal(new BigDecimal(stock));
-        prod.setStockMinimo(BigDecimal.ONE);
-        prod.setTipoProducto(tipoProducto);
-        prod.setAlmacen(alm);
-        prod.setCategoria(cat);
+        Producto prod = Producto.builder()
+                .sku("SKU-WF-" + sufijo + "-" + productosCreados.size())
+                .nombre("Producto Workflow " + sufijo + "-" + productosCreados.size())
+                .unidadMedida("unidad")
+                .precio(new BigDecimal(costo))
+                .costoBase(new BigDecimal(costo))
+                .tipoProducto(tipoProducto)
+                .stockMinimo(BigDecimal.ONE)
+                .stock(0)
+                .activo(Boolean.TRUE)
+                .build();
         prod = productoRepository.save(prod);
         productosCreados.add(prod.getId());
 
+        StockInventario stock = new StockInventario();
+        stock.setProductoId(prod.getId());
+        stock.setAlmacen(alm);
+        stock.setCategoriaId(cat.getId());
+        stock.setCostoPromedio(new BigDecimal(costo));
+        stock.setStockActual(new BigDecimal(stockInicial));
+        stock.setStockMinimo(BigDecimal.ONE);
+        stock = stockRepository.save(stock);
+        stocksCreados.add(stock.getId());
+
         if (cantidadLote > 0) {
             Lote lote = new Lote();
-            lote.setProducto(prod);
+            lote.setProductoId(prod.getId());
             lote.setNumeroLote("LT-WF-" + sufijo + "-" + productosCreados.size());
             lote.setCantidadActual(cantidadLote);
             lote.setFechaProduccion(LocalDate.now().minusDays(1));

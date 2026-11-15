@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { CuentaCobrarService } from '../services/cuenta-cobrar.service';
 import { CrearCreditoRequest, CuentaPorCobrarDetalle } from '../models/cuenta-cobrar.model';
 
 @Component({
   selector: 'app-cuenta-cobrar-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './cuenta-cobrar-form.component.html',
   styleUrls: ['./cuenta-cobrar-form.component.css'],
 })
@@ -17,6 +19,7 @@ export class CuentaCobrarForm implements OnInit {
   private readonly cuentaService = inject(CuentaCobrarService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly loading = signal(false);
   protected readonly guardando = signal(false);
@@ -69,7 +72,9 @@ export class CuentaCobrarForm implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
-        this.mensajeError.set(err.error?.message || 'Error al cargar el crédito.');
+        const msg = err.error?.message || 'Error al cargar el crédito.';
+        this.mensajeError.set(msg);
+        this.snackBar.open(msg, 'Cerrar', { duration: 4000, panelClass: ['error-snackbar'] });
       },
     });
   }
@@ -80,11 +85,13 @@ export class CuentaCobrarForm implements OnInit {
 
     if (!nombre) {
       this.mensajeError.set('El nombre o razón social del cliente es obligatorio.');
+      this.snackBar.open('El nombre del cliente es obligatorio.', 'Cerrar', { duration: 4000, panelClass: ['warning-snackbar'] });
       return;
     }
 
     if (isNaN(monto) || monto <= 0) {
       this.mensajeError.set('El monto total del crédito debe ser un número mayor a cero.');
+      this.snackBar.open('El monto del crédito debe ser mayor a 0.', 'Cerrar', { duration: 4000, panelClass: ['warning-snackbar'] });
       return;
     }
 
@@ -102,13 +109,19 @@ export class CuentaCobrarForm implements OnInit {
     };
 
     this.cuentaService.registrarCredito(req).subscribe({
-      next: () => {
+      next: (res) => {
         this.guardando.set(false);
+        this.snackBar.open(`Crédito "${res.codigo}" registrado exitosamente.`, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['success-snackbar'],
+        });
         this.router.navigate(['/finanzas/creditos']);
       },
       error: (err: HttpErrorResponse) => {
         this.guardando.set(false);
-        this.mensajeError.set(err.error?.message || 'Error al guardar la cuenta por cobrar.');
+        const msg = err.error?.message || 'Error al guardar la cuenta por cobrar.';
+        this.mensajeError.set(msg);
+        this.snackBar.open(msg, 'Cerrar', { duration: 4000, panelClass: ['error-snackbar'] });
       },
     });
   }

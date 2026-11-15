@@ -1,24 +1,29 @@
-<div class="sesiones-container">
-  <!-- Banner Superior / Encabezado -->
-  <header class="page-header">
-    <div class="header-titles">
-      <span class="badge-agro">Gestión Financiera · Caja Diaria</span>
-      <h2>Turnos y Sesiones de Caja Diaria</h2>
-      <p class="subtitle">Control de aperturas, cierres, arqueos de gaveta física y conciliación de métodos de pago.</p>
+<div class="feature-container">
+  <!-- Banner Superior / Encabezado Estilo Producción -->
+  <div class="feature-header">
+    <div class="header-title">
+      <div class="breadcrumb">Finanzas &gt; Control de Caja</div>
+      <div class="title-with-badge" style="display: flex; align-items: center; gap: 0.75rem;">
+        <h2 style="margin: 0;">Turnos y Sesiones de Caja Diaria</h2>
+        <span class="badge badge-amber">CAJA DIARIA</span>
+      </div>
+      <p class="subtitle" style="margin: 0.25rem 0 0 0; color: #64748b;">
+        Control de aperturas, cierres, arqueos de gaveta física y conciliación de métodos de pago
+      </p>
     </div>
 
     <div class="header-actions">
       @if (sesionActiva()) {
-        <button class="btn btn-glacier-primary pulse-btn" (click)="verTurnoActivo()">
+        <button class="btn-glacier-primary pulse-btn" (click)="verTurnoActivo()">
           <span class="live-indicator"></span> Turno Activo: {{ sesionActiva()?.codigoSesion }}
         </button>
       } @else {
-        <button class="btn btn-glacier-primary" (click)="abrirNuevoTurno()">
-          <span class="material-symbols-outlined icon-inline">lock_open</span> + Abrir Turno de Caja
+        <button class="btn-glacier-primary" (click)="abrirNuevoTurno()">
+          <mat-icon class="icon-inline">lock_open</mat-icon> + Abrir Turno de Caja
         </button>
       }
     </div>
-  </header>
+  </div>
 
   <!-- Tarjeta de Estado de Turno Activo -->
   @if (sesionActiva(); as activa) {
@@ -53,8 +58,8 @@
       </div>
 
       <div class="shift-action">
-        <button class="btn btn-glacier-primary" [routerLink]="['/finanzas/sesiones', activa.id]">
-          <span class="material-symbols-outlined icon-inline">point_of_sale</span>
+        <button class="btn-glacier-primary" [routerLink]="['/finanzas/sesiones', activa.id]">
+          <mat-icon class="icon-inline">point_of_sale</mat-icon>
           Registrar Movimiento / Arqueo &rarr;
         </button>
       </div>
@@ -73,10 +78,10 @@
     </div>
   } @else {
     <!-- Tabla de Historial de Sesiones -->
-    <div class="table-card">
-      <div class="table-header">
-        <h3>Historial de Turnos de Caja</h3>
-        <span class="count-badge">{{ sesiones().length }} turnos registrados</span>
+    <div class="card tabla-card">
+      <div class="table-header" style="display:flex; justify-content:space-between; align-items:center; padding:1.25rem 1.5rem; border-bottom:1px solid #e2e8f0;">
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#0f172a;">Historial de Turnos de Caja</h3>
+        <span class="count-badge" style="background:#f1f5f9; color:#475569; font-weight:600; padding:0.25rem 0.65rem; border-radius:9999px; font-size:0.8rem;">{{ sesiones().length }} turnos registrados</span>
       </div>
 
       <div class="table-responsive">
@@ -128,7 +133,7 @@
                 </td>
                 <td class="text-right actions-cell">
                   <button class="btn-action" title="Ver Arqueo y Movimientos" (click)="verDetalle(s)">
-                    <span class="material-symbols-outlined icon-inline">visibility</span> Ver
+                    <mat-icon class="icon-inline">visibility</mat-icon> Ver
                   </button>
                   <button class="btn-action btn-pdf" title="Exportar PDF Oficial" (click)="exportar(s.id, 'PDF')" [disabled]="exportando() === s.id">
                     PDF
@@ -239,7 +244,7 @@
 
           @if (sel.detallesArqueo && sel.detallesArqueo.length > 0) {
             <h4 style="margin: 1.5rem 0 0.5rem 0; color: #1e5a32; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
-              <span class="material-symbols-outlined">payments</span>
+              <mat-icon>payments</mat-icon>
               <span>Desglose Físico de Arqueo de Caja (Monedas y Billetes Contados)</span>
             </h4>
             <div class="table-responsive modal-table">
@@ -273,12 +278,12 @@
 
         <div class="modal-footer">
           <button class="btn btn-neutral-secondary" (click)="exportar(sel.id, 'PDF')">
-            <span class="material-symbols-outlined icon-inline">picture_as_pdf</span> Descargar PDF
+            <mat-icon class="icon-inline">picture_as_pdf</mat-icon> Descargar PDF
           </button>
           <button class="btn btn-neutral-secondary" (click)="exportar(sel.id, 'EXCEL')">
-            <span class="material-symbols-outlined icon-inline">table_view</span> Descargar Excel
+            <mat-icon class="icon-inline">table_view</mat-icon> Descargar Excel
           </button>
-          <button class="btn btn-glacier-primary" (click)="cerrarModal()">Cerrar</button>
+          <button class="btn-glacier-primary" (click)="cerrarModal()">Cerrar</button>
         </div>
       </div>
     </div>

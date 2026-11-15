@@ -1,17 +1,20 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoriaFinancieraService } from '../services/categoria-financiera.service';
 import { CategoriaFinanciera } from '../models/categoria-financiera.model';
 
 @Component({
   selector: 'app-categoria-financiera-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MatIconModule],
   templateUrl: './categoria-financiera-list.component.html',
 })
 export class CategoriaFinancieraList implements OnInit {
   private readonly categoriaService = inject(CategoriaFinancieraService);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly categorias = signal<CategoriaFinanciera[]>([]);
   protected readonly error = signal<string | null>(null);
@@ -35,18 +38,30 @@ export class CategoriaFinancieraList implements OnInit {
   }
 
   eliminar(id: number): void {
-    if (!confirm(`¿Está seguro de eliminar la categoría financiera ${id}?`)) {
+    if (!confirm(`¿Está seguro de eliminar la categoría financiera #${id}?`)) {
       return;
     }
 
     this.categoriaService.eliminar(id).subscribe({
-      next: () => this.cargar(),
+      next: () => {
+        this.snackBar.open(`Categoría #${id} eliminada con éxito.`, 'Cerrar', {
+          duration: 3500,
+          panelClass: ['success-snackbar'],
+        });
+        this.cargar();
+      },
       error: (err: HttpErrorResponse) => {
         if (err.status === 404) {
-          this.error.set('La categoría ya no existe. Se recargó la lista.');
+          this.snackBar.open('La categoría ya no existe. Se recargó la lista.', 'Cerrar', {
+            duration: 4000,
+            panelClass: ['warning-snackbar'],
+          });
           this.cargar();
         } else {
-          this.error.set('No se pudo eliminar la categoría financiera.');
+          this.snackBar.open('No se pudo eliminar la categoría financiera. Puede tener transacciones asociadas.', 'Cerrar', {
+            duration: 5000,
+            panelClass: ['error-snackbar'],
+          });
         }
       },
     });

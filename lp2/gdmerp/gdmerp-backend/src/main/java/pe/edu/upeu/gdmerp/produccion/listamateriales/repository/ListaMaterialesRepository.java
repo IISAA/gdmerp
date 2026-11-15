@@ -1,6 +1,5 @@
 package pe.edu.upeu.gdmerp.produccion.listamateriales.repository;
 
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,21 +12,22 @@ import java.util.Optional;
 @Repository
 public interface ListaMaterialesRepository extends JpaRepository<ListaMateriales, Long> {
 
-    @Override
-    @EntityGraph(attributePaths = {"productoTerminado"})
-    List<ListaMateriales> findAll();
-
     Optional<ListaMateriales> findByCodigo(String codigo);
-    @Query("SELECT DISTINCT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles d LEFT JOIN FETCH d.insumo WHERE lm.productoTerminado.id = :productoId")
+
+    @Query("SELECT DISTINCT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles WHERE lm.productoTerminadoId = :productoId")
     List<ListaMateriales> findByProductoTerminadoId(@Param("productoId") Long productoId);
+
     boolean existsByCodigo(String codigo);
+
     boolean existsByCodigoAndIdNot(String codigo, Long id);
+
     boolean existsByProductoTerminadoId(Long productoTerminadoId);
+
     boolean existsByProductoTerminadoIdAndIdNot(Long productoTerminadoId, Long id);
 
-    @Query("SELECT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles d LEFT JOIN FETCH d.insumo WHERE lm.productoTerminado.id = :productoTerminadoId")
+    @Query("SELECT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles WHERE lm.productoTerminadoId = :productoTerminadoId")
     Optional<ListaMateriales> findByProductoTerminadoIdWithDetalles(@Param("productoTerminadoId") Long productoTerminadoId);
 
-    @Query("SELECT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles d LEFT JOIN FETCH d.insumo WHERE lm.id = :id")
+    @Query("SELECT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles WHERE lm.id = :id")
     Optional<ListaMateriales> findByIdWithDetalles(@Param("id") Long id);
 }

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { TercerosService } from '../services/terceros.service';
 import {
   ConsultaDocumentoResponse,
@@ -14,7 +16,7 @@ import {
 @Component({
   selector: 'app-terceros-form',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, MatSnackBarModule, MatIconModule],
   templateUrl: './terceros-form.component.html',
   styleUrl: './terceros-form.component.css',
 })
@@ -23,6 +25,7 @@ export class TercerosForm implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly tercerosService = inject(TercerosService);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly guardando = signal<boolean>(false);
   readonly consultando = signal<boolean>(false);
@@ -99,17 +102,27 @@ export class TercerosForm implements OnInit {
             razonSocial: res.razonSocial,
             direccion: res.direccion || this.form.controls.direccion.value,
           });
+          this.snackBar.open('Datos obtenidos de SUNAT/RENIEC exitosamente.', 'Cerrar', {
+            duration: 3000,
+            panelClass: ['success-snackbar'],
+          });
         } else {
-          this.error.set(
-            res?.mensaje || 'No se encontró información en SUNAT/RENIEC para este documento.'
-          );
+          const msg = res?.mensaje || 'No se encontró información en SUNAT/RENIEC para este documento.';
+          this.error.set(msg);
+          this.snackBar.open(msg, 'Cerrar', {
+            duration: 4000,
+            panelClass: ['warning-snackbar'],
+          });
         }
       },
       error: () => {
         this.consultando.set(false);
-        this.error.set(
-          'No se pudo conectar con el servicio de SUNAT/RENIEC. Ingrese los datos manualmente.'
-        );
+        const errMsg = 'No se pudo conectar con el servicio de SUNAT/RENIEC. Ingrese los datos manualmente.';
+        this.error.set(errMsg);
+        this.snackBar.open(errMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['warning-snackbar'],
+        });
       },
     });
   }
@@ -117,6 +130,10 @@ export class TercerosForm implements OnInit {
   guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.snackBar.open('Por favor complete los campos obligatorios del tercero.', 'Cerrar', {
+        duration: 3500,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
@@ -133,11 +150,20 @@ export class TercerosForm implements OnInit {
     req$.subscribe({
       next: () => {
         this.guardando.set(false);
+        this.snackBar.open(
+          this.esEdicion() ? 'Tercero comercial actualizado exitosamente.' : 'Tercero comercial registrado exitosamente.',
+          'Cerrar',
+          { duration: 3000, panelClass: ['success-snackbar'] }
+        );
         this.router.navigate(['/terceros']);
       },
       error: (err: HttpErrorResponse) => {
-        const msg = (err.error as { message?: string } | null)?.message;
-        this.error.set(msg || err.message || 'Error al procesar el tercero comercial');
+        const msg = (err.error as { message?: string } | null)?.message || err.message || 'Error al procesar el tercero comercial';
+        this.error.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.guardando.set(false);
       },
     });

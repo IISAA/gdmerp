@@ -1,19 +1,22 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { VentaService } from '../services/venta.service';
 import { VentaAgregado, VentaResponse } from '../models/venta.model';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-venta-reporte',
-  imports: [CommonModule, CurrencyPipe, DatePipe, RouterLink],
+  imports: [CommonModule, CurrencyPipe, DatePipe, RouterLink, MatSnackBarModule, MatIconModule],
   standalone: true,
   templateUrl: './venta-reporte.component.html',
   styleUrl: './venta-reporte.component.css',
 })
 export class VentaReporteComponent implements OnInit {
   private readonly ventaService = inject(VentaService);
+  private readonly snackBar = inject(MatSnackBar);
   protected readonly auth = inject(AuthService);
 
   // Filas paginadas de la página actual
@@ -119,6 +122,7 @@ export class VentaReporteComponent implements OnInit {
         },
         error: () => {
           this.error.set('No se pudo cargar el reporte de ventas del servidor.');
+          this.mostrarMensaje('No se pudo cargar el reporte de ventas del servidor.', 'error');
           this.loading.set(false);
         },
       });
@@ -196,10 +200,12 @@ export class VentaReporteComponent implements OnInit {
       next: () => {
         this.ventaParaSolicitar.set(null);
         this.motivoSolicitud.set('');
+        this.mostrarMensaje('Solicitud de anulación enviada correctamente a supervisión.', 'success');
         this.cargar();
       },
       error: () => {
         this.error.set('No se pudo enviar la solicitud de anulación.');
+        this.mostrarMensaje('No se pudo enviar la solicitud de anulación.', 'error');
         this.loading.set(false);
       },
     });
@@ -212,10 +218,12 @@ export class VentaReporteComponent implements OnInit {
     this.loading.set(true);
     this.ventaService.rechazarAnulacion(id).subscribe({
       next: () => {
+        this.mostrarMensaje('Solicitud de anulación rechazada con éxito.', 'success');
         this.cargar();
       },
       error: () => {
         this.error.set('No se pudo rechazar la solicitud de anulación.');
+        this.mostrarMensaje('No se pudo rechazar la solicitud de anulación.', 'error');
         this.loading.set(false);
       },
     });
@@ -229,10 +237,12 @@ export class VentaReporteComponent implements OnInit {
     this.ventaService.anular(id).subscribe({
       next: () => {
         this.ventaParaAnular.set(null);
+        this.mostrarMensaje('Venta anulada correctamente y reversión contable efectuada.', 'success');
         this.cargar();
       },
       error: () => {
         this.error.set('No se pudo anular la venta seleccionada.');
+        this.mostrarMensaje('No se pudo anular la venta seleccionada.', 'error');
         this.loading.set(false);
       },
     });
@@ -310,5 +320,15 @@ export class VentaReporteComponent implements OnInit {
       default:
         return 'badge-mp-efectivo';
     }
+  }
+
+  private mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
+    const panelClass = tipo === 'success' ? ['snackbar-success'] : tipo === 'error' ? ['snackbar-error'] : ['snackbar-warning'];
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 5000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass
+    });
   }
 }

@@ -13,23 +13,29 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "MOVIMIENTOS_CAJA")
+@Table(name = "MOVIMIENTOS_CAJA", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MovimientoCaja {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_movimientos_caja")
+    @SequenceGenerator(name = "seq_movimientos_caja", sequenceName = "SEQ_MOVIMIENTOS_CAJA", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 
@@ -53,6 +59,12 @@ public class MovimientoCaja {
     @Column(name = "REFERENCIA_EXTERNA", length = 100)
     private String referenciaExterna;
 
+    @Column(name = "VENTA_ID")
+    private Long ventaId;
+
+    @Column(name = "COMPRA_ID")
+    private Long compraId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CATEGORIA_FINANCIERA", nullable = false)
     private CategoriaFinanciera categoriaFinanciera;
@@ -60,19 +72,4 @@ public class MovimientoCaja {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_SESION_CAJA", nullable = false)
     private SesionCaja sesionCaja;
-
-    public MovimientoCaja() {
-    }
-
-    public MovimientoCaja(Long id, LocalDateTime fechaHora, TipoFinanciero tipo, MetodoPago metodoPago, BigDecimal monto, String descripcion, String referenciaExterna, CategoriaFinanciera categoriaFinanciera, SesionCaja sesionCaja) {
-        this.id = id;
-        this.fechaHora = fechaHora;
-        this.tipo = tipo;
-        this.metodoPago = metodoPago;
-        this.monto = monto;
-        this.descripcion = descripcion;
-        this.referenciaExterna = referenciaExterna;
-        this.categoriaFinanciera = categoriaFinanciera;
-        this.sesionCaja = sesionCaja;
-    }
 }

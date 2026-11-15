@@ -1,4 +1,4 @@
-<div class="logistics-dashboard">
+<div class="feature-container logistics-dashboard">
   <!-- Cabecera Superior -->
   <header class="logistics-header">
     <div>
@@ -6,12 +6,12 @@
       <p class="header-subtitle">Monitoreo satelital de rutas, asignación de unidades motorizadas y control de liquidación en caja</p>
     </div>
     <div class="header-actions">
-      <button type="button" class="btn btn-primary" (click)="abrirModalNuevo()">
-        <span class="material-symbols-outlined icon-inline" style="font-size: 1.05rem;">add_location_alt</span>
+      <button type="button" class="btn btn-glacier-primary" (click)="abrirModalNuevo()">
+        <mat-icon class="icon-inline" style="font-size: 1.05rem; width: 1.05rem; height: 1.05rem;">add_location_alt</mat-icon>
         + Programar Envío
       </button>
-      <button type="button" class="btn btn-secondary" (click)="cargarPedidos()" title="Actualizar">
-        <span class="material-symbols-outlined icon-inline" style="font-size: 1.05rem;">refresh</span>
+      <button type="button" class="btn btn-neutral-secondary" (click)="cargarPedidos()" title="Actualizar">
+        <mat-icon class="icon-inline" style="font-size: 1.05rem; width: 1.05rem; height: 1.05rem;">refresh</mat-icon>
       </button>
     </div>
   </header>
@@ -29,7 +29,7 @@
     <!-- Card 1: Total Pedidos -->
     <div class="card kpi-logistics-card">
       <div class="kpi-icon-box" style="background: var(--neutral-dark); color: var(--primary);">
-        <span class="material-symbols-outlined">inventory_2</span>
+        <mat-icon>inventory_2</mat-icon>
       </div>
       <div class="kpi-info-box">
         <span class="kpi-small-label">Total Pedidos del Día</span>
@@ -44,7 +44,7 @@
     <!-- Card 2: Despachos En Ruta -->
     <div class="card kpi-logistics-card">
       <div class="kpi-icon-box" style="background: var(--primary-light); color: var(--primary-dark);">
-        <span class="material-symbols-outlined">two_wheeler</span>
+        <mat-icon>two_wheeler</mat-icon>
       </div>
       <div class="kpi-info-box">
         <span class="kpi-small-label">Despachos En Ruta</span>
@@ -59,7 +59,7 @@
     <!-- Card 3: Entregados y Liquidados -->
     <div class="card kpi-logistics-card">
       <div class="kpi-icon-box" style="background: var(--success-bg); color: var(--success);">
-        <span class="material-symbols-outlined">task_alt</span>
+        <mat-icon>task_alt</mat-icon>
       </div>
       <div class="kpi-info-box">
         <span class="kpi-small-label">Entregados & Liquidados</span>
@@ -138,7 +138,7 @@
               (click)="toggleFullscreen()"
               title="Pantalla Completa"
             >
-              <span class="material-symbols-outlined" style="font-size: 1rem;">fullscreen</span>
+              <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem;">fullscreen</mat-icon>
             </button>
           </div>
         </div>
@@ -153,7 +153,7 @@
         <div class="card subcard-item">
           <div class="subcard-header">
             <span class="subcard-title">Ingresos por Delivery</span>
-            <span class="material-symbols-outlined" style="color: var(--primary-dark);">payments</span>
+            <mat-icon style="color: var(--primary-dark);">payments</mat-icon>
           </div>
           <div class="subcard-amount">{{ totalTarifasEnvio() | currency:'PEN':'S/ ':'1.2-2' }}</div>
           <div class="subcard-meta">
@@ -165,7 +165,7 @@
         <div class="card subcard-item">
           <div class="subcard-header">
             <span class="subcard-title">Unidades Activas en Ruta</span>
-            <span class="material-symbols-outlined" style="color: var(--success);">moped</span>
+            <mat-icon style="color: var(--success);">moped</mat-icon>
           </div>
           <div class="subcard-amount">
             {{ motorizadosActivosCount() }}
@@ -187,7 +187,7 @@
             <h3 class="tracking-header-title">Tracking Delivery</h3>
             <span class="tracking-header-sub">Monitoreo del pedido en tiempo real</span>
           </div>
-          <span class="material-symbols-outlined" style="color: var(--text-muted);">more_horiz</span>
+          <mat-icon style="color: var(--text-muted);">more_horiz</mat-icon>
         </div>
 
         @if (pedidoEnfocado(); as pedido) {
@@ -212,7 +212,7 @@
             <!-- Paso 1: Pedido Registrado -->
             <div class="step-item step-completed">
               <div class="step-marker">
-                <span class="material-symbols-outlined step-icon">receipt_long</span>
+                <mat-icon class="step-icon">receipt_long</mat-icon>
               </div>
               <div class="step-content">
                 <h5 class="step-title">1. Pedido Registrado</h5>
@@ -227,7 +227,7 @@
               [class.step-active]="pedido.estadoDelivery === 'EN_RUTA'"
             >
               <div class="step-marker">
-                <span class="material-symbols-outlined step-icon">two_wheeler</span>
+                <mat-icon class="step-icon">two_wheeler</mat-icon>
               </div>
               <div class="step-content">
                 <h5 class="step-title">2. En Ruta de Reparto</h5>
@@ -242,7 +242,7 @@
               [class.step-active]="pedido.estadoDelivery === 'ENTREGADO'"
             >
               <div class="step-marker">
-                <span class="material-symbols-outlined step-icon">task_alt</span>
+                <mat-icon class="step-icon">task_alt</mat-icon>
               </div>
               <div class="step-content">
                 <h5 class="step-title">3. Entregado & Liquidado</h5>
@@ -290,7 +290,7 @@
                   class="btn btn-primary btn-block"
                   (click)="marcarEnRuta(pedido)"
                 >
-                  <span class="material-symbols-outlined icon-inline">two_wheeler</span>
+                  <mat-icon class="icon-inline">two_wheeler</mat-icon>
                   Despachar a Ruta
                 </button>
               } @else if (pedido.estadoDelivery === 'EN_RUTA') {
@@ -299,12 +299,12 @@
                   class="btn btn-success btn-block"
                   (click)="marcarEntregado(pedido)"
                 >
-                  <span class="material-symbols-outlined icon-inline">check_circle</span>
+                  <mat-icon class="icon-inline">check_circle</mat-icon>
                   Confirmar Entrega & Liquidar
                 </button>
               } @else {
                 <div class="delivered-badge-block">
-                  <span class="material-symbols-outlined icon-inline text-success">verified</span>
+                  <mat-icon class="icon-inline text-success">verified</mat-icon>
                   Liquidado en Turno Activo
                 </div>
               }
@@ -312,7 +312,7 @@
           </div>
         } @else {
           <div class="empty-selection-box">
-            <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #cbd5e1;">touch_app</span>
+            <mat-icon style="font-size: 2.5rem; width: 2.5rem; height: 2.5rem; color: #cbd5e1;">touch_app</mat-icon>
             <p>Selecciona un pedido del mapa o tabla para ver su seguimiento.</p>
           </div>
         }
@@ -366,7 +366,7 @@
         </div>
 
         <div class="search-input-wrap">
-          <span class="material-symbols-outlined search-icon">search</span>
+          <mat-icon class="search-icon">search</mat-icon>
           <input
             type="text"
             placeholder="Buscar por código, cliente o dirección..."
@@ -433,7 +433,7 @@
                     (click)="seleccionarPedido(p)"
                     title="Ver en Tracking y centrar en Mapa"
                   >
-                    <span class="material-symbols-outlined" style="font-size: 1rem;">pin_drop</span>
+                    <mat-icon style="font-size: 1rem; width: 1rem; height: 1rem;">pin_drop</mat-icon>
                   </button>
 
                   @if (p.estadoDelivery === 'PENDIENTE') {
@@ -487,7 +487,7 @@
           <div class="map-picker-box">
             <div class="map-picker-header">
               <div class="picker-label">
-                <span class="material-symbols-outlined icon-inline text-sky-600">location_on</span>
+                <mat-icon class="icon-inline text-sky-600">location_on</mat-icon>
                 <strong>Fijar Punto de Entrega en el Mapa</strong>
               </div>
               @if (geocodificando()) {
@@ -500,7 +500,7 @@
             <div id="mapaPicker" class="mapa-picker-container"></div>
 
             <div class="map-picker-tips">
-              <span class="material-symbols-outlined tip-icon">touch_app</span>
+              <mat-icon class="tip-icon">touch_app</mat-icon>
               <span>Haz clic en el mapa para marcar el punto y la dirección se completará sola, o también puedes escribirla a mano abajo.</span>
             </div>
           </div>
@@ -539,7 +539,7 @@
                 (click)="buscarDireccionEnMapa()"
                 title="Ubicar punto en el mapa a partir del texto escrito"
               >
-                <span class="material-symbols-outlined icon-inline" style="font-size: 1.05rem;">pin_drop</span>
+                <mat-icon class="icon-inline" style="font-size: 1.05rem; width: 1.05rem; height: 1.05rem;">pin_drop</mat-icon>
                 Ubicar
               </button>
             </div>

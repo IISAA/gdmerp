@@ -9,6 +9,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { RendicionCajaChicaService } from '../services/rendicion-caja-chica.service';
 import {
   AsignacionCajaCentroCosto,
@@ -31,7 +33,7 @@ export interface FormLineaItem {
 @Component({
   selector: 'app-rendicion-caja-chica-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './rendicion-caja-chica-form.component.html',
   styleUrls: ['./rendicion-caja-chica-form.component.css'],
 })
@@ -40,6 +42,7 @@ export class RendicionCajaChicaForm implements OnInit {
   private readonly rendicionService = inject(RendicionCajaChicaService);
   private readonly productoService = inject(ProductoService);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   // Señales de Estado
   protected readonly cajasChicas = signal<CajaChica[]>([]);
@@ -346,7 +349,12 @@ export class RendicionCajaChicaForm implements OnInit {
     this.rendicionService.registrarRendicion(payload).subscribe({
       next: (res: RendicionCajaChica) => {
         this.loading.set(false);
-        this.mensajeExito.set(`¡Rendición ${res.codigo} registrada con éxito! Total procesado: S/ ${res.montoTotal.toFixed(2)}`);
+        const msg = `¡Rendición ${res.codigo} registrada con éxito! Total procesado: S/ ${res.montoTotal.toFixed(2)}`;
+        this.mensajeExito.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['success-snackbar'],
+        });
         setTimeout(() => {
           this.router.navigate(['/finanzas/rendiciones']);
         }, 1500);
@@ -364,30 +372,25 @@ export class RendicionCajaChicaForm implements OnInit {
     const mensaje: string = body.message || '';
     const reglaNegocio: string = body.reglaNegocio || '';
 
+    let errorTexto = mensaje || 'Ocurrió un error inesperado al procesar la rendición en el servidor.';
+
     if (reglaNegocio === 'RN-FIN-06' || mensaje.includes('RN-FIN-06') || mensaje.toLowerCase().includes('presupuestal') || mensaje.toLowerCase().includes('centro de costo')) {
-      this.errorSolvencia.set(
-        `REGLA DE NEGOCIO RN-FIN-06 (Presupuesto Centro de Costo): ${mensaje}`
-      );
-      return;
+      errorTexto = `REGLA DE NEGOCIO RN-FIN-06 (Presupuesto Centro de Costo): ${mensaje}`;
+      this.errorSolvencia.set(errorTexto);
+    } else if (reglaNegocio === 'RN-FIN-01' || mensaje.toLowerCase().includes('solvencia') || mensaje.toLowerCase().includes('supera la solvencia')) {
+      errorTexto = `REGLA DE NEGOCIO RN-FIN-01 (Control de Liquidez): ${mensaje}`;
+      this.errorSolvencia.set(errorTexto);
+    } else if (status === 400 && (mensaje.toLowerCase().includes('ya existe una rendición') || mensaje.toLowerCase().includes('código'))) {
+      errorTexto = `ERROR DE INTEGRIDAD: ${mensaje}. Por favor especifique un número correlativo único.`;
+      this.errorDuplicidad.set(errorTexto);
+    } else {
+      this.errorGeneral.set(errorTexto);
     }
 
-    if (reglaNegocio === 'RN-FIN-01' || mensaje.toLowerCase().includes('solvencia') || mensaje.toLowerCase().includes('supera la solvencia')) {
-      this.errorSolvencia.set(
-        `REGLA DE NEGOCIO RN-FIN-01 (Control de Liquidez): ${mensaje}`
-      );
-      return;
-    }
-
-    if (status === 400 && (mensaje.toLowerCase().includes('ya existe una rendición') || mensaje.toLowerCase().includes('código'))) {
-      this.errorDuplicidad.set(
-        `ERROR DE INTEGRIDAD: ${mensaje}. Por favor especifique un número correlativo único.`
-      );
-      return;
-    }
-
-    this.errorGeneral.set(
-      mensaje || 'Ocurrió un error inesperado al procesar la rendición en el servidor.'
-    );
+    this.snackBar.open(errorTexto, 'Cerrar', {
+      duration: 5000,
+      panelClass: ['error-snackbar'],
+    });
   }
 
   private limpiarErrores(): void {

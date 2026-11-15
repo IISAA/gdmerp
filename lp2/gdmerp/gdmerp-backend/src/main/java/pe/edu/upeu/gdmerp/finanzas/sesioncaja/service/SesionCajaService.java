@@ -11,6 +11,7 @@ import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.SesionCajaDetalleResponse;
 import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.SesionCajaResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SesionCajaService {
 
@@ -26,11 +27,11 @@ public interface SesionCajaService {
 
     SesionCajaResponse obtenerSesionActivaUsuario(Long usuarioId);
 
-    java.util.Optional<SesionCajaResponse> buscarUltimaSesionActiva();
+    Optional<SesionCajaResponse> buscarUltimaSesionActiva();
 
     SesionCajaResponse obtenerUltimaSesionActiva();
 
     CierreCajaReporteDto generarDatosReporte(Long id);
 
-    List<pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.DenominacionMonedaResponse> listarDenominaciones();
+    List<DenominacionMonedaResponse> listarDenominaciones();
 }

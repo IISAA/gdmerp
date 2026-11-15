@@ -1,19 +1,22 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { SesionCajaService } from '../services/sesion-caja.service';
 import { CierreCajaReporte, SesionCaja, SesionCajaDetalle } from '../models/sesion-caja.model';
 
 @Component({
   selector: 'app-sesion-caja-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, CurrencyPipe, DatePipe],
+  imports: [CommonModule, RouterLink, CurrencyPipe, DatePipe, MatSnackBarModule, MatIconModule],
   templateUrl: './sesion-caja-list.component.html',
   styleUrls: ['./sesion-caja-list.component.css'],
 })
 export class SesionCajaList implements OnInit {
   private readonly sesionService = inject(SesionCajaService);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly sesiones = signal<SesionCaja[]>([]);
   protected readonly sesionActiva = signal<SesionCaja | null>(null);
@@ -90,9 +93,18 @@ export class SesionCajaList implements OnInit {
         a.click();
         window.URL.revokeObjectURL(url);
         this.exportando.set(null);
+        this.snackBar.open(`Reporte ${formato} exportado exitosamente.`, 'Cerrar', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
       },
       error: () => {
-        this.error.set(`No se pudo descargar el reporte en formato ${formato}.`);
+        const errorMsg = `No se pudo descargar el reporte en formato ${formato}.`;
+        this.error.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.exportando.set(null);
       },
     });

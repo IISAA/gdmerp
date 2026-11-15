@@ -1,21 +1,16 @@
 package pe.edu.upeu.gdmerp.finanzas.cajachica.controller;
 
-import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignarPresupuestoRequest;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoRequest;
-import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse;
-import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.DenominacionMonedaResponse;
-import pe.edu.upeu.gdmerp.finanzas.sesioncaja.service.SesionCajaService;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,68 +20,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CajaChicaResponse;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoRequest;
+import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.RendicionCajaChicaRequest;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.RendicionCajaChicaResponse;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.RendicionResumenDto;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.dto.ReporteRendicionesAgregadoDto;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.entity.EstadoRendicion;
 import pe.edu.upeu.gdmerp.finanzas.cajachica.service.RendicionCajaChicaService;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.DenominacionMonedaResponse;
+import pe.edu.upeu.gdmerp.finanzas.sesioncaja.service.SesionCajaService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "Caja Chica y Rendiciones", description = "Gestión de cajas chicas operativas, asignación de centros de costo, rendiciones con comprobantes y agregaciones analíticas")
+@Tag(name = "Caja Chica y Rendiciones", description = "Gestión de cajas chicas operativas, centros de costo, rendiciones con comprobantes y agregaciones analíticas")
 @CrossOrigin(originPatterns = "*")
 @RestController
 @RequestMapping({"/api/v1/finanzas", "/api/v1"})
 public class RendicionCajaChicaController {
 
     private final RendicionCajaChicaService rendicionService;
-    private final pe.edu.upeu.gdmerp.finanzas.sesioncaja.service.SesionCajaService sesionCajaService;
+    private final SesionCajaService sesionCajaService;
 
     public RendicionCajaChicaController(
             RendicionCajaChicaService rendicionService,
-            pe.edu.upeu.gdmerp.finanzas.sesioncaja.service.SesionCajaService sesionCajaService) {
+            SesionCajaService sesionCajaService) {
         this.rendicionService = rendicionService;
         this.sesionCajaService = sesionCajaService;
     }
 
     @Operation(summary = "Listar catálogo de billetes y monedas activas para arqueos")
     @GetMapping("/denominaciones")
-    public ResponseEntity<List<pe.edu.upeu.gdmerp.finanzas.sesioncaja.dto.DenominacionMonedaResponse>> listarDenominaciones() {
+    public ResponseEntity<List<DenominacionMonedaResponse>> listarDenominaciones() {
         return ResponseEntity.ok(sesionCajaService.listarDenominaciones());
     }
 
-    @Operation(summary = "Listar centros de costo disponibles para asignación presupuestaria")
+    @Operation(summary = "Listar centros de costo disponibles")
     @GetMapping("/centros-costo")
-    public ResponseEntity<List<pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse>> listarCentrosCosto() {
+    public ResponseEntity<List<CentroCostoResponse>> listarCentrosCosto() {
         return ResponseEntity.ok(rendicionService.listarCentrosCosto());
     }
 
     @Operation(summary = "Crear nuevo centro de costo maestro")
     @PostMapping("/centros-costo")
-    public ResponseEntity<pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoResponse> crearCentroCosto(
-            @Valid @RequestBody pe.edu.upeu.gdmerp.finanzas.cajachica.dto.CentroCostoRequest request) {
-        var response = rendicionService.crearCentroCosto(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @Operation(summary = "Asignar presupuesto por centro de costo a una caja chica")
-    @PostMapping("/cajas-chicas/{id}/presupuestos")
-    public ResponseEntity<pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse> asignarPresupuesto(
-            @PathVariable Long id,
-            @Valid @RequestBody pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignarPresupuestoRequest request) {
-        var response = rendicionService.asignarPresupuestoCentroCosto(id, request.getCentroCostoId(), request.getMontoPresupuesto());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @Operation(summary = "Consultar presupuestos asignados por centro de costo a una caja chica")
-    @GetMapping("/cajas-chicas/{id}/presupuestos")
-    public ResponseEntity<List<pe.edu.upeu.gdmerp.finanzas.cajachica.dto.AsignacionCajaCentroCostoResponse>> listarPresupuestosCaja(@PathVariable Long id) {
-        return ResponseEntity.ok(rendicionService.listarPresupuestosPorCaja(id));
+    public ResponseEntity<CentroCostoResponse> crearCentroCosto(@Valid @RequestBody CentroCostoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(rendicionService.crearCentroCosto(request));
     }
 
     @Operation(summary = "Listar todas las cajas chicas activas")
@@ -101,8 +81,10 @@ public class RendicionCajaChicaController {
             @RequestParam String codigo,
             @RequestParam String responsable,
             @RequestParam BigDecimal limiteMaximo,
-            @RequestParam BigDecimal saldoInicial) {
-        CajaChicaResponse response = rendicionService.crearCajaChica(codigo, responsable, limiteMaximo, saldoInicial);
+            @RequestParam BigDecimal saldoInicial,
+            @RequestParam(required = false) Long centroCostoId) {
+        CajaChicaResponse response = rendicionService.crearCajaChica(
+                codigo, responsable, limiteMaximo, saldoInicial, centroCostoId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

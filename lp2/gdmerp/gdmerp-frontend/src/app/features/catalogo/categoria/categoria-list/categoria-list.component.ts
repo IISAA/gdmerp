@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../../core/services/auth.service';
 import { CategoriaService } from '../services/categoria.service';
 import { Categoria } from '../models/categoria.model';
@@ -8,13 +10,14 @@ import { Categoria } from '../models/categoria.model';
 @Component({
   selector: 'app-categoria-list',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './categoria-list.component.html',
   styleUrl: './categoria-list.component.css',
 })
 export class CategoriaList implements OnInit {
   protected readonly auth = inject(AuthService);
   private readonly categoriaService = inject(CategoriaService);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly error = signal<string | null>(null);
@@ -35,7 +38,12 @@ export class CategoriaList implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('No se pudo cargar la lista de categorías desde el backend.');
+        const errorText = 'No se pudo cargar la lista de categorías desde el backend.';
+        this.error.set(errorText);
+        this.snackBar.open(errorText, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.loading.set(false);
       },
       complete: () => this.loading.set(false),
@@ -50,12 +58,21 @@ export class CategoriaList implements OnInit {
     this.loading.set(true);
     this.categoriaService.eliminar(categoria.id).subscribe({
       next: () => {
-        this.successMsg.set(`Categoría "${categoria.nombre}" eliminada correctamente.`);
+        const msg = `Categoría "${categoria.nombre}" eliminada correctamente.`;
+        this.successMsg.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 3000,
+          panelClass: ['success-snackbar'],
+        });
         this.cargarDatos();
       },
       error: (err: HttpErrorResponse) => {
-        const msg = (err.error as { message?: string } | null)?.message;
-        this.error.set(msg || 'No se pudo eliminar la categoría.');
+        const msg = (err.error as { message?: string } | null)?.message || 'No se pudo eliminar la categoría.';
+        this.error.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.loading.set(false);
       },
     });

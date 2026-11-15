@@ -16,6 +16,11 @@ import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 import tools.jackson.databind.jsontype.impl.DefaultTypeResolverBuilder;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.annotation.CachingConfigurer;
+import org.springframework.cache.interceptor.CacheErrorHandler;
+
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
@@ -24,9 +29,45 @@ import java.util.Map;
  * Configuración de caché distribuida Redis exclusiva para datos maestros de baja mutabilidad.
  * Desactivada automáticamente en perfiles donde {@code spring.cache.type} sea distinto de {@code redis}.
  */
+@Slf4j
 @Configuration
 @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
-public class RedisConfig {
+public class RedisConfig implements CachingConfigurer {
+
+    @Override
+    public CacheErrorHandler errorHandler() {
+        return new CacheErrorHandler() {
+            @Override
+            public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
+                log.warn("Fallo de lectura en cache [{}] para clave [{}]. Fallback a BD: {}",
+                        cache != null ? cache.getName() : "desconocido", key, exception.getMessage());
+                if (cache != null) {
+                    try {
+                        cache.evict(key);
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+
+            @Override
+            public void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value) {
+                log.warn("Fallo de escritura en cache [{}] para clave [{}]: {}",
+                        cache != null ? cache.getName() : "desconocido", key, exception.getMessage());
+            }
+
+            @Override
+            public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
+                log.warn("Fallo de desalojo en cache [{}] para clave [{}]: {}",
+                        cache != null ? cache.getName() : "desconocido", key, exception.getMessage());
+            }
+
+            @Override
+            public void handleCacheClearError(RuntimeException exception, Cache cache) {
+                log.warn("Fallo de limpieza en cache [{}]: {}",
+                        cache != null ? cache.getName() : "desconocido", exception.getMessage());
+            }
+        };
+    }
 
     private static final Duration TTL_POR_DEFECTO = Duration.ofMinutes(15);
     private static final Duration TTL_CATALOGOS_MAESTROS = Duration.ofMinutes(30);

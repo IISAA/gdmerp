@@ -10,6 +10,7 @@ import pe.edu.upeu.gdmerp.finanzas.sesioncaja.entity.MetodoPago;
 import pe.edu.upeu.gdmerp.shared.event.CompraAnuladaEvent;
 import pe.edu.upeu.gdmerp.shared.event.CompraRegistradaEvent;
 import pe.edu.upeu.gdmerp.shared.event.PagoCompraRegistradoEvent;
+import pe.edu.upeu.gdmerp.shared.event.RecepcionCompraEvent;
 
 @Slf4j
 @Component
@@ -22,6 +23,8 @@ public class FinanzasCompraEventListener {
     public void onCompraRegistrada(CompraRegistradaEvent event) {
         log.info("Finanzas: procesando CompraRegistradaEvent para comprobante: {}", event.numeroComprobante());
         finanzasApi.registrarFacturaCompraPendiente(
+                event.compraId(),
+                null,
                 event.numeroComprobante(),
                 event.proveedorRazonSocial(),
                 event.total(),
@@ -30,10 +33,17 @@ public class FinanzasCompraEventListener {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT, fallbackExecution = true)
+    public void onRecepcionCompra(RecepcionCompraEvent event) {
+        log.info("Finanzas: procesando RecepcionCompraEvent para comprobante: {}", event.numeroComprobante());
+        finanzasApi.confirmarRecepcionCompra(event.compraId(), event.numeroComprobante());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT, fallbackExecution = true)
     public void onPagoCompraRegistrado(PagoCompraRegistradoEvent event) {
         log.info("Finanzas: procesando PagoCompraRegistradoEvent para comprobante: {}", event.numeroComprobante());
         MetodoPago metodo = parseMetodoPago(event.metodoPago());
         finanzasApi.registrarPagoProveedorCompra(
+                event.compraId(),
                 event.numeroComprobante(),
                 event.proveedorRazonSocial(),
                 event.montoPagado(),
@@ -45,7 +55,7 @@ public class FinanzasCompraEventListener {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT, fallbackExecution = true)
     public void onCompraAnulada(CompraAnuladaEvent event) {
         log.info("Finanzas: procesando CompraAnuladaEvent para comprobante: {}", event.numeroComprobante());
-        finanzasApi.anularFacturaCompra(event.numeroComprobante());
+        finanzasApi.anularFacturaCompra(event.compraId(), event.numeroComprobante());
     }
 
     private MetodoPago parseMetodoPago(String metodo) {

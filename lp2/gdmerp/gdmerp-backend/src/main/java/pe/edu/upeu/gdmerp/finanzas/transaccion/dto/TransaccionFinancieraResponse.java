@@ -1,7 +1,9 @@
 package pe.edu.upeu.gdmerp.finanzas.transaccion.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.EstadoFinanciero;
 import pe.edu.upeu.gdmerp.finanzas.transaccion.entity.TipoFinanciero;
@@ -12,6 +14,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransaccionFinancieraResponse {
     private Long id;
     private String codigo;
@@ -22,21 +26,7 @@ public class TransaccionFinancieraResponse {
     private EstadoFinanciero estado;
     private String tipoComprobante;
     private String numeroComprobante;
+    private Long ventaId;
+    private Long compraId;
     private CategoriaFinancieraResumen categoriaFinanciera;
-
-    public TransaccionFinancieraResponse() {
-    }
-
-    public TransaccionFinancieraResponse(Long id, String codigo, String concepto, BigDecimal monto, LocalDate fechaTransaccion, TipoFinanciero tipo, EstadoFinanciero estado, String tipoComprobante, String numeroComprobante, CategoriaFinancieraResumen categoriaFinanciera) {
-        this.id = id;
-        this.codigo = codigo;
-        this.concepto = concepto;
-        this.monto = monto;
-        this.fechaTransaccion = fechaTransaccion;
-        this.tipo = tipo;
-        this.estado = estado;
-        this.tipoComprobante = tipoComprobante;
-        this.numeroComprobante = numeroComprobante;
-        this.categoriaFinanciera = categoriaFinanciera;
-    }
 }

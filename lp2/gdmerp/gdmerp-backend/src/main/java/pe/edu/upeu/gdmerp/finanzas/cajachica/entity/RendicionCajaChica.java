@@ -12,9 +12,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -23,14 +26,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "RENDICIONES_CAJA_CHICA")
+@Table(name = "RENDICIONES_CAJA_CHICA", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RendicionCajaChica {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_rendiciones_caja_chica")
+    @SequenceGenerator(name = "seq_rendiciones_caja_chica", sequenceName = "SEQ_RENDICIONES_CAJA_CHICA", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 
@@ -76,19 +82,5 @@ public class RendicionCajaChica {
             suma = suma.add(subtotal);
         }
         this.montoTotal = suma;
-    }
-
-    public RendicionCajaChica() {
-    }
-
-    public RendicionCajaChica(Long id, String codigo, String responsable, LocalDate fecha, BigDecimal montoTotal, EstadoRendicion estado, CajaChica cajaChica, List<DetalleRendicionCajaChica> detalles) {
-        this.id = id;
-        this.codigo = codigo;
-        this.responsable = responsable;
-        this.fecha = fecha;
-        this.montoTotal = montoTotal;
-        this.estado = estado;
-        this.cajaChica = cajaChica;
-        this.detalles = detalles != null ? detalles : new ArrayList<>();
     }
 }

@@ -16,9 +16,20 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ProductoResponse {
     private Long id;
+    private String sku;
     private String nombre;
+    private String descripcion;
+    private String unidadMedida;
     private BigDecimal precio;
+    private BigDecimal costoBase;
+    private TipoProducto tipoProducto;
+    private BigDecimal stockMinimo;
     private Integer stock;
     private String imagenUrl;
+    private Boolean activo;
     private CategoriaResumen categoria;
+
+    public BigDecimal getCostoPromedio() {
+        return costoBase;
+    }
 }

@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pe.edu.upeu.gdmerp.inventario.producto.dto.InsumoDetalle;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.inventario.stock.dto.InsumoDetalle;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,10 +26,6 @@ public class DetalleOrdenProduccion implements InsumoDetalle {
 
     @Column(name = "PRODUCTO_ID", nullable = false)
     private Long materiaPrimaId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PRODUCTO_ID", insertable = false, updatable = false)
-    private Producto insumo;
 
     @Column(name = "NOMBRE_PRODUCTO", nullable = false, length = 120)
     private String nombreProducto;

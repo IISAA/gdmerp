@@ -1,8 +1,9 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { CuentaCobrarService } from '../services/cuenta-cobrar.service';
 import {
   CuentaPorCobrar,
@@ -17,13 +18,14 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-cuenta-cobrar-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatSnackBarModule, MatIconModule],
   templateUrl: './cuenta-cobrar-list.component.html',
   styleUrls: ['./cuenta-cobrar-list.component.css'],
 })
 export class CuentaCobrarList implements OnInit {
   protected readonly cuentaService = inject(CuentaCobrarService);
   protected readonly auth = inject(AuthService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // Lista principal y estado
   protected readonly creditos = signal<CuentaPorCobrar[]>([]);
@@ -177,14 +179,22 @@ export class CuentaCobrarList implements OnInit {
       next: (detalleActualizado) => {
         this.abonoLoading.set(false);
         this.cerrarModalAbono();
-        this.mensajeExito.set(
-          `¡Abono de S/ ${monto.toFixed(2)} registrado y sumado a su turno de caja activo! Crédito ${detalleActualizado.codigo} actualizado a ${detalleActualizado.estado}.`
-        );
+        const msg = `¡Abono de S/ ${monto.toFixed(2)} registrado y sumado a su turno de caja activo! Crédito ${detalleActualizado.codigo} actualizado a ${detalleActualizado.estado}.`;
+        this.mensajeExito.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['success-snackbar'],
+        });
         this.cargarCreditos();
       },
       error: (err: HttpErrorResponse) => {
         this.abonoLoading.set(false);
-        this.errorAbono.set(err.error?.message || 'Error al registrar el cobro/abono.');
+        const errMsg = err.error?.message || 'Error al registrar el cobro/abono.';
+        this.errorAbono.set(errMsg);
+        this.snackBar.open(errMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
       },
     });
   }
@@ -244,11 +254,19 @@ export class CuentaCobrarList implements OnInit {
 
     if (!nombre) {
       this.errorNuevo.set('El nombre o razón social del cliente es obligatorio.');
+      this.snackBar.open('El nombre o razón social del cliente es obligatorio.', 'Cerrar', {
+        duration: 3500,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
     if (isNaN(monto) || monto <= 0) {
       this.errorNuevo.set('El monto total del crédito debe ser un número mayor a cero.');
+      this.snackBar.open('El monto total del crédito debe ser un número mayor a cero.', 'Cerrar', {
+        duration: 3500,
+        panelClass: ['warning-snackbar'],
+      });
       return;
     }
 
@@ -269,14 +287,22 @@ export class CuentaCobrarList implements OnInit {
       next: (nuevo) => {
         this.nuevoLoading.set(false);
         this.cerrarModalNuevo();
-        this.mensajeExito.set(
-          `¡Crédito comercial ${nuevo.codigo} para ${nuevo.clienteNombre} registrado exitosamente por S/ ${nuevo.montoTotal.toFixed(2)}!`
-        );
+        const msg = `¡Crédito comercial ${nuevo.codigo} para ${nuevo.clienteNombre} registrado exitosamente por S/ ${nuevo.montoTotal.toFixed(2)}!`;
+        this.mensajeExito.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['success-snackbar'],
+        });
         this.cargarCreditos();
       },
       error: (err: HttpErrorResponse) => {
         this.nuevoLoading.set(false);
-        this.errorNuevo.set(err.error?.message || 'Error al crear la cuenta por cobrar.');
+        const errMsg = err.error?.message || 'Error al crear la cuenta por cobrar.';
+        this.errorNuevo.set(errMsg);
+        this.snackBar.open(errMsg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
       },
     });
   }

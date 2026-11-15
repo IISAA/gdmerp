@@ -8,22 +8,28 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "DETALLES_RENDICION_CAJA_CHICA")
+@Table(name = "DETALLES_RENDICION_CAJA_CHICA", schema = "GDM_FINANZAS")
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DetalleRendicionCajaChica {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_detalles_rendicion_caja_chica")
+    @SequenceGenerator(name = "seq_detalles_rendicion_caja_chica", sequenceName = "SEQ_DETALLES_RENDICION_CAJA_CHICA", schema = "GDM_FINANZAS", allocationSize = 50)
     @Column(name = "ID")
     private Long id;
 
@@ -49,22 +55,4 @@ public class DetalleRendicionCajaChica {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CENTRO_COSTO")
     private CentroCosto centroCosto;
-
-    public DetalleRendicionCajaChica() {
-    }
-
-    public DetalleRendicionCajaChica(Long id, String concepto, Integer cantidad, BigDecimal precioUnitario, BigDecimal subtotal, Long productoId, RendicionCajaChica rendicion) {
-        this(id, concepto, cantidad, precioUnitario, subtotal, productoId, rendicion, null);
-    }
-
-    public DetalleRendicionCajaChica(Long id, String concepto, Integer cantidad, BigDecimal precioUnitario, BigDecimal subtotal, Long productoId, RendicionCajaChica rendicion, CentroCosto centroCosto) {
-        this.id = id;
-        this.concepto = concepto;
-        this.cantidad = cantidad;
-        this.precioUnitario = precioUnitario;
-        this.subtotal = subtotal;
-        this.productoId = productoId;
-        this.rendicion = rendicion;
-        this.centroCosto = centroCosto;
-    }
 }

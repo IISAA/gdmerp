@@ -4,6 +4,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProductoReporteService, StockCriticoDto } from '../services/producto-reporte.service';
 
 @Component({
@@ -15,7 +16,8 @@ import { ProductoReporteService, StockCriticoDto } from '../services/producto-re
     MatTableModule,
     MatCardModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSnackBarModule,
   ],
   templateUrl: './reporte-stock-critico.component.html',
   styleUrls: ['./reporte-stock-critico.component.css']
@@ -23,6 +25,7 @@ import { ProductoReporteService, StockCriticoDto } from '../services/producto-re
 export class ReporteStockCriticoComponent implements OnInit {
   private readonly reporteService = inject(ProductoReporteService);
   private readonly location = inject(Location);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly datosReporte = signal<StockCriticoDto[]>([]);
   readonly textoBusqueda = signal<string>('');
@@ -79,7 +82,12 @@ export class ReporteStockCriticoComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar reporte de stock crítico', err);
-        this.error.set('No se pudo cargar el reporte de stock crítico. Verifique la conexión con el servidor.');
+        const msg = 'No se pudo obtener el reporte de stock crítico. Verifique la conexión con el servidor.';
+        this.error.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.isLoading.set(false);
       }
     });

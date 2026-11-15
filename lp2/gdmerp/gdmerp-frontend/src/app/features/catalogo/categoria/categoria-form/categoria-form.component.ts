@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { CategoriaService } from '../services/categoria.service';
 import { Categoria } from '../models/categoria.model';
 
 @Component({
   selector: 'app-categoria-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MatSnackBarModule, MatIconModule],
   templateUrl: './categoria-form.component.html',
   styleUrl: './categoria-form.component.css',
 })
@@ -18,6 +20,7 @@ export class CategoriaForm implements OnInit {
   private readonly categoriaService = inject(CategoriaService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly id = signal<number | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -73,10 +76,21 @@ export class CategoriaForm implements OnInit {
 
     this.loading.set(true);
     peticion.subscribe({
-      next: () => this.router.navigate(['/catalogo/categorias']),
+      next: () => {
+        this.snackBar.open(
+          id ? 'Categoría actualizada exitosamente.' : 'Categoría creada exitosamente.',
+          'Cerrar',
+          { duration: 3000, panelClass: ['success-snackbar'] }
+        );
+        this.router.navigate(['/catalogo/categorias']);
+      },
       error: (err: HttpErrorResponse) => {
-        const msg = (err.error as { message?: string } | null)?.message;
-        this.error.set(msg || 'No se pudo guardar la categoría.');
+        const msg = (err.error as { message?: string } | null)?.message || 'No se pudo guardar la categoría.';
+        this.error.set(msg);
+        this.snackBar.open(msg, 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
         this.loading.set(false);
       },
     });
