@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
         return buildProblem(HttpStatus.CONFLICT, "Conflicto de negocio", ex.getMessage(), request, null);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ProblemDetail> handleBusinessException(
+            BusinessException ex, HttpServletRequest request) {
+        return buildProblem(HttpStatus.UNPROCESSABLE_ENTITY, "Violación de regla de negocio", ex.getMessage(), request, null);
+    }
+
     @ExceptionHandler(VentaYaAnuladaException.class)
     public ResponseEntity<ProblemDetail> handleVentaYaAnulada(
             VentaYaAnuladaException ex, HttpServletRequest request) {
