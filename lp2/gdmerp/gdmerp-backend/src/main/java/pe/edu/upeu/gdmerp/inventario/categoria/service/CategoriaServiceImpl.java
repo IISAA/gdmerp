@@ -17,6 +17,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class CategoriaServiceImpl implements CategoriaService {
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     @Cacheable(value = "categorias")
     public List<CategoriaResponse> listar() {
-        return categoriaRepository.findAll().stream().map(categoriaMapper::toResponse).toList();
+        return categoriaRepository.findAll().stream().map(categoriaMapper::toResponse).collect(Collectors.toList());
     }
 
     @Override

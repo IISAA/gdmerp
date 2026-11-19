@@ -48,9 +48,12 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
             } catch (OptimisticLockingFailureException ex) {
                 intentos++;
                 if (intentos >= maxIntentos) {
-                    log.error("Excedido el número máximo de reintentos ({}) por bloqueo optimista al consumir stock del producto ID: {}",
+                    log.error(
+                            "Excedido el número máximo de reintentos ({}) por bloqueo optimista al consumir stock del producto ID: {}",
                             maxIntentos, productoId);
-                    throw new IllegalStateException("No fue posible completar la operación debido a concurrencia. Por favor intente nuevamente.", ex);
+                    throw new IllegalStateException(
+                            "No fue posible completar la operación debido a concurrencia. Por favor intente nuevamente.",
+                            ex);
                 }
                 log.warn("Colisión de concurrencia detectada en producto ID: {}. Reintento {}/{}...",
                         productoId, intentos, maxIntentos);
@@ -66,7 +69,8 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
 
     @Override
     public String registrarIngresoLote(Long productoId, Integer cantidad, LocalDate fechaVencimiento) {
-        return registrarIngresoLote(productoId, cantidad != null ? BigDecimal.valueOf(cantidad) : BigDecimal.ZERO, fechaVencimiento);
+        return registrarIngresoLote(productoId, cantidad != null ? BigDecimal.valueOf(cantidad) : BigDecimal.ZERO,
+                fechaVencimiento);
     }
 
     @Override
@@ -74,13 +78,17 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
         int intentos = 0;
         while (true) {
             try {
-                return selfProvider.getObject().registrarIngresoLoteConTransaccion(productoId, cantidad, fechaVencimiento);
+                return selfProvider.getObject().registrarIngresoLoteConTransaccion(productoId, cantidad,
+                        fechaVencimiento);
             } catch (OptimisticLockingFailureException ex) {
                 intentos++;
                 if (intentos >= maxIntentos) {
-                    log.error("Excedido el número máximo de reintentos ({}) por bloqueo optimista al ingresar stock del producto ID: {}",
+                    log.error(
+                            "Excedido el número máximo de reintentos ({}) por bloqueo optimista al ingresar stock del producto ID: {}",
                             maxIntentos, productoId);
-                    throw new IllegalStateException("No fue posible registrar el lote debido a concurrencia. Por favor intente nuevamente.", ex);
+                    throw new IllegalStateException(
+                            "No fue posible registrar el lote debido a concurrencia. Por favor intente nuevamente.",
+                            ex);
                 }
                 log.warn("Colisión de concurrencia en producto ID: {}. Reintento {}/{}...",
                         productoId, intentos, maxIntentos);
@@ -91,7 +99,8 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
 
     @Transactional
     public void consumirStockFefoConTransaccion(Long productoId, Integer cantidadRequerida) {
-        consumirStockFefoConTransaccion(productoId, cantidadRequerida != null ? BigDecimal.valueOf(cantidadRequerida) : null);
+        consumirStockFefoConTransaccion(productoId,
+                cantidadRequerida != null ? BigDecimal.valueOf(cantidadRequerida) : null);
     }
 
     @Transactional
@@ -108,37 +117,40 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
         if (stockActual.compareTo(requerido) < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Stock insuficiente para el insumo: " + producto.getNombre() +
-                    ". Requerido: " + requerido + ", Disponible: " + stockActual);
+                            ". Requerido: " + requerido + ", Disponible: " + stockActual);
         }
 
-        List<Lote> lotesDisponibles = loteRepository.findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(productoId, 0);
+        List<Lote> lotesDisponibles = loteRepository
+                .findByProductoIdAndCantidadActualGreaterThanOrderByFechaVencimientoAsc(productoId, BigDecimal.ZERO);
 
-        int cantidadPendiente = cantidadRequerida.intValue();
+        BigDecimal cantidadPendiente = requerido;
 
         for (Lote lote : lotesDisponibles) {
-            if (cantidadPendiente <= 0) break;
+            if (cantidadPendiente.compareTo(BigDecimal.ZERO) <= 0)
+                break;
 
-            int cantidadAExtraer = Math.min(lote.getCantidadActual(), cantidadPendiente);
-            lote.setCantidadActual(lote.getCantidadActual() - cantidadAExtraer);
+            BigDecimal disponibleLote = lote.getCantidadActual() != null ? lote.getCantidadActual() : BigDecimal.ZERO;
+            BigDecimal cantidadAExtraer = disponibleLote.min(cantidadPendiente);
 
-            cantidadPendiente -= cantidadAExtraer;
+            lote.setCantidadActual(disponibleLote.subtract(cantidadAExtraer).setScale(4, RoundingMode.HALF_UP));
+            cantidadPendiente = cantidadPendiente.subtract(cantidadAExtraer);
         }
 
-        if (cantidadPendiente > 0) {
+        if (cantidadPendiente.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal stockRemanente = (producto.getStockTotal() != null) ? producto.getStockTotal() : BigDecimal.ZERO;
-            if (stockRemanente.compareTo(BigDecimal.valueOf(cantidadPendiente)) >= 0) {
+            if (stockRemanente.compareTo(cantidadPendiente) >= 0) {
                 Lote loteAuto = new Lote();
                 loteAuto.setProducto(producto);
                 loteAuto.setNumeroLote("LT-AUTO-" + producto.getId() + "-" + (System.currentTimeMillis() % 100000));
                 loteAuto.setFechaProduccion(LocalDate.now());
                 loteAuto.setFechaVencimiento(LocalDate.now().plusYears(1));
-                loteAuto.setCantidadActual(0);
+                loteAuto.setCantidadActual(BigDecimal.ZERO);
                 loteRepository.save(loteAuto);
-                cantidadPendiente = 0;
+                cantidadPendiente = BigDecimal.ZERO;
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Stock insuficiente en lotes para el insumo: " + producto.getNombre() +
-                        ". Requerido: " + requerido + ", Disponible: " + stockActual);
+                                ". Requerido: " + requerido + ", Disponible: " + stockActual);
             }
         }
 
@@ -160,12 +172,13 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
 
         Producto producto = getProducto(productoId);
 
-        String numeroLote = "LT-" + LocalDate.now().getYear() + "-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        String numeroLote = "LT-" + LocalDate.now().getYear() + "-"
+                + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
 
         Lote nuevoLote = new Lote();
         nuevoLote.setProducto(producto);
         nuevoLote.setNumeroLote(numeroLote);
-        nuevoLote.setCantidadActual(cantidad.intValue());
+        nuevoLote.setCantidadActual(cantidad.setScale(4, RoundingMode.HALF_UP));
         nuevoLote.setFechaProduccion(LocalDate.now());
         nuevoLote.setFechaVencimiento(fechaVencimiento);
         loteRepository.save(nuevoLote);
@@ -200,7 +213,7 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
         Lote nuevoLote = new Lote();
         nuevoLote.setProducto(producto);
         nuevoLote.setNumeroLote(numeroLote);
-        nuevoLote.setCantidadActual(cantidad.intValue());
+        nuevoLote.setCantidadActual(cantidad.setScale(4, RoundingMode.HALF_UP));
         nuevoLote.setFechaProduccion(LocalDate.now());
         nuevoLote.setFechaVencimiento(fechaVencimiento);
         loteRepository.save(nuevoLote);
@@ -209,7 +222,8 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
     @Override
     @Transactional
     public void registrarIngresoProduccion(String nombreProducto, Integer cantidad, String lote) {
-        registrarIngresoProduccion(nombreProducto, cantidad != null ? BigDecimal.valueOf(cantidad) : BigDecimal.ZERO, lote);
+        registrarIngresoProduccion(nombreProducto, cantidad != null ? BigDecimal.valueOf(cantidad) : BigDecimal.ZERO,
+                lote);
     }
 
     @Override
@@ -219,7 +233,8 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
             throw new IllegalArgumentException("La cantidad fabricada debe ser mayor a cero");
         }
         Producto producto = productoRepository.findByNombre(nombreProducto)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con nombre: " + nombreProducto));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Producto no encontrado con nombre: " + nombreProducto));
 
         BigDecimal stockActual = (producto.getStockTotal() != null) ? producto.getStockTotal() : BigDecimal.ZERO;
         producto.setStockTotal(stockActual.add(cantidad).setScale(4, RoundingMode.HALF_UP));
@@ -232,7 +247,7 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
         Lote nuevoLote = new Lote();
         nuevoLote.setProducto(producto);
         nuevoLote.setNumeroLote(numeroLote);
-        nuevoLote.setCantidadActual(cantidad.intValue());
+        nuevoLote.setCantidadActual(cantidad.setScale(4, RoundingMode.HALF_UP));
         nuevoLote.setFechaProduccion(LocalDate.now());
         nuevoLote.setFechaVencimiento(fechaVencimiento);
         loteRepository.save(nuevoLote);
@@ -248,15 +263,18 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
     @Transactional
     public void descontarInsumosProduccion(List<? extends InsumoDetalle> detalles) {
         if (detalles == null || detalles.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La orden de producción no contiene insumos para descontar");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La orden de producción no contiene insumos para descontar");
         }
 
-        // 1. Validación previa completa con defensa contra nulos y verificación de saldo disponible
+        // 1. Validación previa completa con defensa contra nulos y verificación de
+        // saldo disponible
         for (InsumoDetalle d : detalles) {
             if (d == null || d.getMateriaPrimaId() == null) {
                 continue;
             }
-            BigDecimal cantidadRequerida = d.getCantidadRequerida() != null ? d.getCantidadRequerida() : BigDecimal.ZERO;
+            BigDecimal cantidadRequerida = d.getCantidadRequerida() != null ? d.getCantidadRequerida()
+                    : BigDecimal.ZERO;
             if (cantidadRequerida.compareTo(BigDecimal.ZERO) <= 0) {
                 continue;
             }
@@ -267,7 +285,7 @@ public class InventarioOperacionServiceImpl implements InventarioOperacionServic
             if (stockActual.compareTo(cantidadRequerida) < 0) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Stock insuficiente para el insumo: " + insumo.getNombre() +
-                        ". Requerido: " + cantidadRequerida + ", Disponible: " + stockActual);
+                                ". Requerido: " + cantidadRequerida + ", Disponible: " + stockActual);
             }
         }
 

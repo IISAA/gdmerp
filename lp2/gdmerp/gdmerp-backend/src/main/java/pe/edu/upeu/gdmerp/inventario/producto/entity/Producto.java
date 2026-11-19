@@ -37,7 +37,8 @@ public class Producto {
     @Column(name = "tipo_producto", nullable = false)
     private TipoProducto tipoProducto = TipoProducto.MATERIA_PRIMA;
 
-    // Precisión decimal de 4 dígitos para conteo de masa y volumen alimentario (kg, g, L, ml)
+    // Precisión decimal de 4 dígitos para conteo de masa y volumen alimentario (kg,
+    // g, L, ml)
     @Column(name = "STOCK_TOTAL", nullable = false, precision = 12, scale = 4)
     private BigDecimal stockTotal = BigDecimal.ZERO;
 
@@ -56,7 +57,7 @@ public class Producto {
     // Relación con los lotes para aplicar FEFO
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Lote> lotes = new ArrayList<>();
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORIA_ID", nullable = false)
     private Categoria categoria;

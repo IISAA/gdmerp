@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -24,8 +26,8 @@ public class Lote {
     @JoinColumn(name = "PRODUCTO_ID", nullable = false)
     private Producto producto;
 
-    @Column(nullable = false)
-    private Integer cantidadActual;
+    @Column(nullable = false, precision = 12, scale = 4)
+    private BigDecimal cantidadActual;
 
     @Column(nullable = false)
     private LocalDate fechaProduccion;

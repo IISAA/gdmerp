@@ -52,7 +52,7 @@ public class ProductoServiceImpl implements ProductoService {
         }
         return entidades.stream()
                 .map(productoMapper::toResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -113,7 +113,8 @@ public class ProductoServiceImpl implements ProductoService {
     public void eliminar(Long id) {
         Producto producto = getProductoEntity(id);
         if (producto.getStockTotal() != null && producto.getStockTotal().compareTo(BigDecimal.ZERO) > 0) {
-            throw new IllegalStateException("No se puede eliminar el producto con id " + id + " porque aún tiene stock");
+            throw new IllegalStateException(
+                    "No se puede eliminar el producto con id " + id + " porque aún tiene stock");
         }
         productoRepository.delete(producto);
     }
@@ -123,7 +124,8 @@ public class ProductoServiceImpl implements ProductoService {
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public Map<String, String> sugerirSku(Long almacenId, String nombreProducto) {
         if (almacenId == null || nombreProducto == null || nombreProducto.isBlank()) {
-            throw new IllegalArgumentException("El almacén y el nombre del producto son requeridos para sugerir el SKU");
+            throw new IllegalArgumentException(
+                    "El almacén y el nombre del producto son requeridos para sugerir el SKU");
         }
         Almacen almacen = getAlmacenEntity(almacenId);
         String skuSugerido = generarSku(almacen.getNombre(), nombreProducto);
@@ -208,7 +210,8 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     private void validarSkuUnico(String sku, Long idActual) {
-        if (sku == null || sku.isBlank()) return;
+        if (sku == null || sku.isBlank())
+            return;
         boolean existe = (idActual == null)
                 ? productoRepository.existsBySkuIgnoreCase(sku)
                 : productoRepository.existsBySkuIgnoreCaseAndIdNot(sku, idActual);
@@ -245,7 +248,8 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
-    public List<ProductoResponse> filtrarDinamicamente(Long categoriaId, Long almacenId, BigDecimal minStock, Sort sort) {
+    public List<ProductoResponse> filtrarDinamicamente(Long categoriaId, Long almacenId, BigDecimal minStock,
+            Sort sort) {
         return productoRepository.filtrarDinamicamente(categoriaId, almacenId, minStock, sort)
                 .stream()
                 .map(productoMapper::toResponse)
@@ -256,7 +260,8 @@ public class ProductoServiceImpl implements ProductoService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     public List<ProductoResponse> filtrarDinamicamente(Long categoriaId, Long almacenId, Integer minStock, Sort sort) {
-        return filtrarDinamicamente(categoriaId, almacenId, minStock != null ? BigDecimal.valueOf(minStock) : null, sort);
+        return filtrarDinamicamente(categoriaId, almacenId, minStock != null ? BigDecimal.valueOf(minStock) : null,
+                sort);
     }
 
     @Override
