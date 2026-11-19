@@ -1,4 +1,4 @@
-package pe.edu.upeu.gdmerp.exception;
+package pe.edu.upeu.gdmerp.shared.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

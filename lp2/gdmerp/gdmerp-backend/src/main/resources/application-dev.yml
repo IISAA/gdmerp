@@ -6,26 +6,29 @@ spring:
           issuer-uri: http://localhost:38080/realms/gdmerp
 
   datasource:
-    url: jdbc:oracle:thin:@localhost:21521/FREEPDB1
+    url: jdbc:oracle:thin:@//localhost:21521/FREEPDB1
     username: GDMERP_APP
-    password: 123456
+    password: "123456"
     driver-class-name: oracle.jdbc.OracleDriver
+
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
-# --- CONFIGURACIÓN DE CACHE (REDIS) ---
+
+  # --- CONFIGURACIÓN DE CACHE (REDIS) ---
   data:
     redis:
       host: localhost
       port: 36379
+
   cache:
     type: redis
 
 # --- VARIABLES PERSONALIZADAS DE GDMERP (Entorno DEV) ---
 gdmerp:
   cors:
-    allowed-origins: "http://localhost:4200, http://127.0.0.1:4200" # Frontend local (Angular)
+    allowed-origins: "http://localhost:4200,http://127.0.0.1:4200" # Frontend local (Angular)
   inventario:
     stock-retry:
       max-intentos: 5 # Reintentos ante colisión de bloqueo optimista (@Version)

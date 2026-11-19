@@ -1,4 +1,4 @@
-package pe.edu.upeu.gdmerp;
+package pe.edu.upeu.gdmerp.shared.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

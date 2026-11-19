@@ -3,18 +3,20 @@ package pe.edu.upeu.gdmerp.inventario.almacen.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
+
 import pe.edu.upeu.gdmerp.inventario.almacen.dto.AlmacenRequest;
 import pe.edu.upeu.gdmerp.inventario.almacen.dto.AlmacenResponse;
 import pe.edu.upeu.gdmerp.inventario.almacen.entity.Almacen;
 import pe.edu.upeu.gdmerp.inventario.almacen.mapper.AlmacenMapper;
 import pe.edu.upeu.gdmerp.inventario.almacen.repository.AlmacenRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import pe.edu.upeu.gdmerp.shared.exception.ResourceNotFoundException;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +30,7 @@ public class AlmacenServiceImpl implements AlmacenService {
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
     @Cacheable(value = "almacenes")
     public List<AlmacenResponse> listar() {
-        return almacenRepository.findAll().stream().map(almacenMapper::toResponse).toList();
+        return almacenRepository.findAll().stream().map(almacenMapper::toResponse).collect(Collectors.toList());
     }
 
     @Override

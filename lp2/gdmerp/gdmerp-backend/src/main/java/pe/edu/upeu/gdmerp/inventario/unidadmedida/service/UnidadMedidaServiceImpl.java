@@ -7,7 +7,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
+
 import pe.edu.upeu.gdmerp.inventario.unidadmedida.CatalogoEstandarUnidades;
 import pe.edu.upeu.gdmerp.inventario.unidadmedida.CatalogoEstandarUnidades.UnidadSeed;
 import pe.edu.upeu.gdmerp.inventario.unidadmedida.dto.SincronizacionEstandaresResponse;
@@ -17,6 +17,7 @@ import pe.edu.upeu.gdmerp.inventario.unidadmedida.entity.CategoriaUnidadMedida;
 import pe.edu.upeu.gdmerp.inventario.unidadmedida.entity.UnidadMedida;
 import pe.edu.upeu.gdmerp.inventario.unidadmedida.mapper.UnidadMedidaMapper;
 import pe.edu.upeu.gdmerp.inventario.unidadmedida.repository.UnidadMedidaRepository;
+import pe.edu.upeu.gdmerp.shared.exception.ResourceNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;

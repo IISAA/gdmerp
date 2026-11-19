@@ -1,4 +1,4 @@
-package pe.edu.upeu.gdmerp.exception;
+package pe.edu.upeu.gdmerp.shared.exception;
 
 /**
  * Se lanza cuando una operación sobre el stock (consumo FEFO o ingreso de lote)

@@ -3,7 +3,7 @@ package pe.edu.upeu.gdmerp.inventario.categoria.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
+
 import pe.edu.upeu.gdmerp.inventario.categoria.dto.CategoriaRequest;
 import pe.edu.upeu.gdmerp.inventario.categoria.dto.CategoriaResponse;
 import pe.edu.upeu.gdmerp.inventario.categoria.dto.ReporteCategoriaCostoDTO;
@@ -11,6 +11,7 @@ import pe.edu.upeu.gdmerp.inventario.categoria.entity.Categoria;
 import pe.edu.upeu.gdmerp.inventario.categoria.mapper.CategoriaMapper;
 import pe.edu.upeu.gdmerp.inventario.categoria.repository.CategoriaRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
+import pe.edu.upeu.gdmerp.shared.exception.ResourceNotFoundException;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

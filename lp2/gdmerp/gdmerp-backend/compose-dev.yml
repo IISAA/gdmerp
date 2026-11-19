@@ -6,9 +6,9 @@ services:
     container_name: gdmerp-oracle
     restart: unless-stopped
     environment:
-      ORACLE_PASSWORD: 123456
+      ORACLE_PASSWORD: "123456"
       APP_USER: GDMERP_APP
-      APP_USER_PASSWORD: 123456
+      APP_USER_PASSWORD: "123456"
     ports:
       - "21521:1521"
     volumes:
@@ -30,7 +30,7 @@ services:
     environment:
       POSTGRES_DB: GDMERP_KEYCLOAK
       POSTGRES_USER: GDMERP_KEYCLOAK
-      POSTGRES_PASSWORD: 123456
+      POSTGRES_PASSWORD: "123456"
     volumes:
       - keycloak_db_data:/var/lib/postgresql/data
     healthcheck:
@@ -56,18 +56,18 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/GDMERP_KEYCLOAK
       KC_DB_USERNAME: GDMERP_KEYCLOAK
-      KC_DB_PASSWORD: 123456
+      KC_DB_PASSWORD: "123456"
     volumes:
       - keycloak_data:/opt/keycloak/data
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: gdmerp-redis
+    restart: unless-stopped
+    ports:
+      - "36379:6379"
 
 volumes:
   oracle_data:
   keycloak_data:
   keycloak_db_data:
-
-redis:
-  image: redis:7.4-alpine
-  container_name: gdmerp-redis
-  restart: unless-stopped
-  ports:
-    - "36379:6379"

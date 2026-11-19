@@ -6,8 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import pe.edu.upeu.gdmerp.exception.InsufficientStockException;
-import pe.edu.upeu.gdmerp.exception.ResourceNotFoundException;
+
 import pe.edu.upeu.gdmerp.inventario.producto.dto.ProductoResponse;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 import pe.edu.upeu.gdmerp.inventario.producto.service.InventarioOperacionService;
@@ -27,6 +26,8 @@ import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.EstadoOrdenProduccio
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.entity.OrdenProduccion;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.mapper.OrdenProduccionMapper;
 import pe.edu.upeu.gdmerp.produccion.ordenproduccion.repository.OrdenProduccionRepository;
+import pe.edu.upeu.gdmerp.shared.exception.InsufficientStockException;
+import pe.edu.upeu.gdmerp.shared.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

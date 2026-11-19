@@ -1,4 +1,4 @@
-package pe.edu.upeu.gdmerp;
+package pe.edu.upeu.gdmerp.shared.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

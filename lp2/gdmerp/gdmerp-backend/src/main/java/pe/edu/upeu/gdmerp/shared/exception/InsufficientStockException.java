@@ -1,4 +1,4 @@
-package pe.edu.upeu.gdmerp.exception;
+package pe.edu.upeu.gdmerp.shared.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
