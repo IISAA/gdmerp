@@ -33,19 +33,24 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'productos', pathMatch: 'full' },
       { path: 'productos', component: ProductoListComponent },
-      { 
-        path: 'productos/nuevo', 
-        loadComponent: () => import('./features/inventario/productos/formulario-producto/formulario-producto.component').then(m => m.FormularioProductoComponent) 
+      {
+        path: 'productos/nuevo',
+        loadComponent: () => import('./features/inventario/productos/formulario-producto/formulario-producto.component').then(m => m.FormularioProductoComponent)
       },
-      { 
-        path: 'productos/editar/:id', 
-        loadComponent: () => import('./features/inventario/productos/formulario-producto/formulario-producto.component').then(m => m.FormularioProductoComponent) 
+      {
+        path: 'productos/editar/:id',
+        loadComponent: () => import('./features/inventario/productos/formulario-producto/formulario-producto.component').then(m => m.FormularioProductoComponent)
+      },
+      {
+        path: 'lotes',
+        loadComponent: () =>
+          import('./features/inventario/lotes/lote-list/lote-list.component').then((m) => m.LoteListComponent),
       },
       { path: 'almacenes', component: AlmacenListComponent },
       { path: 'categorias', component: CategoriaListComponent },
-      { 
-        path: 'unidades-medida', 
-        loadComponent: () => import('./features/inventario/unidades-medida/unidades-medida.component').then(m => m.UnidadesMedidaComponent) 
+      {
+        path: 'unidades-medida',
+        loadComponent: () => import('./features/inventario/unidades-medida/unidades-medida.component').then(m => m.UnidadesMedidaComponent)
       }
     ]
   },
@@ -58,11 +63,11 @@ export const routes: Routes = [
       { path: '', redirectTo: 'ordenes', pathMatch: 'full' },
       { path: 'ordenes', component: OrdenListComponent },
       { path: 'ordenes/lista', component: OrdenesListaComponent },
-      { 
-        path: 'ordenes/nueva', 
+      {
+        path: 'ordenes/nueva',
         canActivate: [AuthGuard],
         data: { roles: ['ADMIN', 'JEFE_PRODUCCION'] },
-        loadComponent: () => import('./features/produccion/ordenes/crear-orden/crear-orden.component').then(c => c.CrearOrdenComponent) 
+        loadComponent: () => import('./features/produccion/ordenes/crear-orden/crear-orden.component').then(c => c.CrearOrdenComponent)
       },
       { path: 'ordenes/:id', component: OrdenDetalleComponent },
       { path: 'centros-trabajo', component: CentroTrabajoListComponent },
@@ -77,20 +82,20 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'stock', pathMatch: 'full' },
-      { 
-        path: 'stock', 
+      {
+        path: 'stock',
         data: { roles: ['ADMIN', 'ALMACENERO'] },
-        loadComponent: () => import('./features/reportes/reporte-stock/reporte-stock.component').then(m => m.ReporteStockComponent) 
+        loadComponent: () => import('./features/reportes/reporte-stock/reporte-stock.component').then(m => m.ReporteStockComponent)
       },
-      { 
-        path: 'stock-critico', 
+      {
+        path: 'stock-critico',
         data: { roles: ['ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION'] },
-        loadComponent: () => import('./features/reportes/reporte-stock-critico/reporte-stock-critico.component').then(m => m.ReporteStockCriticoComponent) 
+        loadComponent: () => import('./features/reportes/reporte-stock-critico/reporte-stock-critico.component').then(m => m.ReporteStockCriticoComponent)
       },
-      { 
-        path: 'ordenes-estados', 
+      {
+        path: 'ordenes-estados',
         data: { roles: ['ADMIN', 'JEFE_PRODUCCION'] },
-        loadComponent: () => import('./features/reportes/reporte-ordenes/reporte-ordenes.component').then(m => m.ReporteOrdenesComponent) 
+        loadComponent: () => import('./features/reportes/reporte-ordenes/reporte-ordenes.component').then(m => m.ReporteOrdenesComponent)
       }
     ]
   },

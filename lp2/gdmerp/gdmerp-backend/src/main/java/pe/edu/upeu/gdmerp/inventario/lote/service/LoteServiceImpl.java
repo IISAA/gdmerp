@@ -1,6 +1,7 @@
 package pe.edu.upeu.gdmerp.inventario.lote.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,9 @@ import pe.edu.upeu.gdmerp.shared.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +29,7 @@ public class LoteServiceImpl implements LoteService {
     private final LoteRepository loteRepository;
     private final ProductoRepository productoRepository;
 
-    @Override 
+    @Override
     @Transactional
     @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO')")
     public LoteResponse registrarIngreso(LoteRequest request) {
@@ -38,14 +41,18 @@ public class LoteServiceImpl implements LoteService {
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Producto no encontrado con id " + request.productoId()));
 
-        if (loteRepository.existsByNumeroLoteIgnoreCaseAndProductoId(request.numeroLote().trim(), producto.getId())) {
-            throw new IllegalStateException("Ya existe el lote " + request.numeroLote() + " para este producto");
+        String numeroLote = (request.numeroLote() == null || request.numeroLote().isBlank())
+                ? generarSiguienteNumeroLote()
+                : request.numeroLote().trim().toUpperCase();
+
+        if (loteRepository.existsByNumeroLoteIgnoreCaseAndProductoId(numeroLote, producto.getId())) {
+            throw new IllegalStateException("Ya existe el lote " + numeroLote + " para este producto");
         }
 
         BigDecimal cantidad = request.cantidadActual().setScale(4, RoundingMode.HALF_UP);
 
         Lote lote = loteMapper.toEntity(request);
-        lote.setNumeroLote(request.numeroLote().trim().toUpperCase());
+        lote.setNumeroLote(numeroLote);
         lote.setProducto(producto);
         lote.setCantidadActual(cantidad);
 
@@ -68,4 +75,42 @@ public class LoteServiceImpl implements LoteService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    public List<LoteResponse> listarTodos() {
+        return loteRepository.findAll(Sort.by("fechaVencimiento").ascending())
+                .stream()
+                .map(loteMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('ADMIN', 'ALMACENERO', 'JEFE_PRODUCCION', 'OPERARIO')")
+    public String obtenerSiguienteCodigo() {
+        return generarSiguienteNumeroLote();
+    }
+
+    private String generarSiguienteNumeroLote() {
+        int anioActual = LocalDate.now().getYear();
+        String prefijo = "LT-" + anioActual + "-";
+
+        Optional<String> ultimoCodigoOpt = loteRepository.findTopNumeroLoteByPrefijo(prefijo);
+
+        int siguienteCorrelativo = 1;
+        if (ultimoCodigoOpt.isPresent()) {
+            String ultimo = ultimoCodigoOpt.get().trim();
+            if (ultimo.startsWith(prefijo)) {
+                String parteNumero = ultimo.substring(prefijo.length()).trim();
+                try {
+                    siguienteCorrelativo = Integer.parseInt(parteNumero) + 1;
+                } catch (NumberFormatException ignored) {
+                    siguienteCorrelativo = 1;
+                }
+            }
+        }
+
+        return String.format("%s%03d", prefijo, siguienteCorrelativo);
+    }
 }

@@ -8,4 +8,6 @@ import java.util.List;
 public interface LoteService {
     LoteResponse registrarIngreso(LoteRequest request);
     List<LoteResponse> listarPorProducto(Long productoId);
+    List<LoteResponse> listarTodos();
+    String obtenerSiguienteCodigo();
 }

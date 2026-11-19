@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>Registrar Ingreso de Lote (FEFO)</h2>
+
+<mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="dialog-form">
+        <mat-form-field appearance="outline" class="full-span">
+            <mat-label>Producto / Insumo</mat-label>
+            <mat-select formControlName="productoId">
+                @for (p of data.productos; track p.id) {
+                <mat-option [value]="p.id">
+                    {{ p.sku ? p.sku + ' - ' : '' }}{{ p.nombre }}
+                    {{ p.unidadMedida ? '(' + p.unidadMedida + ')' : '' }}
+                </mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Número de Lote</mat-label>
+            <input matInput formControlName="numeroLote" placeholder="Ej. LT-2026-001">
+            <button mat-icon-button matIconSuffix type="button" (click)="regenerarCodigo()"
+                [disabled]="cargandoCodigo()" matTooltip="Sugerir siguiente código">
+                <mat-icon>autorenew</mat-icon>
+            </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Cantidad a Ingresar</mat-label>
+            <input matInput type="number" step="0.0001" formControlName="cantidadActual">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Fecha de Producción</mat-label>
+            <input matInput type="date" formControlName="fechaProduccion">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Fecha de Vencimiento</mat-label>
+            <input matInput type="date" formControlName="fechaVencimiento">
+        </mat-form-field>
+
+        <div class="dialog-actions full-span">
+            <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || guardando()">
+                {{ guardando() ? 'Guardando...' : 'Guardar Lote' }}
+            </button>
+        </div>
+    </form>
+</mat-dialog-content>

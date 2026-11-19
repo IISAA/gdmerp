@@ -1,0 +1,57 @@
+.lote-container {
+    padding: 16px;
+}
+
+.lote-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.lote-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.lote-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 4px 0 0;
+}
+
+.lote-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.filtro-busqueda {
+    width: 240px;
+}
+
+.filtro-producto {
+    width: 210px;
+}
+
+.lote-table {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.vencido {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.sin-datos {
+    padding: 24px;
+    text-align: center;
+    color: #6b7280;
+}
