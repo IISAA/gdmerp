@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Entidad de Kardex / Movimiento de Inventario con soporte de precisión decimal (12, 4).
+ * Entidad de Kardex / Movimiento de Inventario con soporte de precisión decimal
+ * (12, 4).
  */
 @Entity
 @Table(name = "MOVIMIENTOS_INVENTARIO", schema = "GDM_INVENTARIO")
@@ -48,8 +49,8 @@ public class MovimientoInventario {
     private String referencia;
 
     public MovimientoInventario(Producto producto, String tipoMovimiento, BigDecimal cantidad,
-                                BigDecimal stockAnterior, BigDecimal stockResultante,
-                                BigDecimal costoUnitario, String referencia) {
+            BigDecimal stockAnterior, BigDecimal stockResultante,
+            BigDecimal costoUnitario, String referencia) {
         this.producto = producto;
         this.tipoMovimiento = tipoMovimiento;
         this.cantidad = cantidad;
