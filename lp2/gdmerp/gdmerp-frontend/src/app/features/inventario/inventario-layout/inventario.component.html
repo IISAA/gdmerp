@@ -1,4 +1,11 @@
 <div class="inventario-wrapper">
+  <!-- 1. Barra Corporativa -->
+  <div class="corporate-header-bar">
+    <div class="corporate-brand">
+      <span class="status-pulse-dot"></span>
+      <span class="corporate-text">Agro Peruvian Foods S.A.C. - Sistema ERP</span>
+    </div>
+  </div>
   <!-- Navegación por pestañas del Hub de Inventario -->
   <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="inventario-tab-nav">
     <a mat-tab-link routerLink="/inventario/productos" routerLinkActive="mdc-tab-active"
@@ -7,10 +14,15 @@
       Productos
     </a>
 
-    <a mat-tab-link routerLink="/inventario/lotes" routerLinkActive="mdc-tab-active"
-      #rlaLotes="routerLinkActive" [active]="rlaLotes.isActive">
+    <a mat-tab-link routerLink="/inventario/lotes" routerLinkActive="mdc-tab-active" #rlaLotes="routerLinkActive"
+      [active]="rlaLotes.isActive">
       <mat-icon class="tab-icon">layers</mat-icon>
       Lotes
+    </a>
+    <a mat-tab-link routerLink="/inventario/kardex" routerLinkActive="mdc-tab-active" #rlaKardex="routerLinkActive"
+      [active]="rlaKardex.isActive">
+      <mat-icon class="tab-icon">swap_horiz</mat-icon>
+      Movimiento (Kardex)
     </a>
 
     <a mat-tab-link routerLink="/inventario/almacenes" routerLinkActive="mdc-tab-active"

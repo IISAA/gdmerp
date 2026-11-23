@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { InventarioComponent } from './features/inventario/inventario.component';
+import { InventarioComponent } from './features/inventario/inventario-layout/inventario.component';
 import { ProductoListComponent } from './features/inventario/productos/lista-productos/lista-productos.component';
 import { AlmacenListComponent } from './features/inventario/almacenes/almacen-list/almacen-list.component';
 import { CategoriaListComponent } from './features/inventario/categorias/categoria-list/categoria-list.component';
@@ -12,6 +12,7 @@ import { OrdenDetalleComponent } from './features/produccion/ordenes/orden-detal
 import { CentroTrabajoListComponent } from './features/produccion/centro-trabajo/centro-trabajo-list/centro-trabajo-list.component';
 import { ListaMaterialesListComponent } from './features/produccion/lista-materiales/lista-materiales-list/lista-materiales-list.component';
 import { ListaMaterialesFormComponent } from './features/produccion/lista-materiales/lista-materiales-form/lista-materiales-form.component';
+import { KardexListComponent } from './features/inventario/movimientos/kardex-list/kardex-list.component';
 
 export const routes: Routes = [
   {
@@ -51,7 +52,8 @@ export const routes: Routes = [
       {
         path: 'unidades-medida',
         loadComponent: () => import('./features/inventario/unidades-medida/unidades-medida.component').then(m => m.UnidadesMedidaComponent)
-      }
+      },
+      { path: 'kardex', component: KardexListComponent }
     ]
   },
   {

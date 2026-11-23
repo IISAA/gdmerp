@@ -4,15 +4,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record MovimientoInventarioResponse(
-    Long id,
-    Long productoId,
-    String nombreProducto,
-    String skuProducto,
-    String tipoMovimiento,
-    BigDecimal cantidad,
-    BigDecimal stockAnterior,
-    BigDecimal stockResultante,
-    BigDecimal costoUnitario,
-    LocalDateTime fechaMovimiento,
-    String referencia
-) {}
+        Long id,
+        Long productoId,
+        String productoSku,
+        String productoNombre,
+        String unidadMedida,
+        String tipoMovimiento,
+        BigDecimal cantidad,
+        BigDecimal stockAnterior,
+        BigDecimal stockResultante,
+        BigDecimal costoUnitario,
+        LocalDateTime fechaMovimiento,
+        String referencia) {
+}

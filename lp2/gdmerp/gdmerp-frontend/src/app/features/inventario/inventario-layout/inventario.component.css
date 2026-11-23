@@ -1,0 +1,60 @@
+.inventario-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inventario-tab-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0 1rem;
+}
+
+.tab-icon {
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+.inventario-tab-panel {
+  flex: 1;
+  background-color: transparent;
+  padding-top: 1rem;
+}
+
+/* 1. Barra Corporativa Superior */
+.corporate-header-bar {
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 1.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #ffffff;
+}
+
+.corporate-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.status-pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.corporate-text {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.875rem;
+}

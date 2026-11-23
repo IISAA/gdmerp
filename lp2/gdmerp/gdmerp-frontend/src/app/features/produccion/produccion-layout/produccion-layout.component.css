@@ -9,7 +9,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background-color: #ffffff; /* Evita que el texto de abajo se transparente */
+  background-color: #ffffff;
+  /* Evita que el texto de abajo se transparente */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 16px;
 }

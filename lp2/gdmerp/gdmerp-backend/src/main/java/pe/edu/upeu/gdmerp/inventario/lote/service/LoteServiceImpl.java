@@ -13,6 +13,8 @@ import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
 import pe.edu.upeu.gdmerp.shared.exception.ResourceNotFoundException;
+import pe.edu.upeu.gdmerp.inventario.producto.entity.MovimientoInventario;
+import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,6 +30,7 @@ public class LoteServiceImpl implements LoteService {
     private final LoteMapper loteMapper;
     private final LoteRepository loteRepository;
     private final ProductoRepository productoRepository;
+    private final MovimientoInventarioRepository movimientoRepository;
 
     @Override
     @Transactional
@@ -60,8 +63,21 @@ public class LoteServiceImpl implements LoteService {
 
         // Actualización automática del stock consolidado en Producto
         BigDecimal stockAnterior = producto.getStockTotal() != null ? producto.getStockTotal() : BigDecimal.ZERO;
-        producto.setStockTotal(stockAnterior.add(cantidad).setScale(4, RoundingMode.HALF_UP));
+        BigDecimal stockResultante = stockAnterior.add(cantidad).setScale(4, RoundingMode.HALF_UP);
+        producto.setStockTotal(stockResultante);
         productoRepository.save(producto);
+
+        // Registro automático en el Kardex
+        BigDecimal costo = producto.getCostoPromedio() != null ? producto.getCostoPromedio() : BigDecimal.ZERO;
+        MovimientoInventario movimiento = new MovimientoInventario(
+                producto,
+                "ENTRADA_LOTE",
+                cantidad,
+                stockAnterior.setScale(4, RoundingMode.HALF_UP),
+                stockResultante,
+                costo,
+                "Ingreso de lote " + numeroLote);
+        movimientoRepository.save(movimiento);
 
         return loteMapper.toResponse(guardado);
     }

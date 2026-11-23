@@ -1,0 +1,93 @@
+.kardex-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.header-row h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.subtitle {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.filter-card {
+    padding: 16px 16px 4px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.6fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.table-card {
+    overflow: hidden;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.sku-sub {
+    font-size: 11px;
+    color: #64748b;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-in {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-out {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.text-in {
+    color: #166534;
+    font-weight: 600;
+}
+
+.text-out {
+    color: #991b1b;
+    font-weight: 600;
+}
+
+.empty-cell {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+}
