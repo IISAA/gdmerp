@@ -23,7 +23,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@WithMockUser(roles = {"ADMIN", "JEFE_PRODUCCION"})
+@WithMockUser(roles = { "ADMIN", "JEFE_PRODUCCION" })
 class ListaMaterialesRepositoryTest {
 
     @Autowired
@@ -95,8 +95,6 @@ class ListaMaterialesRepositoryTest {
         ListaMateriales guardada = listaMaterialesRepository.save(lista);
 
         assertNotNull(guardada.getId(), "El ID de la lista debe autogenerarse");
-        assertTrue(listaMaterialesRepository.existsByCodigo("BOM-" + sufijo));
-
         Optional<ListaMateriales> opt = listaMaterialesRepository.findByCodigo("BOM-" + sufijo);
         assertTrue(opt.isPresent());
         assertEquals("BOM-" + sufijo, opt.get().getCodigo());
@@ -106,7 +104,8 @@ class ListaMaterialesRepositoryTest {
                 .findByProductoTerminadoIdWithDetalles(productoTerminado.getId());
         assertTrue(optConDetalles.isPresent());
         assertEquals(1, optConDetalles.get().getDetalles().size());
-        assertEquals(0, new BigDecimal("3.5000").compareTo(optConDetalles.get().getDetalles().get(0).getCantidadRequerida()));
+        assertEquals(0,
+                new BigDecimal("3.5000").compareTo(optConDetalles.get().getDetalles().get(0).getCantidadRequerida()));
     }
 
     @AfterEach

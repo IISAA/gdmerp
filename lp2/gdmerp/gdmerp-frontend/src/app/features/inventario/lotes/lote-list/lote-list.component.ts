@@ -97,9 +97,22 @@ export class LoteListComponent implements OnInit {
         });
     }
 
+    obtenerEstadoVencimiento(fechaVencimiento: string): 'vencido' | 'por-vencer' | 'vigente' {
+        if (!fechaVencimiento) return 'vigente';
+
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        const [anio, mes, dia] = fechaVencimiento.split('-').map(Number);
+        const vencimiento = new Date(anio, mes - 1, dia);
+        const diffDias = Math.ceil((vencimiento.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (diffDias < 0) return 'vencido';
+        if (diffDias <= 30) return 'por-vencer';
+        return 'vigente';
+    }
+
     estaVencido(fechaVencimiento: string): boolean {
-        if (!fechaVencimiento) return false;
-        const hoy = new Date().toISOString().split('T')[0];
-        return fechaVencimiento < hoy;
+        return this.obtenerEstadoVencimiento(fechaVencimiento) === 'vencido';
     }
 }

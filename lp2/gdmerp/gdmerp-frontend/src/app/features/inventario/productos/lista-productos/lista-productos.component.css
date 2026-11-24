@@ -1,4 +1,195 @@
-/* Estilos para el componente lista-productos */
 :host {
   display: block;
+}
+
+.productos-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.productos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.productos-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.productos-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.btn-nuevo {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 8px;
+}
+
+/* Barra de búsqueda */
+.toolbar-filtros {
+  margin-bottom: 20px;
+}
+
+.filtro-busqueda {
+  width: 100%;
+  max-width: 460px;
+}
+
+/* Contenedor de tabla */
+.tabla-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.productos-table {
+  width: 100%;
+}
+
+.productos-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fila-producto:hover {
+  background-color: #f8fafc;
+}
+
+/* Celdas */
+.badge-sku {
+  font-family: monospace;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.producto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.producto-nombre {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.badge-tipo {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.texto-secundario {
+  color: #475569;
+}
+
+.sin-dato {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.almacen-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+}
+
+.icono-almacen {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #94a3b8;
+}
+
+.col-derecha {
+  text-align: right;
+}
+
+.col-acciones {
+  width: 110px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Semáforo de Stock */
+.badge-stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.badge-stock--critico {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.badge-stock--ok {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+/* Loading y vacío */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 16px;
+  color: #64748b;
+}
+
+.sin-datos {
+  text-align: center;
+  padding: 48px 16px !important;
+  color: #64748b;
+}
+
+.empty-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
 }

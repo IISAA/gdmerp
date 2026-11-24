@@ -5,30 +5,49 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProductoService } from '../services/producto.service';
 import { ProductoResponse } from '../models/producto.model';
 
 @Component({
   selector: 'app-lista-productos',
   standalone: true,
-  imports: [CommonModule, DecimalPipe, RouterLink, FormsModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    DecimalPipe,
+    RouterLink,
+    FormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
+  ],
   templateUrl: './lista-productos.component.html',
-  styleUrls: ['./lista-productos.component.css'] // O .scss según tu configuración
+  styleUrls: ['./lista-productos.component.css']
 })
 export class ListaProductosComponent implements OnInit {
   private readonly productoService = inject(ProductoService);
+  private readonly snackBar = inject(MatSnackBar);
 
-  // Estado principal
-  protected productos = signal<ProductoResponse[]>([]);
-  protected textoBusqueda = signal<string>('');
-  protected isLoading = signal<boolean>(false);
+  readonly columnas = ['sku', 'producto', 'categoria', 'almacen', 'stock', 'acciones'];
 
-  // Filtro Reactivo
-  protected productosFiltrados = computed(() => {
+  protected readonly productos = signal<ProductoResponse[]>([]);
+  protected readonly textoBusqueda = signal<string>('');
+  protected readonly isLoading = signal<boolean>(false);
+
+  protected readonly productosFiltrados = computed(() => {
     const termino = this.textoBusqueda().toLowerCase().trim();
     if (!termino) return this.productos();
 
-    return this.productos().filter(p => 
+    return this.productos().filter(p =>
       (p.nombre && p.nombre.toLowerCase().includes(termino)) ||
       (p.sku && p.sku.toLowerCase().includes(termino)) ||
       (p.tipoProducto && p.tipoProducto.toLowerCase().includes(termino)) ||
@@ -51,30 +70,50 @@ export class ListaProductosComponent implements OnInit {
       error: (err) => {
         console.error('Error cargando catálogo de productos:', err);
         this.isLoading.set(false);
+        this.snackBar.open('No se pudo cargar el catálogo de productos.', 'Cerrar', {
+          duration: 4000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
     });
   }
 
-  onBuscar(evento: Event): void {
-    const input = evento.target as HTMLInputElement;
-    this.textoBusqueda.set(input.value);
+  esStockCritico(producto: ProductoResponse): boolean {
+    return (producto.stockTotal ?? 0) <= (producto.stockMinimo ?? 0);
   }
 
   eliminar(id: number, nombre: string): void {
-    if (confirm(`¿Estás seguro de eliminar el producto "${nombre}"?\nNota: Si el producto tiene historial en producción o inventario, la operación será rechazada por el sistema.`)) {
-      this.productoService.eliminar(id).subscribe({
-        next: () => {
-          // Actualizar la señal removiendo el elemento eliminado
-          this.productos.update(actuales => actuales.filter(p => p.id !== id));
-        },
-        error: (err) => {
-          alert('No se pudo eliminar. Es probable que el producto ya esté en uso (Restricción de Integridad).');
-          console.error(err);
-        }
-      });
-    }
+    const confirmado = confirm(
+      `¿Estás seguro de eliminar el producto "${nombre}"?\n` +
+      `Nota: Si el producto tiene historial en producción o inventario, la operación será rechazada por el sistema.`
+    );
+
+    if (!confirmado) return;
+
+    this.productoService.eliminar(id).subscribe({
+      next: () => {
+        this.productos.update(actuales => actuales.filter(p => p.id !== id));
+        this.snackBar.open(`Producto "${nombre}" eliminado correctamente.`, 'Cerrar', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        const mensaje = err.error?.message || 'No se pudo eliminar. Es probable que el producto tenga stock o historial en uso.';
+        this.snackBar.open(mensaje, 'Entendido', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
   }
 }
 
 export { ListaProductosComponent as ProductoListComponent };
-

@@ -1,12 +1,10 @@
 <mat-sidenav-container class="sidenav-container">
 
-  <!-- ========================================================================= -->
-  <!-- 1. CONTENIDO PRINCIPAL (Tabla de Categorías)                              -->
-  <!-- ========================================================================= -->
+  <!-- 1. CONTENIDO PRINCIPAL -->
   <mat-sidenav-content class="sidenav-content">
     <div class="contenedor-principal">
 
-      <!-- Header y Buscador -->
+      <!-- Encabezado -->
       <div class="header-section">
         <div>
           <h2 class="titulo-seccion">Gestión de Categorías</h2>
@@ -15,110 +13,99 @@
           </p>
         </div>
 
-        <div class="acciones-header">
-          <div class="buscador-caja">
-            <mat-icon class="icono-busqueda">search</mat-icon>
-            <input
-              type="text"
-              placeholder="Buscar por nombre o descripción..."
-              (input)="onBuscar($event)"
-              class="input-busqueda"
-            />
-          </div>
-
-          <button mat-raised-button color="primary" class="btn-nueva-categoria" (click)="abrirNuevo()">
-            <mat-icon>add</mat-icon>
-            Nueva Categoría
-          </button>
-        </div>
+        <button mat-flat-button color="primary" class="btn-nueva-categoria" (click)="abrirNuevo()">
+          <mat-icon>add</mat-icon>
+          Nueva Categoría
+        </button>
       </div>
 
-      <!-- Tabla de Datos -->
-      <div class="tabla-card">
-        <table class="tabla-datos">
-          <thead>
-            <tr>
-              <th style="width: 80px;">ID</th>
-              <th style="width: 250px;">NOMBRE DE CATEGORÍA</th>
-              <th>DESCRIPCIÓN</th>
-              <th style="width: 140px; text-align: right;">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (isLoading()) {
-              <tr>
-                <td colspan="4" class="estado-fila">
-                  <div class="spinner-inline">
-                    <span>Cargando categorías...</span>
-                  </div>
-                </td>
-              </tr>
-            } @else {
-              @for (categoria of categoriasFiltradas(); track categoria.id) {
-                <tr class="fila-registro">
-                  <td class="col-id">#{{ categoria.id }}</td>
-                  <td class="col-nombre">
-                    <span class="nombre-texto">{{ categoria.nombre }}</span>
-                  </td>
-                  <td class="col-descripcion">
-                    @if (categoria.descripcion) {
-                      <span>{{ categoria.descripcion }}</span>
-                    } @else {
-                      <span class="sin-dato">Sin descripción registrada</span>
-                    }
-                  </td>
-                  <td class="col-acciones">
-                    <div class="acciones-grupo">
-                      <button
-                        type="button"
-                        class="btn-accion btn-editar"
-                        matTooltip="Editar categoría"
-                        (click)="abrirEditar(categoria)"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        class="btn-accion btn-eliminar"
-                        matTooltip="Eliminar categoría"
-                        (click)="eliminar(categoria)"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="4" class="estado-fila vacio">
-                    @if (textoBusqueda()) {
-                      No se encontraron categorías coincidentes con "{{ textoBusqueda() }}".
-                    } @else {
-                      No hay categorías registradas en el sistema. Haz clic en <strong>+ Nueva Categoría</strong> para crear la primera.
-                    }
-                  </td>
-                </tr>
+      <!-- Barra de Búsqueda Material -->
+      <div class="toolbar-filtros">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro-busqueda">
+          <mat-label>Buscar por nombre o descripción...</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [ngModel]="textoBusqueda()" (ngModelChange)="textoBusqueda.set($event)" />
+          @if (textoBusqueda()) {
+          <button mat-icon-button matSuffix type="button" (click)="textoBusqueda.set('')" aria-label="Limpiar búsqueda">
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Tabla Material -->
+      <div class="tabla-wrapper">
+        @if (isLoading()) {
+        <div class="loading-state">
+          <mat-spinner diameter="36"></mat-spinner>
+          <span>Cargando categorías...</span>
+        </div>
+        } @else {
+        <table mat-table [dataSource]="categoriasFiltradas()" class="categoria-table">
+
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef class="col-id-header">ID</th>
+            <td mat-cell *matCellDef="let cat">
+              <span class="badge-id">#{{ cat.id }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre de Categoría</th>
+            <td mat-cell *matCellDef="let cat" class="col-nombre">
+              {{ cat.nombre }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="descripcion">
+            <th mat-header-cell *matHeaderCellDef>Descripción</th>
+            <td mat-cell *matCellDef="let cat" class="col-descripcion">
+              @if (cat.descripcion) {
+              <span>{{ cat.descripcion }}</span>
+              } @else {
+              <span class="sin-dato">Sin descripción registrada</span>
               }
-            }
-          </tbody>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="col-acciones-header">Acciones</th>
+            <td mat-cell *matCellDef="let cat" class="col-acciones">
+              <button mat-icon-button color="primary" type="button" matTooltip="Editar categoría"
+                (click)="abrirEditar(cat)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" type="button" matTooltip="Eliminar categoría"
+                (click)="eliminar(cat)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnas;" class="fila-registro"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell sin-datos" [attr.colspan]="columnas.length">
+              <mat-icon class="empty-icon">category</mat-icon>
+              @if (textoBusqueda()) {
+              <p>No se encontraron categorías coincidentes con "{{ textoBusqueda() }}".</p>
+              } @else {
+              <p>No hay categorías registradas. Haz clic en <strong>Nueva Categoría</strong> para crear la primera.</p>
+              }
+            </td>
+          </tr>
+
         </table>
+        }
       </div>
 
     </div>
   </mat-sidenav-content>
 
-  <!-- ========================================================================= -->
-  <!-- 2. PANEL LATERAL DESLIZANTE (Side Drawer / Offcanvas)                     -->
-  <!-- ========================================================================= -->
-  <mat-sidenav
-    #drawer
-    position="end"
-    mode="over"
-    [opened]="isDrawerOpen()"
-    (closed)="cerrarDrawer()"
-    class="categoria-drawer"
-  >
-    <!-- Encabezado del Cajón -->
+  <!-- 2. PANEL LATERAL DESLIZANTE (Side Drawer) -->
+  <mat-sidenav #drawer position="end" mode="over" [opened]="isDrawerOpen()" (closed)="cerrarDrawer()"
+    class="categoria-drawer">
     <mat-toolbar class="drawer-toolbar">
       <div class="drawer-header-info">
         <span class="drawer-titulo">{{ drawerTitle() }}</span>
@@ -126,55 +113,36 @@
           {{ isEditing() ? 'Actualiza los datos del registro' : 'Completa la información requerida' }}
         </span>
       </div>
-      <button
-        mat-icon-button
-        type="button"
-        (click)="cerrarDrawer()"
-        aria-label="Cerrar panel"
-        class="btn-cerrar-drawer"
-      >
+      <button mat-icon-button type="button" (click)="cerrarDrawer()" aria-label="Cerrar panel">
         <mat-icon>close</mat-icon>
       </button>
     </mat-toolbar>
 
-    <!-- Formulario Reactivo -->
     <form [formGroup]="form" (ngSubmit)="guardar()" class="drawer-formulario">
-
       <div class="drawer-body">
-        <!-- Campo: Nombre -->
         <mat-form-field appearance="outline" class="campo-full">
-          <mat-label>Nombre de la Categoría *</mat-label>
-          <input
-            matInput
-            formControlName="nombre"
-            placeholder="Ej. Cacao en Grano, Empaques, Coberturas"
-            maxlength="80"
-          />
+          <mat-label>Nombre de la Categoría</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej. Cacao en Grano, Empaques, Coberturas"
+            maxlength="80" />
           @if (form.get('nombre')?.touched && form.get('nombre')?.hasError('required')) {
-            <mat-error>El nombre es obligatorio.</mat-error>
+          <mat-error>El nombre es obligatorio.</mat-error>
           }
           @if (form.get('nombre')?.hasError('maxlength')) {
-            <mat-error>El nombre no puede exceder los 80 caracteres.</mat-error>
+          <mat-error>El nombre no puede exceder los 80 caracteres.</mat-error>
           }
         </mat-form-field>
 
-        <!-- Campo: Descripción -->
         <mat-form-field appearance="outline" class="campo-full">
           <mat-label>Descripción</mat-label>
-          <textarea
-            matInput
-            formControlName="descripcion"
-            rows="4"
+          <textarea matInput formControlName="descripcion" rows="4"
             placeholder="Describe el propósito o alcance de esta categoría en el inventario..."
-            maxlength="200"
-          ></textarea>
+            maxlength="200"></textarea>
           <mat-hint align="end">{{ form.get('descripcion')?.value?.length || 0 }}/200</mat-hint>
           @if (form.get('descripcion')?.hasError('maxlength')) {
-            <mat-error>La descripción no puede exceder los 200 caracteres.</mat-error>
+          <mat-error>La descripción no puede exceder los 200 caracteres.</mat-error>
           }
         </mat-form-field>
 
-        <!-- Nota informativa UX -->
         <div class="alerta-info-panel">
           <mat-icon class="icono-alerta-info">info</mat-icon>
           <div class="texto-alerta-info">
@@ -183,33 +151,19 @@
         </div>
       </div>
 
-      <!-- Pie de Acciones del Formulario -->
       <div class="drawer-footer">
-        <button
-          mat-button
-          type="button"
-          (click)="cerrarDrawer()"
-          [disabled]="isSaving()"
-          class="btn-cancelar"
-        >
+        <button mat-stroked-button type="button" (click)="cerrarDrawer()" [disabled]="isSaving()">
           Cancelar
         </button>
 
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          [disabled]="form.invalid || isSaving()"
-          class="btn-guardar"
-        >
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSaving()">
           @if (isSaving()) {
-            <span>Guardando...</span>
+          <span>Guardando...</span>
           } @else {
-            <span>{{ isEditing() ? 'Actualizar' : 'Guardar' }}</span>
+          <span>{{ isEditing() ? 'Actualizar' : 'Guardar' }}</span>
           }
         </button>
       </div>
-
     </form>
   </mat-sidenav>
 

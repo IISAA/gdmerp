@@ -20,10 +20,10 @@ import { Producto } from '../../../inventario/productos/models/producto.model';
 import { ProductoService } from '../../../inventario/productos/services/producto.service';
 import { CentroTrabajo } from '../../centro-trabajo/models/centro-trabajo.model';
 import { CentroTrabajoService } from '../../centro-trabajo/services/centro-trabajo.service';
-import { ListaMaterialesResponse } from '../../models/lista-materiales.model';
-import { EstadoOrdenProduccion, OrdenProduccionRequest } from '../../models/produccion.models';
-import { ListaMaterialesService } from '../../services/lista-materiales.service';
-import { OrdenProduccionService } from '../../services/orden-produccion.service';
+import { ListaMaterialesResponse } from '../../lista-materiales/model/lista-materiales.model';
+import { EstadoOrdenProduccion, OrdenProduccionRequest } from '../model/produccion.model';
+import { ListaMaterialesService } from '../../lista-materiales/service/lista-materiales.service';
+import { OrdenProduccionService } from '../service/orden-produccion.service';
 
 const UNIDADES_ENTERAS = ['UND', 'CAJ', 'SAC'];
 

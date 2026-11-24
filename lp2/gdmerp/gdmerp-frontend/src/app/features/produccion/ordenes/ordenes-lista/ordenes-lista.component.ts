@@ -9,8 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
-import { OrdenProduccionService } from '../../services/orden-produccion.service';
-import { EstadoOrdenProduccion } from '../../models/produccion.models';
+import { OrdenProduccionService } from '../service/orden-produccion.service';
+import { EstadoOrdenProduccion } from '../model/produccion.model';
 
 @Component({
   selector: 'app-ordenes-lista',

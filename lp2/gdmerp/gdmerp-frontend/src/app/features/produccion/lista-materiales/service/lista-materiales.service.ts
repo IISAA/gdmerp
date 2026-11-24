@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { 
-  ListaMaterialesDto, 
-  ListaMaterialesRequest, 
-  ListaMaterialesResponse 
-} from '../models/lista-materiales.model';
+import { environment } from '../../../../../environments/environment';
+import {
+  ListaMaterialesDto,
+  ListaMaterialesRequest,
+  ListaMaterialesResponse,
+  SugerirCodigoBomResponse
+} from '../model/lista-materiales.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,12 +24,17 @@ export class ListaMaterialesService {
     return this.http.get<ListaMaterialesResponse>(`${this.apiUrl}/${id}`);
   }
 
-  obtenerPorProductoTerminado(productoTerminadoId: number): Observable<ListaMaterialesResponse[]> {
-    return this.http.get<ListaMaterialesResponse[]>(`${this.apiUrl}/por-producto/${productoTerminadoId}`);
-  }
-
   obtenerPorProducto(productoId: number): Observable<ListaMaterialesResponse[]> {
     return this.http.get<ListaMaterialesResponse[]>(`${this.apiUrl}/por-producto/${productoId}`);
+  }
+
+  obtenerPorProductoTerminado(productoTerminadoId: number): Observable<ListaMaterialesResponse[]> {
+    return this.obtenerPorProducto(productoTerminadoId);
+  }
+
+  sugerirCodigo(productoTerminadoId: number): Observable<SugerirCodigoBomResponse> {
+    const params = new HttpParams().set('productoTerminadoId', productoTerminadoId.toString());
+    return this.http.get<SugerirCodigoBomResponse>(`${this.apiUrl}/sugerir-codigo`, { params });
   }
 
   crear(request: ListaMaterialesRequest | ListaMaterialesDto): Observable<ListaMaterialesResponse> {

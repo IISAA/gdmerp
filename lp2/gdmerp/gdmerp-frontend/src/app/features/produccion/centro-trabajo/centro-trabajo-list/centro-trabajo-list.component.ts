@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CentroTrabajoService } from '../services/centro-trabajo.service';
 import { CentroTrabajo, CentroTrabajoRequest } from '../models/centro-trabajo.model';
 
@@ -27,7 +29,9 @@ import { CentroTrabajo, CentroTrabajoRequest } from '../models/centro-trabajo.mo
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTableModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './centro-trabajo-list.component.html',
   styleUrls: ['./centro-trabajo-list.component.css']
@@ -37,19 +41,19 @@ export class CentroTrabajoListComponent implements OnInit {
   private readonly centroTrabajoService = inject(CentroTrabajoService);
   private readonly snackBar = inject(MatSnackBar);
 
-  // --------------------------------------------------------------------------
+  readonly columnas = ['id', 'nombre', 'codigo', 'capacidad', 'costoHora', 'acciones'];
+
   // Señales de Estado Reactivo
-  // --------------------------------------------------------------------------
   readonly centros = signal<CentroTrabajo[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly textoBusqueda = signal<string>('');
 
-  // Control del Cajón Deslizante (Side Drawer) y Elemento en Edición
+  // Control del Side Drawer
   readonly isDrawerOpen = signal<boolean>(false);
   readonly selectedCentroTrabajo = signal<CentroTrabajo | null>(null);
 
-  // Señales computadas derivadas
+  // Señales computadas
   readonly isEditing = computed<boolean>(() => this.selectedCentroTrabajo() !== null);
   readonly drawerTitle = computed<string>(() =>
     this.selectedCentroTrabajo() ? 'Editar Centro de Trabajo' : 'Nuevo Centro de Trabajo'
@@ -66,7 +70,7 @@ export class CentroTrabajoListComponent implements OnInit {
     );
   });
 
-  // Formulario Reactivo dentro del Sidenav
+  // Formulario Reactivo
   readonly form: FormGroup = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(80)]],
     codigo: ['', [Validators.required, Validators.maxLength(20)]],
@@ -78,9 +82,6 @@ export class CentroTrabajoListComponent implements OnInit {
     this.cargarCentros();
   }
 
-  // --------------------------------------------------------------------------
-  // Operaciones de Carga y Búsqueda
-  // --------------------------------------------------------------------------
   cargarCentros(): void {
     this.isLoading.set(true);
     this.centroTrabajoService.listar().subscribe({
@@ -91,7 +92,7 @@ export class CentroTrabajoListComponent implements OnInit {
       error: (err) => {
         console.error('Error al listar centros de trabajo:', err);
         this.isLoading.set(false);
-        this.snackBar.open('❌ No se pudieron cargar los centros de trabajo.', 'Cerrar', {
+        this.snackBar.open('No se pudieron cargar los centros de trabajo.', 'Cerrar', {
           duration: 4000,
           horizontalPosition: 'right',
           verticalPosition: 'top',
@@ -101,17 +102,9 @@ export class CentroTrabajoListComponent implements OnInit {
     });
   }
 
-  onBuscar(evento: Event): void {
-    const input = evento.target as HTMLInputElement;
-    this.textoBusqueda.set(input.value);
-  }
-
-  // --------------------------------------------------------------------------
-  // Gestión del Drawer (Offcanvas / Side Sidenav)
-  // --------------------------------------------------------------------------
   abrirNuevo(): void {
     this.selectedCentroTrabajo.set(null);
-    this.form.reset({ nombre: '', codigo: '', capacidad: 1, costoHora: null });
+    this.form.reset({ nombre: '', codigo: '', capacidad: 1, costoHora: null }, { emitEvent: false });
     this.isDrawerOpen.set(true);
   }
 
@@ -122,23 +115,20 @@ export class CentroTrabajoListComponent implements OnInit {
       codigo: centro.codigo || '',
       capacidad: centro.capacidad ?? 1,
       costoHora: centro.costoHora ?? null
-    });
+    }, { emitEvent: false });
     this.isDrawerOpen.set(true);
   }
 
   cerrarDrawer(): void {
     this.isDrawerOpen.set(false);
     this.selectedCentroTrabajo.set(null);
-    this.form.reset({ nombre: '', codigo: '', capacidad: 1, costoHora: null });
+    this.form.reset({ nombre: '', codigo: '', capacidad: 1, costoHora: null }, { emitEvent: false });
   }
 
-  // --------------------------------------------------------------------------
-  // Guardado (Creación / Edición)
-  // --------------------------------------------------------------------------
   guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.snackBar.open('⚠️ Por favor, ingresa los campos requeridos correctamente.', 'Cerrar', {
+      this.snackBar.open('Por favor, ingresa los campos requeridos correctamente.', 'Cerrar', {
         duration: 4000
       });
       return;
@@ -148,7 +138,7 @@ export class CentroTrabajoListComponent implements OnInit {
     const raw = this.form.getRawValue();
     const request: CentroTrabajoRequest = {
       nombre: raw.nombre.trim(),
-      codigo: raw.codigo ? raw.codigo.trim() : undefined,
+      codigo: raw.codigo ? raw.codigo.trim().toUpperCase() : undefined,
       capacidad: Number(raw.capacidad) || 0,
       costoHora: raw.costoHora !== null && raw.costoHora !== '' ? Number(raw.costoHora) : undefined
     };
@@ -162,7 +152,7 @@ export class CentroTrabajoListComponent implements OnInit {
       next: () => {
         this.isSaving.set(false);
         this.snackBar.open(
-          `✅ Centro de trabajo ${centroActual ? 'actualizado' : 'creado'} exitosamente.`,
+          `Centro de trabajo ${centroActual ? 'actualizado' : 'creado'} exitosamente.`,
           'Cerrar',
           {
             duration: 3000,
@@ -172,15 +162,15 @@ export class CentroTrabajoListComponent implements OnInit {
           }
         );
         this.cerrarDrawer();
-        this.cargarCentros(); // Recarga reactiva de la tabla
+        this.cargarCentros();
       },
       error: (err) => {
         this.isSaving.set(false);
         console.error('Error al guardar centro de trabajo:', err);
         const mensajeBackend = err.error?.message;
         const mensaje = mensajeBackend
-          ? `❌ Error: ${mensajeBackend}`
-          : '❌ Ocurrió un error al guardar el centro de trabajo. Verifica que el nombre no esté duplicado.';
+          ? `Error: ${mensajeBackend}`
+          : 'Ocurrió un error al guardar el centro de trabajo. Verifica que el nombre o código no estén duplicados.';
 
         this.snackBar.open(mensaje, 'Entendido', {
           duration: 5000,
@@ -192,23 +182,18 @@ export class CentroTrabajoListComponent implements OnInit {
     });
   }
 
-  // --------------------------------------------------------------------------
-  // Eliminación
-  // --------------------------------------------------------------------------
   eliminar(centro: CentroTrabajo): void {
     const confirmacion = confirm(
       `¿Deseas eliminar el centro de trabajo "${centro.nombre}"?\n` +
       `Nota: Si el centro tiene órdenes de producción asociadas, la operación será rechazada por integridad del sistema.`
     );
 
-    if (!confirmacion) {
-      return;
-    }
+    if (!confirmacion) return;
 
     this.centroTrabajoService.eliminar(centro.id).subscribe({
       next: () => {
         this.centros.update((actuales) => actuales.filter((c) => c.id !== centro.id));
-        this.snackBar.open(`✅ Centro de trabajo "${centro.nombre}" eliminado correctamente.`, 'Cerrar', {
+        this.snackBar.open(`Centro de trabajo "${centro.nombre}" eliminado correctamente.`, 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'right',
           verticalPosition: 'top',
@@ -219,8 +204,8 @@ export class CentroTrabajoListComponent implements OnInit {
         console.error('Error al eliminar centro de trabajo:', err);
         const mensajeBackend = err.error?.message;
         const mensaje = mensajeBackend
-          ? `❌ ${mensajeBackend}`
-          : '❌ No se pudo eliminar el centro de trabajo. Probablemente tiene órdenes de producción vinculadas.';
+          ? mensajeBackend
+          : 'No se pudo eliminar el centro de trabajo. Probablemente tiene órdenes de producción vinculadas.';
 
         this.snackBar.open(mensaje, 'Entendido', {
           duration: 6000,

@@ -13,10 +13,11 @@ import pe.edu.upeu.gdmerp.produccion.listamateriales.dto.ListaMaterialesResponse
 import pe.edu.upeu.gdmerp.produccion.listamateriales.service.ListaMaterialesService;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Lista de Materiales (BOM / Recetas)")
 @RestController
-@RequestMapping({"/api/v1/listas-materiales", "/api/v1/produccion/listas-materiales"})
+@RequestMapping({ "/api/v1/listas-materiales", "/api/v1/produccion/listas-materiales" })
 @RequiredArgsConstructor
 public class ListaMaterialesController {
 
@@ -27,6 +28,14 @@ public class ListaMaterialesController {
     @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION', 'ALMACENERO')")
     public ResponseEntity<List<ListaMaterialesResponse>> listar() {
         return ResponseEntity.ok(listaMaterialesService.listar());
+    }
+
+    @Operation(summary = "Sugiere un código BOM automático según el producto terminado")
+    @GetMapping("/sugerir-codigo")
+    @PreAuthorize("hasAnyRole('ADMIN', 'JEFE_PRODUCCION')")
+    public ResponseEntity<Map<String, String>> sugerirCodigo(
+            @RequestParam("productoTerminadoId") Long productoTerminadoId) {
+        return ResponseEntity.ok(listaMaterialesService.sugerirCodigo(productoTerminadoId));
     }
 
     @Operation(summary = "Obtiene una receta por su ID")

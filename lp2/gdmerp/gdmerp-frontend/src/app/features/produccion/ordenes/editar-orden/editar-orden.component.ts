@@ -11,8 +11,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { OrdenProduccionService } from '../../services/orden-produccion.service';
-import { EstadoOrdenProduccion, OrdenProduccionUpdateRequest } from '../../models/produccion.models';
+import { OrdenProduccionService } from '../service/orden-produccion.service';
+import { EstadoOrdenProduccion, OrdenProduccionUpdateRequest } from '../model/produccion.model';
 import { ProductoService } from '../../../inventario/productos/services/producto.service';
 import { Producto } from '../../../inventario/productos/models/producto.model';
 

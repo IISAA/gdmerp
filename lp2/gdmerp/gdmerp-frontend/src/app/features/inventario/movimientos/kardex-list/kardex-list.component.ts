@@ -13,11 +13,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 import { MovimientoInventarioService } from '../services/movimiento-inventario.service';
 import { KardexFiltro, MovimientoInventarioResponse } from '../models/movimiento-inventario.model';
 import { MovimientoFormDialogComponent } from '../movimiento-form-dialog/movimiento-form-dialog.component';
-// Ajusta este import a tu ProductoService existente:
 import { ProductoService } from '../../productos/services/producto.service';
 
 @Component({
@@ -39,6 +39,7 @@ import { ProductoService } from '../../productos/services/producto.service';
         MatDialogModule,
         MatProgressBarModule,
         MatSnackBarModule,
+        MatDatepickerModule,
     ],
     templateUrl: './kardex-list.component.html',
     styleUrl: './kardex-list.component.scss',
@@ -64,6 +65,10 @@ export class KardexListComponent implements OnInit {
     dataSource = new MatTableDataSource<MovimientoInventarioResponse>([]);
     productos: any[] = [];
     cargando = false;
+
+    // Fechas enlazadas a los MatDatepicker
+    fechaDesde: Date | null = null;
+    fechaHasta: Date | null = null;
 
     filtro: KardexFiltro = {
         productoId: null,
@@ -98,7 +103,6 @@ export class KardexListComponent implements OnInit {
     }
 
     cargarProductos(): void {
-        // Ajusta el nombre del método si en tu ProductoService se llama listar() o getAll()
         this.productoService.listar().subscribe({
             next: (res: any[]) => (this.productos = res),
             error: () => this.snackBar.open('No se pudo cargar la lista de productos', 'Cerrar', { duration: 3000 }),
@@ -107,6 +111,9 @@ export class KardexListComponent implements OnInit {
 
     cargarKardex(): void {
         this.cargando = true;
+        this.filtro.desde = this.formatearFechaIso(this.fechaDesde);
+        this.filtro.hasta = this.formatearFechaIso(this.fechaHasta);
+
         this.movimientoService.listarKardex(this.filtro).subscribe({
             next: (datos) => {
                 this.dataSource.data = datos;
@@ -120,6 +127,8 @@ export class KardexListComponent implements OnInit {
     }
 
     limpiarFiltros(): void {
+        this.fechaDesde = null;
+        this.fechaHasta = null;
         this.filtro = { productoId: null, tipoMovimiento: null, desde: null, hasta: null };
         this.cargarKardex();
     }
@@ -143,5 +152,13 @@ export class KardexListComponent implements OnInit {
 
     esIngreso(tipo: string): boolean {
         return ['ENTRADA', 'ENTRADA_LOTE', 'ENTRADA_PRODUCCION', 'DEVOLUCION_PRODUCCION', 'AJUSTE_POSITIVO'].includes(tipo);
+    }
+
+    private formatearFechaIso(fecha: Date | null): string | null {
+        if (!fecha) return null;
+        const anio = fecha.getFullYear();
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
     }
 }

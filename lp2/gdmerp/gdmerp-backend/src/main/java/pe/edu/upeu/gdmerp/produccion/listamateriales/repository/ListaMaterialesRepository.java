@@ -12,15 +12,23 @@ import java.util.Optional;
 @Repository
 public interface ListaMaterialesRepository extends JpaRepository<ListaMateriales, Long> {
     Optional<ListaMateriales> findByCodigo(String codigo);
+
     @Query("SELECT DISTINCT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles d LEFT JOIN FETCH d.insumo WHERE lm.productoTerminado.id = :productoId")
     List<ListaMateriales> findByProductoTerminadoId(@Param("productoId") Long productoId);
-    boolean existsByCodigo(String codigo);
-    boolean existsByCodigoAndIdNot(String codigo, Long id);
+
+    long countByCodigoStartingWith(String prefijo);
+
+    boolean existsByCodigoIgnoreCase(String codigo);
+
+    boolean existsByCodigoIgnoreCaseAndIdNot(String codigo, Long id);
+
     boolean existsByProductoTerminadoId(Long productoTerminadoId);
+
     boolean existsByProductoTerminadoIdAndIdNot(Long productoTerminadoId, Long id);
 
     @Query("SELECT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles d LEFT JOIN FETCH d.insumo WHERE lm.productoTerminado.id = :productoTerminadoId")
-    Optional<ListaMateriales> findByProductoTerminadoIdWithDetalles(@Param("productoTerminadoId") Long productoTerminadoId);
+    Optional<ListaMateriales> findByProductoTerminadoIdWithDetalles(
+            @Param("productoTerminadoId") Long productoTerminadoId);
 
     @Query("SELECT lm FROM ListaMateriales lm LEFT JOIN FETCH lm.detalles d LEFT JOIN FETCH d.insumo WHERE lm.id = :id")
     Optional<ListaMateriales> findByIdWithDetalles(@Param("id") Long id);

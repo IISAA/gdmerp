@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CategoriaService } from '../services/categoria.service';
 import { Categoria, CategoriaRequest } from '../models/categoria.model';
 
@@ -26,7 +28,9 @@ import { Categoria, CategoriaRequest } from '../models/categoria.model';
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTableModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './categoria-list.component.html',
   styleUrls: ['./categoria-list.component.css']
@@ -36,15 +40,15 @@ export class CategoriaListComponent implements OnInit {
   private readonly categoriaService = inject(CategoriaService);
   private readonly snackBar = inject(MatSnackBar);
 
-  // --------------------------------------------------------------------------
+  readonly columnas = ['id', 'nombre', 'descripcion', 'acciones'];
+
   // Señales de Estado Reactivo
-  // --------------------------------------------------------------------------
   readonly categorias = signal<Categoria[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly textoBusqueda = signal<string>('');
 
-  // Control del Cajón Deslizante (Side Drawer) y Elemento en Edición
+  // Control del Cajón Deslizante (Side Drawer)
   readonly isDrawerOpen = signal<boolean>(false);
   readonly selectedCategoria = signal<Categoria | null>(null);
 
@@ -75,9 +79,6 @@ export class CategoriaListComponent implements OnInit {
     this.cargarCategorias();
   }
 
-  // --------------------------------------------------------------------------
-  // Operaciones de Carga y Búsqueda
-  // --------------------------------------------------------------------------
   cargarCategorias(): void {
     this.isLoading.set(true);
     this.categoriaService.listar().subscribe({
@@ -88,7 +89,7 @@ export class CategoriaListComponent implements OnInit {
       error: (err) => {
         console.error('Error al listar categorías:', err);
         this.isLoading.set(false);
-        this.snackBar.open('❌ No se pudieron cargar las categorías.', 'Cerrar', {
+        this.snackBar.open('No se pudieron cargar las categorías.', 'Cerrar', {
           duration: 4000,
           horizontalPosition: 'right',
           verticalPosition: 'top',
@@ -98,14 +99,6 @@ export class CategoriaListComponent implements OnInit {
     });
   }
 
-  onBuscar(evento: Event): void {
-    const input = evento.target as HTMLInputElement;
-    this.textoBusqueda.set(input.value);
-  }
-
-  // --------------------------------------------------------------------------
-  // Gestión del Drawer (Offcanvas / Side Sidenav)
-  // --------------------------------------------------------------------------
   abrirNuevo(): void {
     this.selectedCategoria.set(null);
     this.form.reset({ nombre: '', descripcion: '' });
@@ -127,13 +120,10 @@ export class CategoriaListComponent implements OnInit {
     this.form.reset({ nombre: '', descripcion: '' });
   }
 
-  // --------------------------------------------------------------------------
-  // Guardado (Creación / Edición)
-  // --------------------------------------------------------------------------
   guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.snackBar.open('⚠️ Por favor, ingresa los campos requeridos correctamente.', 'Cerrar', {
+      this.snackBar.open('Por favor, ingresa los campos requeridos correctamente.', 'Cerrar', {
         duration: 4000
       });
       return;
@@ -155,7 +145,7 @@ export class CategoriaListComponent implements OnInit {
       next: () => {
         this.isSaving.set(false);
         this.snackBar.open(
-          `✅ Categoría ${categoriaActual ? 'actualizada' : 'creada'} exitosamente.`,
+          `Categoría ${categoriaActual ? 'actualizada' : 'creada'} exitosamente.`,
           'Cerrar',
           {
             duration: 3000,
@@ -172,8 +162,8 @@ export class CategoriaListComponent implements OnInit {
         console.error('Error al guardar categoría:', err);
         const mensajeBackend = err.error?.message;
         const mensaje = mensajeBackend
-          ? `❌ Error: ${mensajeBackend}`
-          : '❌ Ocurrió un error al guardar la categoría. Verifica que el nombre no esté duplicado.';
+          ? `Error: ${mensajeBackend}`
+          : 'Ocurrió un error al guardar la categoría. Verifica que el nombre no esté duplicado.';
 
         this.snackBar.open(mensaje, 'Entendido', {
           duration: 5000,
@@ -185,9 +175,6 @@ export class CategoriaListComponent implements OnInit {
     });
   }
 
-  // --------------------------------------------------------------------------
-  // Eliminación
-  // --------------------------------------------------------------------------
   eliminar(categoria: Categoria): void {
     const confirmacion = confirm(
       `¿Deseas eliminar la categoría "${categoria.nombre}"?\n` +
@@ -201,7 +188,7 @@ export class CategoriaListComponent implements OnInit {
     this.categoriaService.eliminar(categoria.id).subscribe({
       next: () => {
         this.categorias.update((actuales) => actuales.filter((c) => c.id !== categoria.id));
-        this.snackBar.open(`✅ Categoría "${categoria.nombre}" eliminada correctamente.`, 'Cerrar', {
+        this.snackBar.open(`Categoría "${categoria.nombre}" eliminada correctamente.`, 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'right',
           verticalPosition: 'top',
@@ -212,8 +199,8 @@ export class CategoriaListComponent implements OnInit {
         console.error('Error al eliminar categoría:', err);
         const mensajeBackend = err.error?.message;
         const mensaje = mensajeBackend
-          ? `❌ ${mensajeBackend}`
-          : '❌ No se pudo eliminar la categoría. Probablemente ya está asignada a uno o más productos.';
+          ? mensajeBackend
+          : 'No se pudo eliminar la categoría. Probablemente ya está asignada a uno o más productos.';
 
         this.snackBar.open(mensaje, 'Entendido', {
           duration: 6000,

@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AlmacenService } from '../services/almacen.service';
 import { Almacen, AlmacenRequest } from '../models/almacen.model';
 
@@ -27,7 +29,9 @@ import { Almacen, AlmacenRequest } from '../models/almacen.model';
     MatFormFieldModule,
     MatInputModule,
     MatTooltipModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTableModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './almacen-list.component.html',
   styleUrls: ['./almacen-list.component.css']
@@ -37,19 +41,19 @@ export class AlmacenListComponent implements OnInit {
   private readonly almacenService = inject(AlmacenService);
   private readonly snackBar = inject(MatSnackBar);
 
-  // --------------------------------------------------------------------------
+  readonly columnas = ['id', 'nombre', 'ubicacion', 'capacidad', 'acciones'];
+
   // Señales de Estado Reactivo
-  // --------------------------------------------------------------------------
   readonly almacenes = signal<Almacen[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly isSaving = signal<boolean>(false);
   readonly textoBusqueda = signal<string>('');
 
-  // Control del Cajón Deslizante (Side Drawer) y Elemento en Edición
+  // Control del Cajón Deslizante (Side Drawer)
   readonly isDrawerOpen = signal<boolean>(false);
   readonly selectedAlmacen = signal<Almacen | null>(null);
 
-  // Señales computadas derivadas
+  // Señales computadas
   readonly isEditing = computed<boolean>(() => this.selectedAlmacen() !== null);
   readonly drawerTitle = computed<string>(() =>
     this.selectedAlmacen() ? 'Editar Almacén' : 'Nuevo Almacén'
@@ -77,9 +81,6 @@ export class AlmacenListComponent implements OnInit {
     this.cargarAlmacenes();
   }
 
-  // --------------------------------------------------------------------------
-  // Operaciones de Carga y Búsqueda
-  // --------------------------------------------------------------------------
   cargarAlmacenes(): void {
     this.isLoading.set(true);
     this.almacenService.listar().subscribe({
@@ -90,7 +91,7 @@ export class AlmacenListComponent implements OnInit {
       error: (err) => {
         console.error('Error al listar almacenes:', err);
         this.isLoading.set(false);
-        this.snackBar.open('❌ No se pudieron cargar los almacenes.', 'Cerrar', {
+        this.snackBar.open('No se pudieron cargar los almacenes.', 'Cerrar', {
           duration: 4000,
           horizontalPosition: 'right',
           verticalPosition: 'top',
@@ -100,14 +101,6 @@ export class AlmacenListComponent implements OnInit {
     });
   }
 
-  onBuscar(evento: Event): void {
-    const input = evento.target as HTMLInputElement;
-    this.textoBusqueda.set(input.value);
-  }
-
-  // --------------------------------------------------------------------------
-  // Gestión del Drawer (Offcanvas / Side Sidenav)
-  // --------------------------------------------------------------------------
   abrirNuevo(): void {
     this.selectedAlmacen.set(null);
     this.form.reset({ nombre: '', ubicacion: '', capacidad: null });
@@ -130,13 +123,10 @@ export class AlmacenListComponent implements OnInit {
     this.form.reset({ nombre: '', ubicacion: '', capacidad: null });
   }
 
-  // --------------------------------------------------------------------------
-  // Guardado (Creación / Edición)
-  // --------------------------------------------------------------------------
   guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.snackBar.open('⚠️ Por favor, ingresa los campos requeridos correctamente.', 'Cerrar', {
+      this.snackBar.open('Por favor, ingresa los campos requeridos correctamente.', 'Cerrar', {
         duration: 4000
       });
       return;
@@ -159,7 +149,7 @@ export class AlmacenListComponent implements OnInit {
       next: () => {
         this.isSaving.set(false);
         this.snackBar.open(
-          `✅ Almacén ${almacenActual ? 'actualizado' : 'creado'} exitosamente.`,
+          `Almacén ${almacenActual ? 'actualizado' : 'creado'} exitosamente.`,
           'Cerrar',
           {
             duration: 3000,
@@ -169,15 +159,15 @@ export class AlmacenListComponent implements OnInit {
           }
         );
         this.cerrarDrawer();
-        this.cargarAlmacenes(); // Recarga reactiva de la tabla
+        this.cargarAlmacenes();
       },
       error: (err) => {
         this.isSaving.set(false);
         console.error('Error al guardar almacén:', err);
         const mensajeBackend = err.error?.message;
         const mensaje = mensajeBackend
-          ? `❌ Error: ${mensajeBackend}`
-          : '❌ Ocurrió un error al guardar el almacén. Verifica que el nombre no esté duplicado.';
+          ? `Error: ${mensajeBackend}`
+          : 'Ocurrió un error al guardar el almacén. Verifica que el nombre no esté duplicado.';
 
         this.snackBar.open(mensaje, 'Entendido', {
           duration: 5000,
@@ -189,9 +179,6 @@ export class AlmacenListComponent implements OnInit {
     });
   }
 
-  // --------------------------------------------------------------------------
-  // Eliminación
-  // --------------------------------------------------------------------------
   eliminar(almacen: Almacen): void {
     const confirmacion = confirm(
       `¿Deseas eliminar el almacén "${almacen.nombre}"?\n` +
@@ -205,7 +192,7 @@ export class AlmacenListComponent implements OnInit {
     this.almacenService.eliminar(almacen.id).subscribe({
       next: () => {
         this.almacenes.update((actuales) => actuales.filter((a) => a.id !== almacen.id));
-        this.snackBar.open(`✅ Almacén "${almacen.nombre}" eliminado correctamente.`, 'Cerrar', {
+        this.snackBar.open(`Almacén "${almacen.nombre}" eliminado correctamente.`, 'Cerrar', {
           duration: 3000,
           horizontalPosition: 'right',
           verticalPosition: 'top',
@@ -216,8 +203,8 @@ export class AlmacenListComponent implements OnInit {
         console.error('Error al eliminar almacén:', err);
         const mensajeBackend = err.error?.message;
         const mensaje = mensajeBackend
-          ? `❌ ${mensajeBackend}`
-          : '❌ No se pudo eliminar el almacén. Probablemente tiene productos o movimientos vinculados.';
+          ? mensajeBackend
+          : 'No se pudo eliminar el almacén. Probablemente tiene productos o movimientos vinculados.';
 
         this.snackBar.open(mensaje, 'Entendido', {
           duration: 6000,

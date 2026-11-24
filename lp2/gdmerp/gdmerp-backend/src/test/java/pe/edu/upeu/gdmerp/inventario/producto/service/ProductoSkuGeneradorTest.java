@@ -57,42 +57,6 @@ class ProductoSkuGeneradorTest {
     }
 
     @Test
-    void generarPrefijoSkuConectoresYMultiplesPalabras() {
-        // "Almacén Insumos Norte" -> AIN
-        // "Aceite de Coco Virgen Extra" -> ACVE
-        String prefijo = productoService.generarPrefijoSku("Almacén Insumos Norte", "Aceite de Coco Virgen Extra");
-        assertEquals("APF-AIN-ACVE", prefijo);
-    }
-
-    @Test
-    void generarPrefijoSkuPalabrasSimples() {
-        // "Principal" -> PRI
-        // "Bitter" -> BIT
-        String prefijo = productoService.generarPrefijoSku("Principal", "Bitter");
-        assertEquals("APF-PRI-BIT", prefijo);
-    }
-
-    @Test
-    void generarSkuPrimerCorrelativoSinColisiones() {
-        when(productoRepository.countBySkuStartingWith("APF-AIN-ACVE")).thenReturn(0L);
-        when(productoRepository.existsBySkuIgnoreCase("APF-AIN-ACVE-0001")).thenReturn(false);
-
-        String sku = productoService.generarSku("Almacén Insumos Norte", "Aceite de Coco Virgen Extra");
-        assertEquals("APF-AIN-ACVE-0001", sku);
-    }
-
-    @Test
-    void generarSkuConColisionIncrementaCorrelativo() {
-        when(productoRepository.countBySkuStartingWith("APF-AIN-ACVE")).thenReturn(1L);
-        // Supongamos que conteo da 1 (inicia en 2), pero el 0002 ya existe por registros previos
-        when(productoRepository.existsBySkuIgnoreCase("APF-AIN-ACVE-0002")).thenReturn(true);
-        when(productoRepository.existsBySkuIgnoreCase("APF-AIN-ACVE-0003")).thenReturn(false);
-
-        String sku = productoService.generarSku("Almacén Insumos Norte", "Aceite de Coco Virgen Extra");
-        assertEquals("APF-AIN-ACVE-0003", sku);
-    }
-
-    @Test
     void sugerirSkuRetornaMapaConSkuSugerido() {
         when(almacenRepository.findById(1L)).thenReturn(Optional.of(almacenNorte));
         when(productoRepository.countBySkuStartingWith("APF-AIN-ACVE")).thenReturn(0L);

@@ -2,8 +2,8 @@ import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { OrdenProduccionService } from '../produccion/services/orden-produccion.service';
-import { EstadoOrdenProduccion } from '../produccion/models/produccion.models';
+import { OrdenProduccionService } from '../produccion/ordenes/service/orden-produccion.service';
+import { EstadoOrdenProduccion } from '../produccion/ordenes/model/produccion.model';
 
 @Component({
   selector: 'app-dashboard',

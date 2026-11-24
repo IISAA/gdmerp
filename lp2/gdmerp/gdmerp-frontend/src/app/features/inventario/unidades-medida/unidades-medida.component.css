@@ -1,10 +1,7 @@
-/* ─────────────────────────────────────────────────────────────────────────────
-   CONTENEDOR PRINCIPAL
-───────────────────────────────────────────────────────────────────────────── */
 .sidenav-container {
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - 64px);
   background-color: transparent;
-  overflow-x: hidden; /* elimina scroll horizontal doble */
+  overflow-x: hidden;
 }
 
 .sidenav-content {
@@ -13,34 +10,33 @@
 }
 
 .contenedor-principal {
-  padding: 1.5rem 2rem;
+  padding: 24px;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   HEADER
-───────────────────────────────────────────────────────────────────────────── */
+/* Encabezado */
 .header-section {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1.25rem;
-  gap: 1.5rem;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
 .header-badges {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-.badge-total, .badge-activas {
+.badge-total,
+.badge-activas {
   font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.2rem 0.65rem;
-  border-radius: 9999px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -48,191 +44,203 @@
 .badge-total {
   background-color: #f1f5f9;
   color: #475569;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
 }
 
 .badge-activas {
-  background-color: #dcfce7;
-  color: #166534;
+  background-color: #f0fdf4;
+  color: #15803d;
   border: 1px solid #bbf7d0;
 }
 
 .titulo-seccion {
-  font-size: 1.55rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.25rem 0;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
 }
 
 .subtitulo-seccion {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
   color: #64748b;
-  font-size: 0.88rem;
-  margin: 0;
 }
 
 .acciones-header {
   display: flex;
-  gap: 0.75rem;
+  gap: 10px;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.sync-bar {
-  margin-bottom: 0.75rem;
-  border-radius: 4px;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   BUSCADOR
-───────────────────────────────────────────────────────────────────────────── */
-.buscador-caja {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.icono-busqueda {
-  position: absolute;
-  left: 0.75rem;
-  color: #94a3b8;
-  font-size: 1.15rem;
-  width: 1.15rem;
-  height: 1.15rem;
-}
-
-.input-busqueda {
-  padding: 0.55rem 1rem 0.55rem 2.4rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  font-size: 0.88rem;
-  width: 270px;
-  background-color: white;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
-}
-
-.input-busqueda:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   BOTONES HEADER
-───────────────────────────────────────────────────────────────────────────── */
-.btn-sync {
-  font-size: 0.85rem;
-  font-weight: 600;
-  height: 40px;
-  color: #475569;
-  border-color: #cbd5e1;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
+.btn-sync,
 .btn-nueva-unidad {
-  font-weight: 600;
-  height: 40px;
+  height: 44px;
+  border-radius: 8px;
+  padding: 0 18px;
 }
 
 .spinner-inline {
   display: inline-block;
-  margin-right: 0.4rem;
+  margin-right: 6px;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   FILTROS POR MAGNITUD
-───────────────────────────────────────────────────────────────────────────── */
+.sync-bar {
+  margin-bottom: 12px;
+  border-radius: 4px;
+}
+
+/* Barra de filtros */
+.toolbar-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filtro-busqueda {
+  width: 100%;
+  max-width: 460px;
+}
+
 .filtro-magnitudes-bar {
-  margin-bottom: 1.25rem;
   overflow-x: auto;
-  padding-bottom: 0.25rem;
+  padding-bottom: 2px;
 }
 
 .chip-magnitud {
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.18s, color 0.18s;
 }
 
 .chip-icon {
-  font-size: 1.05rem;
-  width: 1.05rem;
-  height: 1.05rem;
-  margin-right: 0.25rem;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
 }
 
 .chip-activo {
   background-color: #1e293b !important;
-  color: white !important;
+  color: #ffffff !important;
 }
 
 .chip-activo .chip-icon {
-  color: white !important;
+  color: #ffffff !important;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   TABLA
-───────────────────────────────────────────────────────────────────────────── */
-.tabla-card {
-  background: white;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+/* Tabla Material */
+.tabla-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
-.tabla-unidades { width: 100%; }
+.table-scroll {
+  overflow-x: auto;
+  width: 100%;
+}
 
-.th-codigo    { width: 150px; }
-.th-nombre    { width: 200px; }
-.th-categoria { width: 170px; }
-.th-factor    { width: 240px; }
-.th-sunat     { width: 130px; }
-.th-decimales { width: 110px; }
-.th-activo    { width: 130px; }
-.th-acciones  { width: 75px; text-align: center; }
+.tabla-unidades {
+  width: 100%;
+  min-width: 960px;
+}
 
-.codigo-cluster { display: flex; align-items: center; gap: 0.4rem; }
+.tabla-unidades th.mat-mdc-header-cell,
+.tabla-unidades td.mat-mdc-cell {
+  padding: 10px 12px;
+}
+
+.tabla-unidades th.mat-mdc-header-cell:first-child,
+.tabla-unidades td.mat-mdc-cell:first-child {
+  padding-left: 16px;
+}
+
+.tabla-unidades th.mat-mdc-header-cell:last-child,
+.tabla-unidades td.mat-mdc-cell:last-child {
+  padding-right: 16px;
+}
+
+.tabla-unidades th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.fila-unidad:hover {
+  background-color: #f8fafc;
+}
+
+.codigo-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
 
 .codigo-badge {
   font-family: monospace;
-  font-weight: 700;
-  color: #1e293b;
-  background-color: #f1f5f9;
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
+  font-weight: 600;
   font-size: 0.85rem;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
-.simbolo-tag { color: #64748b; font-size: 0.82rem; }
+.simbolo-tag {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.td-nombre {
+  font-weight: 600;
+  color: #0f172a;
+}
 
 .categoria-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 700;
+  gap: 4px;
+  font-size: 0.74rem;
+  font-weight: 600;
   text-transform: uppercase;
   background-color: #f8fafc;
-  padding: 0.2rem 0.55rem;
-  border-radius: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
   border: 1px solid #e2e8f0;
+  white-space: nowrap;
 }
 
-.categoria-icon { font-size: 0.95rem; width: 0.95rem; height: 0.95rem; }
+.categoria-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+}
 
-.factor-wrap { display: flex; flex-direction: column; }
+.factor-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 .factor-num {
-  font-weight: 700;
-  color: #0f172a;
   font-family: monospace;
-  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 0.88rem;
 }
 
-.factor-desc { font-size: 0.76rem; color: #64748b; }
+.factor-desc {
+  font-size: 0.76rem;
+  color: #64748b;
+}
 
 .sunat-pill {
   font-family: monospace;
@@ -240,170 +248,192 @@
   font-weight: 600;
   background-color: #eff6ff;
   color: #1e40af;
-  padding: 0.18rem 0.45rem;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
   border: 1px solid #bfdbfe;
 }
 
-.tipo-fraccionario, .tipo-discreto {
+.tipo-fraccionario,
+.tipo-discreto {
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
-  font-size: 0.78rem;
+  gap: 4px;
+  font-size: 0.76rem;
   font-weight: 600;
-  padding: 0.18rem 0.45rem;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
-.tipo-fraccionario { background-color: #ecfdf5; color: #065f46; }
-.tipo-discreto     { background-color: #fefce8; color: #854d0e; }
+.tipo-fraccionario {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
 
-.tipo-icon { font-size: 0.9rem; width: 0.9rem; height: 0.9rem; }
+.tipo-discreto {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
 
-.toggle-label { font-size: 0.8rem; font-weight: 500; color: #475569; }
+.tipo-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
 
-.fila-unidad { transition: background-color 0.15s ease; }
-.fila-unidad:hover { background-color: #f8fafc; }
+.toggle-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #475569;
+}
 
-.sin-dato { color: #94a3b8; font-style: italic; }
+.col-acciones {
+  width: 72px;
+  text-align: right;
+}
 
-.loading-state, .estado-vacio {
+.sin-dato {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Loading y vacío */
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1rem;
+  gap: 12px;
+  padding: 48px 16px;
   color: #64748b;
 }
 
-.loading-state span { margin-top: 1rem; }
-
-.vacio-icon {
-  font-size: 3rem;
-  width: 3rem;
-  height: 3rem;
-  color: #cbd5e1;
-  margin-bottom: 0.75rem;
+.sin-datos {
+  text-align: center;
+  padding: 48px 16px !important;
+  color: #64748b;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   SIDE DRAWER — sin scroll doble, ancho fijo 540px
-───────────────────────────────────────────────────────────────────────────── */
+.empty-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+/* Side Drawer */
 .unidad-drawer {
-  width: 540px;
+  width: 500px;
   max-width: 95vw;
-  background-color: white;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.14);
-  overflow-x: hidden; /* evita scroll horizontal dentro del drawer */
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
-/* Cabecera (sustituye mat-toolbar para evitar overflow) */
 .drawer-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1.25rem 1.5rem 1rem;
-  background-color: #0f172a;
-  color: white;
+  padding: 16px 20px;
+  background-color: #ffffff;
   flex-shrink: 0;
 }
 
-.drawer-header-info { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
-
-.drawer-titulo {
-  font-size: 1.1rem;
-  font-weight: 700;
+.drawer-header-info {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.drawer-titulo-icon { font-size: 1.2rem; }
+.drawer-titulo {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+}
 
-.drawer-subtitulo { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
+.drawer-subtitulo {
+  font-size: 0.82rem;
+  color: #64748b;
+}
 
-/* Formulario como columna flex para que el footer quede siempre abajo */
 .drawer-formulario {
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden; /* el scroll solo ocurre en drawer-body */
+  overflow: hidden;
 }
 
 .drawer-body {
-  padding: 1.25rem 1.5rem;
+  padding: 20px;
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0; /* Las secciones manejan su propio espaciado */
 }
 
-/* ─── Secciones del formulario ─── */
 .form-section {
-  margin-bottom: 1.25rem;
+  margin-bottom: 16px;
 }
 
 .form-section-label {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #334155;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin: 0 0 0.6rem 0;
+  margin: 0 0 8px;
 }
 
 .section-icon {
-  font-size: 1rem;
-  width: 1rem;
-  height: 1rem;
-  color: #1976d2;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
 }
 
-/* Asistente visual de factor */
 .ayuda-factor-box {
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 8px;
   background-color: #fffbeb;
   border: 1px solid #fde68a;
-  border-radius: 0.5rem;
-  padding: 0.65rem 0.85rem;
-  margin-bottom: 0.75rem;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
 }
 
 .ayuda-icon {
-  font-size: 1.15rem;
-  width: 1.15rem;
-  height: 1.15rem;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
   color: #d97706;
   flex-shrink: 0;
-  margin-top: 1px;
 }
 
 .ayuda-texto {
-  font-size: 0.84rem;
+  font-size: 0.83rem;
   color: #78350f;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 .suffix-base {
-  font-weight: 700;
+  font-weight: 600;
   color: #475569;
   font-size: 0.85rem;
 }
 
-/* Toggles compactos */
 .toggles-compactos {
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -411,40 +441,45 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 1rem;
+  gap: 16px;
+  padding: 12px 14px;
 }
 
-.toggle-info { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
-.toggle-titulo { font-size: 0.88rem; font-weight: 600; color: #1e293b; }
+.toggle-titulo {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+}
 
-.toggle-desc-small { font-size: 0.76rem; color: #64748b; line-height: 1.4; }
+.toggle-desc-small {
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.35;
+}
 
-/* Grid dos columnas */
 .row-2-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-.w-full { width: 100%; }
+.w-full {
+  width: 100%;
+}
 
-/* Footer fijo */
 .drawer-footer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.9rem 1.5rem;
-  background-color: #f8fafc;
+  gap: 12px;
+  padding: 16px 20px;
+  background-color: #ffffff;
   border-top: 1px solid #e2e8f0;
   flex-shrink: 0;
-}
-
-.btn-guardar {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-weight: 600;
 }

@@ -13,8 +13,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
-import { ListaMaterialesService } from '../../services/lista-materiales.service';
-import { ListaMaterialesResponse } from '../../models/lista-materiales.model';
+import { ListaMaterialesService } from '../service/lista-materiales.service';
+import { ListaMaterialesResponse } from '../model/lista-materiales.model';
 
 @Component({
   selector: 'app-lista-materiales-list',

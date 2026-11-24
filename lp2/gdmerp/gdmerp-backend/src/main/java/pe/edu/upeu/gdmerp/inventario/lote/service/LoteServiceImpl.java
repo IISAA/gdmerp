@@ -10,18 +10,17 @@ import pe.edu.upeu.gdmerp.inventario.lote.dto.LoteResponse;
 import pe.edu.upeu.gdmerp.inventario.lote.entity.Lote;
 import pe.edu.upeu.gdmerp.inventario.lote.mapper.LoteMapper;
 import pe.edu.upeu.gdmerp.inventario.lote.repository.LoteRepository;
+import pe.edu.upeu.gdmerp.inventario.producto.entity.MovimientoInventario;
 import pe.edu.upeu.gdmerp.inventario.producto.entity.Producto;
+import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
 import pe.edu.upeu.gdmerp.inventario.producto.repository.ProductoRepository;
 import pe.edu.upeu.gdmerp.shared.exception.ResourceNotFoundException;
-import pe.edu.upeu.gdmerp.inventario.producto.entity.MovimientoInventario;
-import pe.edu.upeu.gdmerp.inventario.producto.repository.MovimientoInventarioRepository;
+import pe.edu.upeu.gdmerp.shared.util.CodigoGeneratorUtil;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,14 +38,16 @@ public class LoteServiceImpl implements LoteService {
         if (request.fechaVencimiento().isBefore(request.fechaProduccion())) {
             throw new IllegalArgumentException("La fecha de vencimiento no puede ser anterior a la de producción");
         }
+        if (request.cantidadActual() == null || request.cantidadActual().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("La cantidad del lote debe ser mayor a cero");
+        }
 
         Producto producto = productoRepository.findById(request.productoId())
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Producto no encontrado con id " + request.productoId()));
 
-        String numeroLote = (request.numeroLote() == null || request.numeroLote().isBlank())
-                ? generarSiguienteNumeroLote()
-                : request.numeroLote().trim().toUpperCase();
+        String codigoNormalizado = CodigoGeneratorUtil.normalizarCodigo(request.numeroLote());
+        String numeroLote = (codigoNormalizado != null) ? codigoNormalizado : generarSiguienteNumeroLote();
 
         if (loteRepository.existsByNumeroLoteIgnoreCaseAndProductoId(numeroLote, producto.getId())) {
             throw new IllegalStateException("Ya existe el lote " + numeroLote + " para este producto");
@@ -88,7 +89,7 @@ public class LoteServiceImpl implements LoteService {
     public List<LoteResponse> listarPorProducto(Long productoId) {
         return loteRepository.findByProductoIdOrderByFechaVencimientoAsc(productoId).stream()
                 .map(loteMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -109,24 +110,10 @@ public class LoteServiceImpl implements LoteService {
     }
 
     private String generarSiguienteNumeroLote() {
-        int anioActual = LocalDate.now().getYear();
-        String prefijo = "LT-" + anioActual + "-";
-
-        Optional<String> ultimoCodigoOpt = loteRepository.findTopNumeroLoteByPrefijo(prefijo);
-
-        int siguienteCorrelativo = 1;
-        if (ultimoCodigoOpt.isPresent()) {
-            String ultimo = ultimoCodigoOpt.get().trim();
-            if (ultimo.startsWith(prefijo)) {
-                String parteNumero = ultimo.substring(prefijo.length()).trim();
-                try {
-                    siguienteCorrelativo = Integer.parseInt(parteNumero) + 1;
-                } catch (NumberFormatException ignored) {
-                    siguienteCorrelativo = 1;
-                }
-            }
-        }
-
-        return String.format("%s%03d", prefijo, siguienteCorrelativo);
+        String prefijo = "LT-" + LocalDate.now().getYear();
+        long conteo = loteRepository.countByNumeroLoteStartingWith(prefijo);
+        return CodigoGeneratorUtil.generarCorrelativoUnico(
+                prefijo, conteo, 3, loteRepository::existsByNumeroLoteIgnoreCase
+        );
     }
 }

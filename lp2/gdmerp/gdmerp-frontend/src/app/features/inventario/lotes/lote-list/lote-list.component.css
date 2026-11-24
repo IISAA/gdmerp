@@ -1,57 +1,151 @@
 .lote-container {
-    padding: 16px;
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .lote-header {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .lote-title {
-    font-size: 1.25rem;
-    font-weight: 700;
     margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
 }
 
 .lote-subtitle {
-    font-size: 0.875rem;
-    color: #6b7280;
     margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: #64748b;
 }
 
-.lote-actions {
+.btn-registrar {
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 8px;
+}
+
+/* Barra de filtros alineada */
+.lote-toolbar {
     display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
 }
 
 .filtro-busqueda {
-    width: 240px;
+    flex: 1;
+    min-width: 260px;
 }
 
 .filtro-producto {
-    width: 210px;
+    width: 280px;
+}
+
+/* Contenedor de tabla */
+.tabla-wrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
 .lote-table {
     width: 100%;
-    background: #ffffff;
-    border-radius: 8px;
-    overflow: hidden;
 }
 
-.vencido {
-    color: #dc2626;
+.lote-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.fila-lote:hover {
+    background-color: #f8fafc;
+}
+
+.codigo-lote {
+    font-family: monospace;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #0f172a;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.col-producto {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.col-num {
+    text-align: right;
+}
+
+.stock-valor {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* Semáforo FEFO */
+.badge-fefo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.82rem;
     font-weight: 600;
 }
 
+.badge-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.badge-fefo--vencido {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.badge-fefo--por-vencer {
+    background-color: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.badge-fefo--vigente {
+    background-color: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+/* Estado vacío */
 .sin-datos {
-    padding: 24px;
     text-align: center;
-    color: #6b7280;
+    padding: 48px 16px !important;
+    color: #64748b;
+}
+
+.empty-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #cbd5e1;
+    margin-bottom: 8px;
 }

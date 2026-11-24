@@ -88,30 +88,30 @@ export class UnidadesMedidaComponent implements OnInit {
 
   // ── Filtros por magnitud ─────────────────────────────────────────────────
   readonly categoriasFiltro: OpcionCategoriaFiltro[] = [
-    { valor: 'TODAS',          label: 'Todas las Magnitudes', icono: 'all_inclusive' },
-    { valor: 'MASA',           label: 'Masa / Peso',          icono: 'scale'         },
-    { valor: 'LONGITUD',       label: 'Longitud',             icono: 'straighten'    },
-    { valor: 'VOLUMEN',        label: 'Volumen / Líquidos',   icono: 'water_drop'    },
-    { valor: 'SUPERFICIE',     label: 'Superficie / Área',    icono: 'square_foot'   },
-    { valor: 'UNIDAD_EMPAQUE', label: 'Unidades y Empaque',   icono: 'inventory_2'   },
+    { valor: 'TODAS', label: 'Todas las Magnitudes', icono: 'all_inclusive' },
+    { valor: 'MASA', label: 'Masa / Peso', icono: 'scale' },
+    { valor: 'LONGITUD', label: 'Longitud', icono: 'straighten' },
+    { valor: 'VOLUMEN', label: 'Volumen / Líquidos', icono: 'water_drop' },
+    { valor: 'SUPERFICIE', label: 'Superficie / Área', icono: 'square_foot' },
+    { valor: 'UNIDAD_EMPAQUE', label: 'Unidades y Empaque', icono: 'inventory_2' },
   ];
 
   // ── Opciones de categoría en el formulario (sin asteriscos manuales) ─────
   readonly categoriasFormulario: { valor: CategoriaUnidadMedida; label: string }[] = [
-    { valor: 'MASA',           label: 'Masa / Peso'         },
-    { valor: 'LONGITUD',       label: 'Longitud'            },
-    { valor: 'VOLUMEN',        label: 'Volumen / Capacidad' },
-    { valor: 'SUPERFICIE',     label: 'Superficie / Área'   },
-    { valor: 'UNIDAD_EMPAQUE', label: 'Unidades y Empaque'  },
+    { valor: 'MASA', label: 'Masa / Peso' },
+    { valor: 'LONGITUD', label: 'Longitud' },
+    { valor: 'VOLUMEN', label: 'Volumen / Capacidad' },
+    { valor: 'SUPERFICIE', label: 'Superficie / Área' },
+    { valor: 'UNIDAD_EMPAQUE', label: 'Unidades y Empaque' },
   ];
 
   /** Asistente visual: texto de ayuda dinámico según la categoría seleccionada */
   private readonly infoCategorias: Record<CategoriaUnidadMedida, InfoCategoriaBase> = {
-    MASA:           { unidad: 'Kilogramo', simbolo: 'kg',  ayuda: '¿A cuántos Kilogramos (kg) equivale 1 de esta unidad?',          placeholder: 'Ej. 50 para un saco de 50 kg, 0.001 para Gramo', sunatDefault: 'KGM' },
-    LONGITUD:       { unidad: 'Metro',     simbolo: 'm',   ayuda: '¿A cuántos Metros (m) equivale 1 de esta unidad?',                placeholder: 'Ej. 0.01 para Centímetro, 100 para Hectómetro',  sunatDefault: 'MTR' },
-    VOLUMEN:        { unidad: 'Litro',     simbolo: 'L',   ayuda: '¿A cuántos Litros (L) equivale 1 de esta unidad?',                placeholder: 'Ej. 3.7854 para Galón, 0.001 para Mililitro',   sunatDefault: 'LTR' },
-    SUPERFICIE:     { unidad: 'Metro²',    simbolo: 'm²',  ayuda: '¿A cuántos Metros cuadrados (m²) equivale 1 de esta unidad?',     placeholder: 'Ej. 0.0001 para cm², 10000 para Hectárea',       sunatDefault: 'MTK' },
-    UNIDAD_EMPAQUE: { unidad: 'Unidad',    simbolo: 'und', ayuda: 'Cantidad de unidades base que contiene (deja 1 para unidad simple).', placeholder: 'Ej. 1 para Unidad, 12 para Docena, 24 para Display', sunatDefault: 'NIU' },
+    MASA: { unidad: 'Kilogramo', simbolo: 'kg', ayuda: '¿A cuántos Kilogramos (kg) equivale 1 de esta unidad?', placeholder: 'Ej. 50 para un saco de 50 kg, 0.001 para Gramo', sunatDefault: 'KGM' },
+    LONGITUD: { unidad: 'Metro', simbolo: 'm', ayuda: '¿A cuántos Metros (m) equivale 1 de esta unidad?', placeholder: 'Ej. 0.01 para Centímetro, 100 para Hectómetro', sunatDefault: 'MTR' },
+    VOLUMEN: { unidad: 'Litro', simbolo: 'L', ayuda: '¿A cuántos Litros (L) equivale 1 de esta unidad?', placeholder: 'Ej. 3.7854 para Galón, 0.001 para Mililitro', sunatDefault: 'LTR' },
+    SUPERFICIE: { unidad: 'Metro²', simbolo: 'm²', ayuda: '¿A cuántos Metros cuadrados (m²) equivale 1 de esta unidad?', placeholder: 'Ej. 0.0001 para cm², 10000 para Hectárea', sunatDefault: 'MTK' },
+    UNIDAD_EMPAQUE: { unidad: 'Unidad', simbolo: 'und', ayuda: 'Cantidad de unidades base que contiene (deja 1 para unidad simple).', placeholder: 'Ej. 1 para Unidad, 12 para Docena, 24 para Display', sunatDefault: 'NIU' },
   };
 
   // ── Lista filtrada computada ──────────────────────────────────────────────
@@ -136,27 +136,26 @@ export class UnidadesMedidaComponent implements OnInit {
 
   /** Texto de ayuda dinámico para el campo Factor de Conversión */
   readonly ayudaFactor = computed(() =>
-    this.infoCategorias[this.categoriaSeleccionada()].ayuda
+    (this.infoCategorias[this.categoriaSeleccionada()] ?? this.infoCategorias['MASA']).ayuda
   );
 
   readonly placeholderFactor = computed(() =>
-    this.infoCategorias[this.categoriaSeleccionada()].placeholder
+    (this.infoCategorias[this.categoriaSeleccionada()] ?? this.infoCategorias['MASA']).placeholder
   );
 
   readonly simboloBase = computed(() =>
-    this.infoCategorias[this.categoriaSeleccionada()].simbolo
+    (this.infoCategorias[this.categoriaSeleccionada()] ?? this.infoCategorias['MASA']).simbolo
   );
-
   // ── Formulario Reactivo ───────────────────────────────────────────────────
   readonly form: FormGroup = this.fb.group({
-    categoria:       ['MASA' as CategoriaUnidadMedida, [Validators.required]],
-    nombre:          ['', [Validators.required, Validators.maxLength(80)]],
-    codigo:          ['', [Validators.required, Validators.maxLength(20)]],
-    simbolo:         ['', [Validators.required, Validators.maxLength(15)]],
-    codigoSunat:     ['', [Validators.maxLength(10)]],
-    factorConversion:[1,  [Validators.required, Validators.min(0.0001)]],
-    permiteDecimales:[true],
-    activo:          [true],
+    categoria: ['MASA' as CategoriaUnidadMedida, [Validators.required]],
+    nombre: ['', [Validators.required, Validators.maxLength(80)]],
+    codigo: ['', [Validators.required, Validators.maxLength(20)]],
+    simbolo: ['', [Validators.required, Validators.maxLength(15)]],
+    codigoSunat: ['', [Validators.maxLength(10)]],
+    factorConversion: [1, [Validators.required, Validators.min(0.0001)]],
+    permiteDecimales: [true],
+    activo: [true],
   });
 
   ngOnInit(): void {
@@ -168,13 +167,14 @@ export class UnidadesMedidaComponent implements OnInit {
   // ── Suscripciones ─────────────────────────────────────────────────────────
 
   private _suscribirCambioCategoria(): void {
-    this.form.get('categoria')?.valueChanges.subscribe((cat: CategoriaUnidadMedida) => {
+    this.form.get('categoria')?.valueChanges.subscribe((cat: CategoriaUnidadMedida | null) => {
+      if (!cat || !this.infoCategorias[cat]) return;
+
       this.categoriaSeleccionada.set(cat);
-      // Ajusta permiteDecimales automáticamente si no se está editando
       if (!this.selectedUnidad()) {
         const esDiscreta = cat === 'UNIDAD_EMPAQUE';
         this.form.get('permiteDecimales')?.setValue(!esDiscreta, { emitEvent: false });
-        // Precarga el código SUNAT por defecto de la categoría
+
         const sunatActual = this.form.get('codigoSunat')?.value;
         const defaultSunats = Object.values(this.infoCategorias).map(i => i.sunatDefault);
         if (!sunatActual || defaultSunats.includes(sunatActual)) {
@@ -302,8 +302,21 @@ export class UnidadesMedidaComponent implements OnInit {
   cerrarDrawer(): void {
     this.isDrawerOpen.set(false);
     this.selectedUnidad.set(null);
-    this.form.reset();
-    this.form.get('codigo')?.enable();
+    this.categoriaSeleccionada.set('MASA');
+    this.form.reset(
+      {
+        categoria: 'MASA',
+        nombre: '',
+        codigo: '',
+        simbolo: '',
+        codigoSunat: this.infoCategorias['MASA'].sunatDefault,
+        factorConversion: 1,
+        permiteDecimales: true,
+        activo: true,
+      },
+      { emitEvent: false }
+    );
+    this.form.get('codigo')?.enable({ emitEvent: false });
   }
 
   // ── Cambio de estado (slide-toggle en tabla) ──────────────────────────────
@@ -340,14 +353,14 @@ export class UnidadesMedidaComponent implements OnInit {
     const raw = this.form.getRawValue();
 
     const request: UnidadMedidaRequest = {
-      codigo:           raw.codigo.trim().toUpperCase(),
-      codigoSunat:      raw.codigoSunat ? raw.codigoSunat.trim().toUpperCase() : undefined,
-      nombre:           raw.nombre.trim(),
-      simbolo:          raw.simbolo.trim(),
-      categoria:        raw.categoria as CategoriaUnidadMedida,
+      codigo: raw.codigo.trim().toUpperCase(),
+      codigoSunat: raw.codigoSunat ? raw.codigoSunat.trim().toUpperCase() : undefined,
+      nombre: raw.nombre.trim(),
+      simbolo: raw.simbolo.trim(),
+      categoria: raw.categoria as CategoriaUnidadMedida,
       factorConversion: Number(raw.factorConversion),
       permiteDecimales: Boolean(raw.permiteDecimales),
-      activo:           Boolean(raw.activo),
+      activo: Boolean(raw.activo),
     };
 
     const unidadExistente = this.selectedUnidad();
@@ -402,7 +415,7 @@ export class UnidadesMedidaComponent implements OnInit {
   private mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
     const panelClass =
       tipo === 'success' ? ['snackbar-success'] :
-      tipo === 'error'   ? ['snackbar-error']   : ['snackbar-warning'];
+        tipo === 'error' ? ['snackbar-error'] : ['snackbar-warning'];
     this.snackBar.open(mensaje, 'Cerrar', {
       duration: 4500,
       horizontalPosition: 'right',

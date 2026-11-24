@@ -44,8 +44,7 @@ public class ProductoController {
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) Long almacenId,
             @RequestParam(required = false) BigDecimal minStock,
-            Sort sort
-    ) {
+            Sort sort) {
         return ResponseEntity.ok(productoService.filtrarDinamicamente(categoriaId, almacenId, minStock, sort));
     }
 
@@ -69,7 +68,8 @@ public class ProductoController {
 
     @Operation(summary = "Actualiza un producto")
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoResponse> actualizar(@PathVariable Long id, @Valid @RequestBody ProductoRequest request) {
+    public ResponseEntity<ProductoResponse> actualizar(@PathVariable Long id,
+            @Valid @RequestBody ProductoRequest request) {
         return ResponseEntity.ok(productoService.actualizar(id, request));
     }
 

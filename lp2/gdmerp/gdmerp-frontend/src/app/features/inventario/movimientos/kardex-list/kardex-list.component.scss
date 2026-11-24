@@ -1,93 +1,251 @@
-.kardex-container {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+:host {
+    display: block;
 }
 
-.header-row {
+.kardex-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Encabezado */
+.kardex-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
-    gap: 12px;
 }
 
-.header-row h1 {
+.kardex-title {
     margin: 0;
-    font-size: 22px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
 }
 
-.subtitle {
+.kardex-subtitle {
     margin: 4px 0 0;
+    font-size: 0.9rem;
     color: #64748b;
-    font-size: 13px;
 }
 
-.filter-card {
-    padding: 16px 16px 4px;
+.btn-nuevo {
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 8px;
+}
+
+/* Panel de filtros */
+.filter-panel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .filters-grid {
     display: grid;
     grid-template-columns: 2fr 1.6fr 1fr 1fr auto;
     gap: 12px;
-    align-items: start;
+    align-items: center;
 }
 
 .filter-actions {
     display: flex;
     gap: 8px;
-    padding-top: 4px;
+    align-items: center;
 }
 
-.table-card {
+.btn-filtrar,
+.btn-limpiar {
+    height: 44px;
+    border-radius: 8px;
+}
+
+/* Contenedor de tabla */
+.tabla-wrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
     overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
-.table-wrapper {
+.table-scroll {
     overflow-x: auto;
-}
-
-.full-width {
     width: 100%;
 }
 
-.sku-sub {
-    font-size: 11px;
-    color: #64748b;
+.kardex-table {
+    width: 100%;
+    min-width: 980px; // Garantiza que ninguna columna se aplaste en pantallas medianas
 }
 
-.badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
+/* Compacta ligeramente el padding lateral de Angular Material (de 16px a 12px) */
+.kardex-table th.mat-mdc-header-cell,
+.kardex-table td.mat-mdc-cell {
+    padding: 10px 12px;
+}
+
+.kardex-table th.mat-mdc-header-cell:first-child,
+.kardex-table td.mat-mdc-cell:first-child {
+    padding-left: 16px;
+}
+
+.kardex-table th.mat-mdc-header-cell:last-child,
+.kardex-table td.mat-mdc-cell:last-child {
+    padding-right: 16px;
+}
+
+.kardex-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.fila-kardex:hover {
+    background-color: #f8fafc;
+}
+
+/* Celdas */
+.col-fecha {
+    white-space: nowrap;
+    color: #475569;
+    font-size: 0.84rem;
+}
+
+.producto-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 190px; // Evita que el nombre se parta en 4 líneas
+}
+
+.producto-nombre {
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.25;
+}
+
+.badge-sku {
+    align-self: flex-start;
+    font-family: monospace;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap; // El SKU nunca se parte en 2 líneas
+}
+
+.col-num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.texto-secundario {
+    color: #475569;
+}
+
+.stock-final {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.col-referencia {
+    color: #475569;
+    font-size: 0.85rem;
+    min-width: 180px;
+    line-height: 1.3;
+}
+
+/* Badges de tipo de movimiento */
+.badge-mov {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;
 }
 
-.badge-in {
-    background: #dcfce7;
-    color: #166534;
+.badge-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
 }
 
-.badge-out {
-    background: #fee2e2;
-    color: #991b1b;
+.badge-mov--in {
+    background-color: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.badge-mov--out {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
 }
 
 .text-in {
-    color: #166534;
+    color: #15803d;
     font-weight: 600;
 }
 
 .text-out {
-    color: #991b1b;
+    color: #dc2626;
     font-weight: 600;
 }
 
-.empty-cell {
+/* Estado vacío y paginador */
+.sin-datos {
     text-align: center;
-    padding: 24px;
+    padding: 48px 16px !important;
     color: #64748b;
+}
+
+.empty-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+}
+
+.kardex-paginator {
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .filters-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter-actions {
+        grid-column: span 2;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 640px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        grid-column: span 1;
+    }
 }

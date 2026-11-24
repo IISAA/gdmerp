@@ -10,7 +10,7 @@ export interface DetalleListaMaterialesDto {
 
 export interface ListaMaterialesDto {
   id?: number;
-  codigo: string;
+  codigo?: string;
   productoTerminadoId: number;
   nombreProductoTerminado?: string;
   skuProductoTerminado?: string;
@@ -25,7 +25,7 @@ export interface DetalleListaMaterialesRequest {
 }
 
 export interface ListaMaterialesRequest {
-  codigo: string;
+  codigo?: string;
   productoTerminadoId: number;
   cantidadBase: number;
   detalles: DetalleListaMaterialesRequest[];
@@ -50,4 +50,8 @@ export interface ListaMaterialesResponse {
   unidadMedidaProductoTerminado?: string;
   cantidadBase: number;
   detalles: DetalleListaMaterialesResponse[];
+}
+
+export interface SugerirCodigoBomResponse {
+  codigoSugerido: string;
 }

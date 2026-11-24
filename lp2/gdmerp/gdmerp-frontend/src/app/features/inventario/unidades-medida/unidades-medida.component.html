@@ -1,12 +1,10 @@
 <mat-sidenav-container class="sidenav-container">
 
-  <!-- ======================================================================== -->
-  <!-- 1. CONTENIDO PRINCIPAL: TABLA DE UNIDADES DE MEDIDA                      -->
-  <!-- ======================================================================== -->
+  <!-- 1. CONTENIDO PRINCIPAL -->
   <mat-sidenav-content class="sidenav-content">
     <div class="contenedor-principal">
 
-      <!-- ── Header ─────────────────────────────────────────────────────────── -->
+      <!-- Encabezado -->
       <div class="header-section">
         <div>
           <div class="header-badges">
@@ -15,221 +13,190 @@
           </div>
           <h2 class="titulo-seccion">Catálogo de Unidades de Medida</h2>
           <p class="subtitulo-seccion">
-            Estándares internacionales (SI y UN/ECE) y factores de conversión para inventario, recetas y producción.
+            Estándares internacionales (SI y UN/ECE) y factores de conversión para inventario, recetas y producción
           </p>
         </div>
 
         <div class="acciones-header">
-          <!-- Buscador -->
-          <div class="buscador-caja">
-            <mat-icon class="icono-busqueda">search</mat-icon>
-            <input
-              type="text"
-              placeholder="Buscar por código, nombre o SUNAT..."
-              [value]="textoBusqueda()"
-              (input)="onBuscar($event)"
-              class="input-busqueda"
-            />
-          </div>
-
-          <!-- Botón: Sincronizar catálogo oficial -->
-          <button
-            mat-stroked-button
-            class="btn-sync"
-            (click)="cargarEstandares()"
-            [disabled]="isSyncing()"
-            matTooltip="Restaura las 18 unidades SI/SUNAT oficiales sin borrar las existentes"
-          >
+          <button mat-stroked-button class="btn-sync" (click)="cargarEstandares()" [disabled]="isSyncing()"
+            matTooltip="Restaura las 18 unidades SI/SUNAT oficiales sin borrar las existentes">
             @if (isSyncing()) {
-              <mat-spinner diameter="16" class="spinner-inline"></mat-spinner>
+            <mat-spinner diameter="16" class="spinner-inline"></mat-spinner>
             } @else {
-              <mat-icon>sync</mat-icon>
+            <mat-icon>sync</mat-icon>
             }
             Cargar Estándares SI/SUNAT
           </button>
 
-          <!-- Botón: Nueva Unidad -->
-          <button mat-raised-button color="primary" class="btn-nueva-unidad" (click)="abrirNuevo()">
+          <button mat-flat-button color="primary" class="btn-nueva-unidad" (click)="abrirNuevo()">
             <mat-icon>add</mat-icon>
             Nueva Unidad
           </button>
         </div>
       </div>
 
-      <!-- Progress bar durante sincronización -->
       @if (isSyncing()) {
-        <mat-progress-bar mode="indeterminate" class="sync-bar"></mat-progress-bar>
+      <mat-progress-bar mode="indeterminate" class="sync-bar"></mat-progress-bar>
       }
 
-      <!-- ── Filtros por magnitud ────────────────────────────────────────────── -->
-      <div class="filtro-magnitudes-bar">
-        <mat-chip-set class="chip-set-magnitudes">
-          @for (cat of categoriasFiltro; track cat.valor) {
-            <mat-chip
-              [highlighted]="categoriaFiltro() === cat.valor"
-              (click)="seleccionarCategoriaFiltro(cat.valor)"
-              class="chip-magnitud"
-              [class.chip-activo]="categoriaFiltro() === cat.valor"
-            >
+      <!-- Barra de Búsqueda y Filtros por Magnitud -->
+      <div class="toolbar-filtros">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filtro-busqueda">
+          <mat-label>Buscar por código, nombre, símbolo o SUNAT...</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [ngModel]="textoBusqueda()" (ngModelChange)="textoBusqueda.set($event)" />
+          @if (textoBusqueda()) {
+          <button mat-icon-button matSuffix type="button" (click)="textoBusqueda.set('')" aria-label="Limpiar búsqueda">
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </mat-form-field>
+
+        <div class="filtro-magnitudes-bar">
+          <mat-chip-set class="chip-set-magnitudes">
+            @for (cat of categoriasFiltro; track cat.valor) {
+            <mat-chip [highlighted]="categoriaFiltro() === cat.valor" (click)="seleccionarCategoriaFiltro(cat.valor)"
+              class="chip-magnitud" [class.chip-activo]="categoriaFiltro() === cat.valor">
               <mat-icon class="chip-icon">{{ cat.icono }}</mat-icon>
               {{ cat.label }}
             </mat-chip>
-          }
-        </mat-chip-set>
+            }
+          </mat-chip-set>
+        </div>
       </div>
 
-      <!-- ── Tabla de datos ─────────────────────────────────────────────────── -->
-      <div class="tabla-card">
+      <!-- Tabla Material -->
+      <div class="tabla-wrapper">
         @if (isLoading()) {
-          <div class="loading-state">
-            <mat-spinner diameter="40"></mat-spinner>
-            <span>Cargando unidades de medida...</span>
-          </div>
+        <div class="loading-state">
+          <mat-spinner diameter="36"></mat-spinner>
+          <span>Cargando unidades de medida...</span>
+        </div>
         } @else {
-          <div class="table-responsive">
-            <table mat-table [dataSource]="unidadesFiltradas()" class="tabla-unidades">
+        <div class="table-scroll">
+          <table mat-table [dataSource]="unidadesFiltradas()" class="tabla-unidades">
 
-              <!-- Código -->
-              <ng-container matColumnDef="codigo">
-                <th mat-header-cell *matHeaderCellDef class="th-codigo">CÓDIGO</th>
-                <td mat-cell *matCellDef="let row">
-                  <div class="codigo-cluster">
-                    <span class="codigo-badge">{{ row.codigo }}</span>
-                    <span class="simbolo-tag">({{ row.simbolo }})</span>
-                  </div>
-                </td>
-              </ng-container>
+            <!-- Código -->
+            <ng-container matColumnDef="codigo">
+              <th mat-header-cell *matHeaderCellDef>Código</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="codigo-cluster">
+                  <span class="codigo-badge">{{ row.codigo }}</span>
+                  <span class="simbolo-tag">({{ row.simbolo }})</span>
+                </div>
+              </td>
+            </ng-container>
 
-              <!-- Nombre -->
-              <ng-container matColumnDef="nombre">
-                <th mat-header-cell *matHeaderCellDef class="th-nombre">NOMBRE</th>
-                <td mat-cell *matCellDef="let row" class="td-nombre">
-                  <strong>{{ row.nombre }}</strong>
-                </td>
-              </ng-container>
+            <!-- Nombre -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef>Nombre</th>
+              <td mat-cell *matCellDef="let row" class="td-nombre">
+                {{ row.nombre }}
+              </td>
+            </ng-container>
 
-              <!-- Categoría -->
-              <ng-container matColumnDef="categoria">
-                <th mat-header-cell *matHeaderCellDef class="th-categoria">CATEGORÍA</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="categoria-badge" [style.color]="obtenerColorCategoria(row.categoria)">
-                    <mat-icon class="categoria-icon">{{ obtenerIconoCategoria(row.categoria) }}</mat-icon>
-                    {{ row.categoria }}
-                  </span>
-                </td>
-              </ng-container>
+            <!-- Categoría -->
+            <ng-container matColumnDef="categoria">
+              <th mat-header-cell *matHeaderCellDef>Categoría</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="categoria-badge" [style.color]="obtenerColorCategoria(row.categoria)">
+                  <mat-icon class="categoria-icon">{{ obtenerIconoCategoria(row.categoria) }}</mat-icon>
+                  {{ row.categoria }}
+                </span>
+              </td>
+            </ng-container>
 
-              <!-- Factor de Conversión -->
-              <ng-container matColumnDef="factor">
-                <th mat-header-cell *matHeaderCellDef class="th-factor">FACTOR</th>
-                <td mat-cell *matCellDef="let row" class="td-factor">
-                  <div class="factor-wrap">
-                    <span class="factor-num">{{ (row.factor ?? row.factorConversion) | number:'1.0-4' }}</span>
-                    <span class="factor-desc">{{ obtenerTextoEquivalencia(row) }}</span>
-                  </div>
-                </td>
-              </ng-container>
+            <!-- Factor de Conversión -->
+            <ng-container matColumnDef="factor">
+              <th mat-header-cell *matHeaderCellDef>Factor</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="factor-wrap">
+                  <span class="factor-num">{{ (row.factor ?? row.factorConversion) | number:'1.0-4' }}</span>
+                  <span class="factor-desc">{{ obtenerTextoEquivalencia(row) }}</span>
+                </div>
+              </td>
+            </ng-container>
 
-              <!-- Código SUNAT / ISO -->
-              <ng-container matColumnDef="codigoSunat">
-                <th mat-header-cell *matHeaderCellDef class="th-sunat">SUNAT (UN/ECE)</th>
-                <td mat-cell *matCellDef="let row">
-                  @if (row.codigoSunat) {
-                    <span class="sunat-pill">{{ row.codigoSunat }}</span>
-                  } @else {
-                    <span class="sin-dato">–</span>
-                  }
-                </td>
-              </ng-container>
+            <!-- Código SUNAT / ISO -->
+            <ng-container matColumnDef="codigoSunat">
+              <th mat-header-cell *matHeaderCellDef>SUNAT</th>
+              <td mat-cell *matCellDef="let row">
+                @if (row.codigoSunat) {
+                <span class="sunat-pill">{{ row.codigoSunat }}</span>
+                } @else {
+                <span class="sin-dato">—</span>
+                }
+              </td>
+            </ng-container>
 
-              <!-- Permite Decimales -->
-              <ng-container matColumnDef="permiteDecimales">
-                <th mat-header-cell *matHeaderCellDef class="th-decimales">TIPO</th>
-                <td mat-cell *matCellDef="let row">
-                  @if (row.permiteDecimales) {
-                    <span class="tipo-fraccionario" matTooltip="Admite fracciones (step 0.001)">
-                      <mat-icon class="tipo-icon">tune</mat-icon>Decimal
-                    </span>
-                  } @else {
-                    <span class="tipo-discreto" matTooltip="Solo números enteros (step 1)">
-                      <mat-icon class="tipo-icon">pin</mat-icon>Entero
-                    </span>
-                  }
-                </td>
-              </ng-container>
+            <!-- Permite Decimales -->
+            <ng-container matColumnDef="permiteDecimales">
+              <th mat-header-cell *matHeaderCellDef>Tipo</th>
+              <td mat-cell *matCellDef="let row">
+                @if (row.permiteDecimales) {
+                <span class="tipo-fraccionario" matTooltip="Admite fracciones (step 0.001)">
+                  <mat-icon class="tipo-icon">tune</mat-icon>Decimal
+                </span>
+                } @else {
+                <span class="tipo-discreto" matTooltip="Solo números enteros (step 1)">
+                  <mat-icon class="tipo-icon">pin</mat-icon>Entero
+                </span>
+                }
+              </td>
+            </ng-container>
 
-              <!-- Estado (slide-toggle) -->
-              <ng-container matColumnDef="activo">
-                <th mat-header-cell *matHeaderCellDef class="th-activo">ESTADO</th>
-                <td mat-cell *matCellDef="let row">
-                  <mat-slide-toggle
-                    [checked]="row.activo"
-                    color="primary"
-                    (change)="cambiarEstado(row, $event)"
-                    matTooltip="Activar o desactivar unidad en selectores"
-                  >
-                    <span class="toggle-label">{{ row.activo ? 'Activa' : 'Inactiva' }}</span>
-                  </mat-slide-toggle>
-                </td>
-              </ng-container>
+            <!-- Estado -->
+            <ng-container matColumnDef="activo">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-slide-toggle [checked]="row.activo" color="primary" (change)="cambiarEstado(row, $event)"
+                  matTooltip="Activar o desactivar unidad en selectores">
+                  <span class="toggle-label">{{ row.activo ? 'Activa' : 'Inactiva' }}</span>
+                </mat-slide-toggle>
+              </td>
+            </ng-container>
 
-              <!-- Acciones -->
-              <ng-container matColumnDef="acciones">
-                <th mat-header-cell *matHeaderCellDef class="th-acciones">EDITAR</th>
-                <td mat-cell *matCellDef="let row">
-                  <button
-                    mat-icon-button color="primary"
-                    (click)="abrirEditar(row)"
-                    matTooltip="Editar parámetros"
-                  >
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef class="col-acciones">Editar</th>
+              <td mat-cell *matCellDef="let row" class="col-acciones">
+                <button mat-icon-button color="primary" type="button" (click)="abrirEditar(row)"
+                  matTooltip="Editar parámetros">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </td>
+            </ng-container>
 
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="fila-unidad"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="fila-unidad"></tr>
 
-              <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell sin-datos-celda" [attr.colspan]="displayedColumns.length">
-                  <div class="estado-vacio">
-                    <mat-icon class="vacio-icon">straighten</mat-icon>
-                    <h3>No se encontraron unidades de medida</h3>
-                    <p>Ajusta el término de búsqueda o selecciona otra magnitud física.</p>
-                  </div>
-                </td>
-              </tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell sin-datos" [attr.colspan]="displayedColumns.length">
+                <mat-icon class="empty-icon">straighten</mat-icon>
+                <p>No se encontraron unidades de medida con los filtros actuales.</p>
+              </td>
+            </tr>
 
-            </table>
-          </div>
+          </table>
+        </div>
         }
       </div>
 
     </div>
   </mat-sidenav-content>
 
-  <!-- ======================================================================== -->
-  <!-- 2. SIDE DRAWER: FORMULARIO SIMPLIFICADO (SIN DOBLES ** NI DOBLE SCROLL)  -->
-  <!-- ======================================================================== -->
-  <mat-sidenav
-    #drawer
-    position="end"
-    mode="over"
-    [opened]="isDrawerOpen()"
-    (closed)="cerrarDrawer()"
-    class="unidad-drawer"
-  >
-    <!-- Cabecera del drawer -->
+  <!-- 2. SIDE DRAWER -->
+  <mat-sidenav #drawer position="end" mode="over" [opened]="isDrawerOpen()" (closed)="cerrarDrawer()"
+    class="unidad-drawer">
     <div class="drawer-header">
       <div class="drawer-header-info">
         <span class="drawer-titulo">
-          <mat-icon class="drawer-titulo-icon">{{ selectedUnidad() ? 'edit_note' : 'add_circle_outline' }}</mat-icon>
           {{ selectedUnidad() ? 'Editar Unidad de Medida' : 'Nueva Unidad de Medida' }}
         </span>
         <span class="drawer-subtitulo">
           {{ selectedUnidad()
-            ? 'Ajusta el factor de conversión o las propiedades de la unidad.'
-            : 'Registra una unidad derivada como "Saco de 50 kg" o "Caja × 12".' }}
+          ? 'Ajusta el factor de conversión o las propiedades de la unidad'
+          : 'Registra una unidad derivada como "Saco de 50 kg" o "Caja × 12"' }}
         </span>
       </div>
       <button mat-icon-button type="button" (click)="cerrarDrawer()" aria-label="Cerrar panel">
@@ -239,67 +206,57 @@
 
     <mat-divider></mat-divider>
 
-    <!-- Formulario -->
     <form [formGroup]="form" (ngSubmit)="guardar()" class="drawer-formulario" autocomplete="off">
       <div class="drawer-body">
 
-        <!-- ── PASO 1: Tipo de Magnitud ─────────────────────────────────────── -->
+        <!-- Paso 1 -->
         <div class="form-section">
           <p class="form-section-label">
             <mat-icon class="section-icon">category</mat-icon>
-            1 · ¿De qué tipo es esta unidad?
+            1 · Tipo de magnitud
           </p>
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Tipo de Magnitud</mat-label>
             <mat-select formControlName="categoria">
               @for (cat of categoriasFormulario; track cat.valor) {
-                <mat-option [value]="cat.valor">{{ cat.label }}</mat-option>
+              <mat-option [value]="cat.valor">{{ cat.label }}</mat-option>
               }
             </mat-select>
             @if (form.get('categoria')?.hasError('required')) {
-              <mat-error>Selecciona el tipo de magnitud.</mat-error>
+            <mat-error>Selecciona el tipo de magnitud.</mat-error>
             }
           </mat-form-field>
         </div>
 
-        <!-- ── PASO 2: Nombre (dispara autogeneración de código/símbolo) ─────── -->
+        <!-- Paso 2 -->
         <div class="form-section">
           <p class="form-section-label">
             <mat-icon class="section-icon">badge</mat-icon>
-            2 · ¿Cómo se llama esta unidad?
+            2 · Nombre de la unidad
           </p>
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Nombre de la Unidad</mat-label>
-            <input
-              matInput
-              formControlName="nombre"
-              placeholder="Ej. Saco de 50 kg, Bidón 20 Litros, Docena"
-            >
-            <mat-hint>Escribe el nombre y el código y símbolo se generarán automáticamente.</mat-hint>
+            <input matInput formControlName="nombre" placeholder="Ej. Saco de 50 kg, Bidón 20 Litros, Docena">
+            <mat-hint>El código y símbolo se sugieren automáticamente al escribir.</mat-hint>
             @if (form.get('nombre')?.hasError('required') && form.get('nombre')?.touched) {
-              <mat-error>El nombre es obligatorio.</mat-error>
+            <mat-error>El nombre es obligatorio.</mat-error>
             }
           </mat-form-field>
         </div>
 
-        <!-- ── PASO 3: Código y Símbolo (autogenerados, editables) ───────────── -->
+        <!-- Paso 3 -->
         <div class="form-section">
           <p class="form-section-label">
             <mat-icon class="section-icon">qr_code</mat-icon>
-            3 · Código único y símbolo (editables)
+            3 · Código único y símbolo
           </p>
           <div class="row-2-cols">
             <mat-form-field appearance="outline">
               <mat-label>Código Único</mat-label>
-              <input
-                matInput
-                formControlName="codigo"
-                placeholder="Ej. SAC50, BID20"
-                style="text-transform: uppercase; letter-spacing: 0.05em;"
-                [readonly]="!!selectedUnidad()"
-              >
+              <input matInput formControlName="codigo" placeholder="Ej. SAC50, BID20"
+                style="text-transform: uppercase; letter-spacing: 0.04em;" [readonly]="!!selectedUnidad()">
               @if (form.get('codigo')?.hasError('required') && form.get('codigo')?.touched) {
-                <mat-error>El código es obligatorio.</mat-error>
+              <mat-error>El código es obligatorio.</mat-error>
               }
             </mat-form-field>
 
@@ -307,20 +264,19 @@
               <mat-label>Símbolo gráfico</mat-label>
               <input matInput formControlName="simbolo" placeholder="Ej. sac50, bid">
               @if (form.get('simbolo')?.hasError('required') && form.get('simbolo')?.touched) {
-                <mat-error>El símbolo es obligatorio.</mat-error>
+              <mat-error>El símbolo es obligatorio.</mat-error>
               }
             </mat-form-field>
           </div>
         </div>
 
-        <!-- ── PASO 4: Factor de conversión con asistente visual ─────────────── -->
+        <!-- Paso 4 -->
         <div class="form-section">
           <p class="form-section-label">
             <mat-icon class="section-icon">calculate</mat-icon>
-            4 · ¿Cuánto vale en la unidad base?
+            4 · Equivalencia en unidad base
           </p>
 
-          <!-- Chip de ayuda contextual (sin asteriscos, solo explicación humana) -->
           <div class="ayuda-factor-box">
             <mat-icon class="ayuda-icon">lightbulb</mat-icon>
             <span class="ayuda-texto">{{ ayudaFactor() }}</span>
@@ -329,50 +285,38 @@
           <div class="row-2-cols">
             <mat-form-field appearance="outline">
               <mat-label>Factor de conversión</mat-label>
-              <input
-                matInput
-                type="number"
-                formControlName="factorConversion"
-                step="0.0001"
-                min="0.0001"
-                [placeholder]="placeholderFactor()"
-              >
+              <input matInput type="number" formControlName="factorConversion" step="0.0001" min="0.0001"
+                [placeholder]="placeholderFactor()">
               <span matTextSuffix class="suffix-base">{{ simboloBase() }}</span>
               @if (form.get('factorConversion')?.hasError('required')) {
-                <mat-error>El factor es obligatorio.</mat-error>
+              <mat-error>El factor es obligatorio.</mat-error>
               }
               @if (form.get('factorConversion')?.hasError('min')) {
-                <mat-error>Debe ser mayor a 0.</mat-error>
+              <mat-error>Debe ser mayor a 0.</mat-error>
               }
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Código SUNAT / UN-ECE</mat-label>
-              <input
-                matInput
-                formControlName="codigoSunat"
-                placeholder="Ej. KGM, NIU, LTR"
-                style="text-transform: uppercase;"
-              >
-              <mat-hint>Precargado según magnitud. Opcional.</mat-hint>
+              <input matInput formControlName="codigoSunat" placeholder="Ej. KGM, NIU, LTR"
+                style="text-transform: uppercase;">
+              <mat-hint>Opcional.</mat-hint>
             </mat-form-field>
           </div>
         </div>
 
-        <!-- ── PASO 5: Comportamiento (toggles compactos) ─────────────────────── -->
+        <!-- Paso 5 -->
         <div class="form-section">
           <p class="form-section-label">
             <mat-icon class="section-icon">settings</mat-icon>
             5 · Comportamiento
           </p>
           <div class="toggles-compactos">
-
             <div class="toggle-row">
               <div class="toggle-info">
                 <span class="toggle-titulo">Permite decimales en formularios</span>
                 <span class="toggle-desc-small">
-                  Activo → el campo de cantidad acepta 0.125 (paso 0.001).
-                  Inactivo → solo números enteros.
+                  Activo: acepta fracciones (paso 0.001). Inactivo: solo números enteros.
                 </span>
               </div>
               <mat-slide-toggle formControlName="permiteDecimales" color="primary"></mat-slide-toggle>
@@ -384,36 +328,28 @@
               <div class="toggle-info">
                 <span class="toggle-titulo">Visible en catálogos de productos</span>
                 <span class="toggle-desc-small">
-                  Si está inactivo, no aparecerá en el selector de Unidad al crear productos o recetas.
+                  Si está inactivo, no aparecerá en selectores de productos o recetas.
                 </span>
               </div>
               <mat-slide-toggle formControlName="activo" color="accent"></mat-slide-toggle>
             </div>
-
           </div>
         </div>
 
-      </div><!-- /drawer-body -->
+      </div>
 
-      <!-- Footer fijo -->
       <div class="drawer-footer">
-        <button mat-button type="button" (click)="cerrarDrawer()">Cancelar</button>
-        <button
-          mat-flat-button
-          color="primary"
-          type="submit"
-          [disabled]="form.invalid || isSaving()"
-          class="btn-guardar"
-        >
+        <button mat-stroked-button type="button" (click)="cerrarDrawer()" [disabled]="isSaving()">
+          Cancelar
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || isSaving()">
           @if (isSaving()) {
-            <mat-spinner diameter="18" class="spinner-inline"></mat-spinner>
+          <mat-spinner diameter="18" class="spinner-inline"></mat-spinner>
           }
-          <mat-icon>{{ selectedUnidad() ? 'save' : 'add_circle' }}</mat-icon>
-          {{ selectedUnidad() ? 'Actualizar Unidad' : 'Registrar Unidad' }}
+          <span>{{ selectedUnidad() ? 'Actualizar Unidad' : 'Registrar Unidad' }}</span>
         </button>
       </div>
     </form>
-
   </mat-sidenav>
 
 </mat-sidenav-container>

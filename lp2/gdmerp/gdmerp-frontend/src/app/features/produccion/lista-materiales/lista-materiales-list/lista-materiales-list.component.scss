@@ -1,180 +1,166 @@
-.bom-list-container {
-  padding: 1.5rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+:host {
+  display: block;
 }
 
-// 1. Barra superior
-.top-nav-bar {
+.bom-list-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.back-nav {
+  margin-bottom: 16px;
+}
+
+.btn-volver {
+  border-color: #cbd5e1;
+  color: #475569;
+  border-radius: 8px;
+}
+
+/* Encabezado */
+.header-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 1rem;
-
-  .title-cluster {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-
-    .btn-volver {
-      border-color: #cbd5e1;
-      color: #475569;
-      font-weight: 500;
-    }
-
-    .page-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0;
-
-      .title-icon {
-        color: #0284c7;
-      }
-    }
-
-    .page-subtitle {
-      font-size: 0.875rem;
-      color: #64748b;
-      margin: 0.25rem 0 0 0;
-    }
-  }
-
-  .btn-nueva-receta {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    font-weight: 600;
-    border-radius: 8px;
-  }
 }
 
-// 2. Buscador
-.filtro-section {
-  .buscador-field {
-    width: 100%;
-    max-width: 460px;
-    background: #ffffff;
-    border-radius: 8px;
-
-    .search-icon {
-      color: #94a3b8;
-    }
-  }
+.titulo-seccion {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
 }
 
-// 3. Tabla estilo Odoo
-.table-card {
+.subtitulo-seccion {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.btn-nueva-receta {
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 8px;
+}
+
+/* Barra de búsqueda */
+.toolbar-filtros {
+  margin-bottom: 20px;
+}
+
+.filtro-busqueda {
+  width: 100%;
+  max-width: 460px;
+}
+
+/* Contenedor de tabla */
+.tabla-wrapper {
+  background: #ffffff;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
-.table-responsive {
-  width: 100%;
+.table-scroll {
   overflow-x: auto;
+  width: 100%;
 }
 
 .bom-table {
   width: 100%;
-  border-collapse: collapse;
 
-  th.mat-header-cell {
+  th {
     background-color: #f8fafc;
     color: #475569;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 0.8rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 1rem 1.25rem;
-    border-bottom: 2px solid #e2e8f0;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
   }
 
-  td.mat-cell {
-    padding: 0.875rem 1.25rem;
-    border-bottom: 1px solid #f1f5f9;
-    color: #1e293b;
-    font-size: 0.875rem;
-  }
-
-  // Interacción estilo Odoo
   .fila-interactiva {
     cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
+    transition: background-color 0.15s ease;
 
     &:hover {
-      background-color: #f1f5f9 !important;
+      background-color: #f8fafc;
     }
 
     &:active {
-      background-color: #e2e8f0 !important;
+      background-color: #f1f5f9;
     }
   }
 
-  // Formato celdas
   .codigo-badge {
     display: inline-block;
-    padding: 0.25rem 0.65rem;
+    padding: 4px 8px;
     font-family: monospace;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.85rem;
     border-radius: 6px;
     background-color: #eff6ff;
     color: #1d4ed8;
     border: 1px solid #bfdbfe;
+    white-space: nowrap;
   }
 
   .producto-info {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    .sku-tag {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #64748b;
-      font-family: monospace;
-    }
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 0;
 
     .nombre-prod {
       font-weight: 600;
       color: #0f172a;
     }
+
+    .sku-tag {
+      align-self: flex-start;
+      font-size: 0.74rem;
+      font-weight: 600;
+      font-family: monospace;
+      color: #475569;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  }
+
+  .col-derecha {
+    text-align: right;
+    white-space: nowrap;
   }
 
   .cantidad-num {
-    font-weight: 700;
-    font-size: 0.95rem;
+    font-weight: 600;
+    font-size: 0.92rem;
     color: #0f172a;
   }
 
   .unit-tag {
-    margin-left: 0.35rem;
-    font-size: 0.75rem;
-    font-weight: 700;
+    margin-left: 6px;
+    font-size: 0.74rem;
+    font-weight: 600;
     text-transform: uppercase;
-    color: #64748b;
+    color: #475569;
     background-color: #f1f5f9;
-    padding: 0.15rem 0.4rem;
+    padding: 2px 6px;
     border-radius: 4px;
   }
 
   .badge-insumos {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.25rem 0.65rem;
-    border-radius: 20px;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
     font-size: 0.8rem;
     font-weight: 600;
     background-color: #f8fafc;
@@ -182,58 +168,40 @@
     border: 1px solid #e2e8f0;
 
     .icon-inline {
-      font-size: 1rem;
-      width: 1rem;
-      height: 1rem;
-      color: #0284c7;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: #3b82f6;
     }
   }
 }
 
-// Estados de carga y vacío
+/* Loading y estado vacío */
 .loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding: 4rem 1rem;
+  gap: 12px;
+  padding: 48px 16px;
   color: #64748b;
-  font-weight: 500;
 }
 
-.sin-datos-celda {
-  padding: 3.5rem 1rem !important;
+.sin-datos {
   text-align: center;
+  padding: 48px 16px !important;
+  color: #64748b;
 }
 
-.estado-vacio {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
+.empty-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
 
-  .vacio-icon {
-    font-size: 3.5rem;
-    width: 3.5rem;
-    height: 3.5rem;
-    color: #94a3b8;
-  }
-
-  .vacio-titulo {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #334155;
-  }
-
-  .vacio-desc {
-    color: #64748b;
-    font-size: 0.875rem;
-    margin: 0;
-    max-width: 400px;
-  }
-
-  .btn-crear-vacio {
-    margin-top: 0.75rem;
-  }
+.btn-crear-vacio {
+  margin-top: 12px;
+  border-radius: 8px;
 }
