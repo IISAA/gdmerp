@@ -1,0 +1,303 @@
+.orden-edit-container {
+    padding: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.back-nav {
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    color: #d97706;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.orden-card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Cabecera y Smart Buttons */
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.orden-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+}
+
+.badge-estado {
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    display: inline-block;
+}
+
+.odoo-smart-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.oe-stat-button {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.oe-stat-button:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+}
+
+.oe-stat-button:hover {
+    background-color: #f8fafc;
+}
+
+.stat-icon {
+    color: #64748b;
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    margin-right: 0.5rem;
+}
+
+.stat-content {
+    text-align: left;
+    line-height: 1.2;
+}
+
+.stat-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.stat-value--amber {
+    color: #d97706;
+}
+
+.stat-value--green {
+    color: #16a34a;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+/* Sección 1: Parámetros */
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 0.5rem;
+}
+
+.params-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.suffix-icon {
+    color: #64748b;
+}
+
+/* Sección 2: Insumos */
+.insumos-section {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.insumos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.insumos-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.btn-add-insumo {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fcd34d;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-add-insumo:hover {
+    background: #fde68a;
+}
+
+.insumos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.insumo-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #f9fafb;
+    padding: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.insumo-index {
+    font-weight: 700;
+    color: #6b7280;
+    font-size: 0.85rem;
+    width: 25px;
+}
+
+.insumo-field-mp {
+    flex: 2;
+}
+
+.insumo-field-qty {
+    flex: 1;
+}
+
+.compact-field {
+    margin-bottom: -1.25em;
+}
+
+.empty-insumos {
+    padding: 1.5rem;
+    text-align: center;
+    color: #9ca3af;
+    background: #f9fafb;
+    border-radius: 0.5rem;
+}
+
+/* Totales */
+.tabla-totales {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.totales-group {
+    display: flex;
+    gap: 2rem;
+    font-size: 1.1rem;
+}
+
+.total-costo-valor {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+/* Alertas y Botones de Acción */
+.error-alert {
+    background-color: #fee2e2;
+    border: 1px solid #f87171;
+    color: #b91c1c;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 1.5rem;
+}
+
+.btn-cancelar {
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.375rem;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-cancelar:hover {
+    background: #f9fafb;
+}
+
+.btn-guardar {
+    background-color: #16a34a;
+    color: #ffffff;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.btn-guardar:hover:not(:disabled) {
+    background-color: #15803d;
+}
+
+.btn-guardar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

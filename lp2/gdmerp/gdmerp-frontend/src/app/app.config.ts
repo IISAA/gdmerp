@@ -2,6 +2,7 @@ import { APP_INITIALIZER, ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { KeycloakBearerInterceptor, KeycloakService } from 'keycloak-angular';
 
 import { routes } from './app.routes';
@@ -47,7 +48,9 @@ export const appConfig: ApplicationConfig = {
       useClass: KeycloakBearerInterceptor,
       multi: true
     },
-    // Requerido por Angular Material
-    provideAnimationsAsync()
+    // Requerido por Angular Material y MatDatepicker (en diálogos y componentes standalone)
+    provideAnimationsAsync(),
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'es-PE' }
   ]
 };

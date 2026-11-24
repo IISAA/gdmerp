@@ -1,0 +1,186 @@
+.orden-create-container {
+    padding: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    color: #d97706;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0.5rem 0 0.25rem 0;
+}
+
+.orden-card {
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    padding: 2rem;
+}
+
+/* Sección 1: Parámetros */
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 0.5rem;
+}
+
+.params-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.hint-receta-auto {
+    color: #059669;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hint-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #10b981;
+}
+
+.hint-muted {
+    color: #6b7280;
+}
+
+/* Sección 2: Insumos */
+.insumos-section {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.insumos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.insumos-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.insumos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.insumo-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #f9fafb;
+    padding: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.insumo-index {
+    font-weight: 700;
+    color: #6b7280;
+    font-size: 0.85rem;
+    width: 25px;
+}
+
+.insumo-field-mp {
+    flex: 2;
+}
+
+.insumo-field-qty {
+    flex: 1;
+}
+
+.compact-field {
+    margin-bottom: -1.25em;
+}
+
+/* Badges de origen (Receta vs Manual) */
+.insumo-origen {
+    min-width: 85px;
+    text-align: center;
+}
+
+.badge-origen {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.badge-origen--manual {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-origen--receta {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    line-height: 13px;
+}
+
+/* Alertas y Acciones */
+.error-alert {
+    background-color: #fee2e2;
+    border: 1px solid #f87171;
+    color: #b91c1c;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 1.5rem;
+}

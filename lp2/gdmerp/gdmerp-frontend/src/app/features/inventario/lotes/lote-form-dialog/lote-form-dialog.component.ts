@@ -3,13 +3,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { LoteService } from '../services/lote.service';
 import { LoteRequest } from '../models/lote.model';
-import { MatIcon } from '@angular/material/icon';
+import { LoteService } from '../services/lote.service';
 
 export interface ProductoOpcion {
     id: number;
@@ -35,7 +36,8 @@ export interface LoteFormDialogData {
         MatInputModule,
         MatSelectModule,
         MatSnackBarModule,
-        MatIcon
+        MatIconModule,
+        MatDatepickerModule
     ],
     templateUrl: './lote-form-dialog.component.html',
     styleUrl: './lote-form-dialog.component.css'
@@ -54,8 +56,8 @@ export class LoteFormDialogComponent implements OnInit {
         productoId: [null as number | null, Validators.required],
         numeroLote: ['', [Validators.required, Validators.maxLength(50)]],
         cantidadActual: [null as number | null, [Validators.required, Validators.min(0.0001)]],
-        fechaProduccion: [new Date().toISOString().split('T')[0], Validators.required],
-        fechaVencimiento: ['', Validators.required]
+        fechaProduccion: [new Date() as Date | null, Validators.required],
+        fechaVencimiento: [null as Date | null, Validators.required]
     });
 
     ngOnInit(): void {
@@ -69,7 +71,6 @@ export class LoteFormDialogComponent implements OnInit {
         this.cargandoCodigo.set(true);
         this.loteService.obtenerSiguienteCodigo().subscribe({
             next: ({ codigo }) => {
-                // Solo rellena si el usuario aún no escribió uno manualmente
                 if (!this.form.controls.numeroLote.dirty) {
                     this.form.patchValue({ numeroLote: codigo });
                 }
@@ -87,12 +88,23 @@ export class LoteFormDialogComponent implements OnInit {
     }
 
     guardar(): void {
-        if (this.form.invalid) return;
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+
         const raw = this.form.getRawValue();
         if (raw.productoId == null || raw.cantidadActual == null) return;
 
-        if (raw.fechaVencimiento && raw.fechaProduccion && raw.fechaVencimiento < raw.fechaProduccion) {
-            this.snackBar.open('La fecha de vencimiento no puede ser anterior a la de producción', 'Cerrar', { duration: 3500 });
+        const fechaProduccionStr = this.formatearLocalDate(raw.fechaProduccion);
+        const fechaVencimientoStr = this.formatearLocalDate(raw.fechaVencimiento);
+
+        if (fechaVencimientoStr < fechaProduccionStr) {
+            this.snackBar.open(
+                'La fecha de vencimiento no puede ser anterior a la de producción',
+                'Cerrar',
+                { duration: 3500 }
+            );
             return;
         }
 
@@ -101,8 +113,8 @@ export class LoteFormDialogComponent implements OnInit {
             productoId: raw.productoId,
             numeroLote: (raw.numeroLote ?? '').trim(),
             cantidadActual: Number(raw.cantidadActual),
-            fechaProduccion: raw.fechaProduccion ?? '',
-            fechaVencimiento: raw.fechaVencimiento ?? ''
+            fechaProduccion: fechaProduccionStr,
+            fechaVencimiento: fechaVencimientoStr
         };
 
         this.loteService.registrarIngreso(payload).subscribe({
@@ -121,5 +133,15 @@ export class LoteFormDialogComponent implements OnInit {
 
     cancelar(): void {
         this.dialogRef.close(null);
+    }
+
+    private formatearLocalDate(fecha: Date | string | null): string {
+        if (!fecha) return '';
+        if (typeof fecha === 'string') return fecha.split('T')[0];
+
+        const anio = fecha.getFullYear();
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
     }
 }

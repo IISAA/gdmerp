@@ -28,14 +28,19 @@
             <input matInput type="number" step="0.0001" formControlName="cantidadActual">
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-            <mat-label>Fecha de Producción</mat-label>
-            <input matInput type="date" formControlName="fechaProduccion">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha de Producción *</mat-label>
+            <input matInput [matDatepicker]="pickerProd" formControlName="fechaProduccion" (click)="pickerProd.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerProd"></mat-datepicker-toggle>
+            <mat-datepicker #pickerProd></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-            <mat-label>Fecha de Vencimiento</mat-label>
-            <input matInput type="date" formControlName="fechaVencimiento">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha de Vencimiento *</mat-label>
+            <input matInput [matDatepicker]="pickerVenc" [min]="form.controls.fechaProduccion.value"
+                formControlName="fechaVencimiento" (click)="pickerVenc.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerVenc"></mat-datepicker-toggle>
+            <mat-datepicker #pickerVenc></mat-datepicker>
         </mat-form-field>
 
         <div class="dialog-actions full-span">

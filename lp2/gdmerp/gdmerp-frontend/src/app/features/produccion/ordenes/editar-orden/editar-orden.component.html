@@ -1,74 +1,64 @@
-<div style="padding: 1.5rem; max-width: 900px; margin: 0 auto;">
-  <div style="margin-bottom: 1.5rem;">
-    <a routerLink="/produccion/ordenes"
-      style="color: #d97706; text-decoration: none; font-size: 0.875rem; font-weight: 500;">
+<div class="orden-edit-container">
+  <div class="back-nav">
+    <a routerLink="/produccion/ordenes" class="back-link">
       ← Volver al listado de órdenes
     </a>
   </div>
 
-  <div
-    style="background: white; padding: 2rem; border-radius: 0.75rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+  <div class="orden-card">
     <form [formGroup]="form" (ngSubmit)="guardar()">
 
       <!-- Cabecera del Formulario -->
-      <div class="form-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+      <div class="form-header">
         <div>
-          <h2 style="font-size: 1.75rem; font-weight: 700; color: #111827; margin: 0 0 0.5rem 0;">
-            Orden de Producción #{{ ordenId() }}
-          </h2>
-          <span class="badge-estado"
-            [style.background-color]="getEstadoBadgeBg(form.get('estado')?.value)"
-            [style.color]="getEstadoBadgeColor(form.get('estado')?.value)"
-            style="padding: 0.25rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; display: inline-block;">
+          <h2 class="orden-title">Orden de Producción #{{ ordenId() }}</h2>
+          <span class="badge-estado" [style.background-color]="getEstadoBadgeBg(form.get('estado')?.value)"
+            [style.color]="getEstadoBadgeColor(form.get('estado')?.value)">
             {{ form.get('estado')?.value }}
           </span>
         </div>
 
-        <!-- INICIO: SMART BUTTONS ESTILO ODOO -->
-        <div class="odoo-smart-buttons" style="display: flex; gap: 0.5rem; background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); flex-wrap: wrap;">
-          
+        <!-- Smart Buttons estilo Odoo -->
+        <div class="odoo-smart-buttons">
           <!-- Botón 1: Insumos Reservados -->
-          <button type="button" class="oe-stat-button" style="display: flex; align-items: center; background: transparent; border: none; border-right: 1px solid #e2e8f0; padding: 0.5rem 1rem; cursor: pointer; transition: background 0.2s;">
-            <mat-icon style="color: #64748b; font-size: 2rem; width: 2rem; height: 2rem; margin-right: 0.5rem;">inventory_2</mat-icon>
-            <div style="text-align: left; line-height: 1.2;">
-              <div style="font-weight: 700; font-size: 1.1rem; color: #0f172a;">{{ totalUnidadesReservadas() | number:'1.0-4' }}</div>
-              <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Insumos Res.</div>
+          <button type="button" class="oe-stat-button">
+            <mat-icon class="stat-icon">inventory_2</mat-icon>
+            <div class="stat-content">
+              <div class="stat-value">{{ totalUnidadesReservadas() | number:'1.0-4' }}</div>
+              <div class="stat-label">Insumos Res.</div>
             </div>
           </button>
 
           <!-- Botón 2: Costo Operativo -->
           @if (costoOperativo() > 0) {
-          <button type="button" class="oe-stat-button" style="display: flex; align-items: center; background: transparent; border: none; border-right: 1px solid #e2e8f0; padding: 0.5rem 1rem; cursor: pointer; transition: background 0.2s;">
-            <mat-icon style="color: #64748b; font-size: 2rem; width: 2rem; height: 2rem; margin-right: 0.5rem;">engineering</mat-icon>
-            <div style="text-align: left; line-height: 1.2;">
-              <div style="font-weight: 700; font-size: 1.1rem; color: #d97706;">S/ {{ costoOperativo() | number:'1.2-2' }}</div>
-              <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Costo Oper.</div>
+          <button type="button" class="oe-stat-button">
+            <mat-icon class="stat-icon">engineering</mat-icon>
+            <div class="stat-content">
+              <div class="stat-value stat-value--amber">S/ {{ costoOperativo() | number:'1.2-2' }}</div>
+              <div class="stat-label">Costo Oper.</div>
             </div>
           </button>
           }
 
           <!-- Botón 3: Costo Total Estimado / Real -->
-          <button type="button" class="oe-stat-button" style="display: flex; align-items: center; background: transparent; border: none; padding: 0.5rem 1rem; cursor: pointer; transition: background 0.2s;">
-            <mat-icon style="color: #64748b; font-size: 2rem; width: 2rem; height: 2rem; margin-right: 0.5rem;">payments</mat-icon>
-            <div style="text-align: left; line-height: 1.2;">
-              <div style="font-weight: 700; font-size: 1.1rem; color: #16a34a;">S/ {{ (costoTotal() || costoTotalProyectado()) | number:'1.2-2' }}</div>
-              <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Costo Total</div>
+          <button type="button" class="oe-stat-button">
+            <mat-icon class="stat-icon">payments</mat-icon>
+            <div class="stat-content">
+              <div class="stat-value stat-value--green">
+                S/ {{ (costoTotal() || costoTotalProyectado()) | number:'1.2-2' }}
+              </div>
+              <div class="stat-label">Costo Total</div>
             </div>
           </button>
-
         </div>
-        <!-- FIN: SMART BUTTONS -->
       </div>
 
-      <h3
-        style="font-size: 1.1rem; font-weight: 600; color: #374151; margin-top: 0; margin-bottom: 1.25rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem;">
-        1. Parámetros de la Orden
-      </h3>
+      <!-- Sección 1: Parámetros -->
+      <h3 class="section-title">1. Parámetros de la Orden</h3>
 
-      <div
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+      <div class="params-grid">
         <div>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Estado de la Orden</mat-label>
             <mat-select formControlName="estado">
               @for (estado of estadosPermitidos(); track estado) {
@@ -79,67 +69,60 @@
         </div>
 
         <div>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Cantidad Planificada *</mat-label>
             <input matInput type="number" formControlName="cantidadPlanificada" min="0.0001" step="0.001">
           </mat-form-field>
         </div>
 
         <div>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Horas Trabajadas</mat-label>
             <input matInput type="number" formControlName="horasTrabajadas" min="0" step="0.25" placeholder="Ej. 8.0">
-            <mat-icon matSuffix style="color: #64748b;">schedule</mat-icon>
+            <mat-icon matSuffix class="suffix-icon">schedule</mat-icon>
             @if (form.get('horasTrabajadas')?.hasError('min')) {
-              <mat-error>Las horas no pueden ser negativas.</mat-error>
+            <mat-error>Las horas no pueden ser negativas.</mat-error>
             }
           </mat-form-field>
         </div>
 
         <div>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Fecha Planificada Inicio *</mat-label>
             <input matInput type="date" formControlName="fechaPlanificadaInicio">
           </mat-form-field>
         </div>
 
         <div>
-          <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Fecha Estimada Fin *</mat-label>
             <input matInput type="date" formControlName="fechaEstimadaFin">
           </mat-form-field>
         </div>
       </div>
 
-      <!-- SECCIÓN DE INSUMOS CARGADOS (FormArray) -->
-      <div style="margin-top: 2rem; margin-bottom: 2rem;">
-        <div
-          style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem; margin-bottom: 1rem;">
-          <h3 style="font-size: 1.1rem; font-weight: 600; color: #374151; margin: 0;">
-            2. Insumos y Materias Primas Asignadas
-          </h3>
+      <!-- Sección 2: Insumos Cargados (FormArray) -->
+      <div class="insumos-section">
+        <div class="insumos-header">
+          <h3 class="insumos-title">2. Insumos y Materias Primas Asignadas</h3>
           @if (!isInsumosBloqueados()) {
-          <button type="button" (click)="agregarMateriaPrima()"
-            style="background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; padding: 0.375rem 0.75rem; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+          <button type="button" (click)="agregarMateriaPrima()" class="btn-add-insumo">
             + Agregar Insumo
           </button>
           }
         </div>
 
-        <div formArrayName="detalles" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <div formArrayName="detalles" class="insumos-list">
           @for (detalle of detalles.controls; track $index; let i = $index) {
-          <div [formGroupName]="i"
-            style="display: flex; align-items: center; gap: 1rem; background-color: #f9fafb; padding: 0.875rem; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
-            <div style="font-weight: 700; color: #6b7280; font-size: 0.85rem; width: 25px;">#{{ i + 1 }}</div>
+          <div [formGroupName]="i" class="insumo-row">
+            <div class="insumo-index">#{{ i + 1 }}</div>
 
-            <div style="flex: 2;">
-              <!-- MATERIA PRIMA (Autocomplete Dinámico por Fila) -->
-              <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
+            <div class="insumo-field-mp">
+              <mat-form-field appearance="outline" class="full-width compact-field">
                 <mat-label>Materia Prima</mat-label>
                 <input type="text" matInput formControlName="materiaPrimaNombre" [matAutocomplete]="autoMP"
                   (input)="invalidarMateriaPrimaId(i)">
                 <mat-autocomplete #autoMP="matAutocomplete" (optionSelected)="onMateriaPrimaSeleccionada($event, i)">
-                  <!-- Evaluamos el filtro de forma dinámica pasando el índice de la fila -->
                   @for (mp of obtenerMateriasPrimasFiltradas(i); track mp.id) {
                   <mat-option [value]="mp.nombre">{{ mp.nombre }}</mat-option>
                   }
@@ -150,10 +133,11 @@
               </mat-form-field>
             </div>
 
-            <div style="flex: 1;">
-              <mat-form-field appearance="outline" style="width: 100%; margin-bottom: -1.25em;">
+            <div class="insumo-field-qty">
+              <mat-form-field appearance="outline" class="full-width compact-field">
                 <mat-label>Cantidad</mat-label>
-                <input matInput type="number" formControlName="cantidadRequerida" min="0.0001" [step]="obtenerStepMateriaPrima(i)">
+                <input matInput type="number" formControlName="cantidadRequerida" min="0.0001"
+                  [step]="obtenerStepMateriaPrima(i)">
               </mat-form-field>
             </div>
 
@@ -167,38 +151,34 @@
             }
           </div>
           } @empty {
-          <div style="padding: 1.5rem; text-align: center; color: #9ca3af; background: #f9fafb; border-radius: 0.5rem;">
+          <div class="empty-insumos">
             No hay insumos registrados para esta orden.
           </div>
           }
         </div>
 
-        <!-- Al final de la tabla de insumos, añade la fila de Totales -->
-        <div class="tabla-totales" style="display: flex; justify-content: flex-end; padding: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 0.5rem 0.5rem;">
-          <div style="display: flex; gap: 2rem; font-size: 1.1rem;">
+        <!-- Fila de Totales -->
+        <div class="tabla-totales">
+          <div class="totales-group">
             <div><strong>Total Cantidad:</strong> {{ totalUnidadesReservadas() | number:'1.0-4' }}</div>
-            <div><strong>Total Costo:</strong> <span style="color: #16a34a; font-weight: 700;">S/ {{ costoTotalProyectado() | number:'1.2-2' }}</span></div>
+            <div>
+              <strong>Total Costo:</strong>
+              <span class="total-costo-valor">S/ {{ costoTotalProyectado() | number:'1.2-2' }}</span>
+            </div>
           </div>
         </div>
       </div>
 
       @if (errorMessage) {
-      <div
-        style="background-color: #fee2e2; border: 1px solid #f87171; color: #b91c1c; padding: 0.75rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; margin-bottom: 1.5rem;">
-        {{ errorMessage }}
-      </div>
+      <div class="error-alert">{{ errorMessage }}</div>
       }
 
-      <div
-        style="display: flex; justify-content: flex-end; gap: 1rem; border-top: 1px solid #f3f4f6; padding-top: 1.5rem;">
-        <a routerLink="/produccion/ordenes"
-          style="padding: 0.625rem 1.25rem; border-radius: 0.375rem; border: 1px solid #d1d5db; background: white; color: #374151; font-weight: 600; text-decoration: none; font-size: 0.95rem; display: inline-flex; align-items: center;">
+      <div class="form-actions">
+        <a routerLink="/produccion/ordenes" class="btn-cancelar">
           {{ isFinalizado() ? 'Volver' : 'Cancelar' }}
         </a>
         @if (!isFinalizado()) {
-        <button type="submit" [disabled]="form.invalid || isSubmitting"
-          [style.opacity]="form.invalid || isSubmitting ? '0.6' : '1'"
-          style="background-color: #16a34a; color: white; border: none; padding: 0.625rem 1.5rem; border-radius: 0.375rem; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background-color 0.2s;">
+        <button type="submit" class="btn-guardar" [disabled]="form.invalid || isSubmitting">
           @if (isSubmitting) {
           <span>Guardando...</span>
           } @else {
@@ -207,6 +187,7 @@
         </button>
         }
       </div>
+
     </form>
   </div>
 </div>
